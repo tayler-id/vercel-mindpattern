@@ -3,12 +3,14 @@
 import { motion } from 'motion/react'
 
 const SUGGESTIONS = [
-  { text: "What did my agents find today?", icon: "📡" },
-  { text: "Show me the most important findings this week", icon: "🔥" },
-  { text: "How are my research agents performing?", icon: "📊" },
-  { text: "What patterns are emerging in AI?", icon: "🧩" },
-  { text: "Teach me about context engineering", icon: "🎓" },
-  { text: "Which sources produce the best research?", icon: "🏆" },
+  { text: "Show me the stats", icon: "📊" },
+  { text: "How is the system health?", icon: "💓" },
+  { text: "What are the top sources?", icon: "🏆" },
+  { text: "What patterns are trending?", icon: "🧩" },
+  { text: "Show me today's findings", icon: "📡" },
+  { text: "What skills about prompt engineering?", icon: "🎓" },
+  { text: "Show me the latest report", icon: "📰" },
+  { text: "Search findings about AI agents", icon: "🔍" },
 ]
 
 export function EmptyState({ onSuggestion }: { onSuggestion: (text: string) => void }) {
@@ -35,7 +37,7 @@ export function EmptyState({ onSuggestion }: { onSuggestion: (text: string) => v
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-w-lg w-full"
+        className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-w-xl w-full"
       >
         {SUGGESTIONS.map(({ text, icon }, i) => (
           <motion.button
