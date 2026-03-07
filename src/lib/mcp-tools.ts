@@ -2,6 +2,14 @@ import { z } from 'zod'
 import { backendFetch } from './api'
 import type { Finding, Stats, Pattern, Source, Skill, HealthData, ReportListItem, Report, ReportSearchResult } from './types'
 
+async function safeFetch<T>(path: string, params?: Record<string, string>): Promise<T | { error: string }> {
+  try {
+    return await backendFetch<T>(path, params)
+  } catch (e) {
+    return { error: `Failed to fetch ${path}: ${e instanceof Error ? e.message : String(e)}` }
+  }
+}
+
 export const mcpTools = {
   search_findings: {
     description: 'Semantic vector search across all research findings. Use this when the user asks about a topic, wants to know what the agents found about something, or asks "what do you know about X".',
@@ -10,7 +18,7 @@ export const mcpTools = {
       limit: z.number().default(10).describe('Max results to return'),
     }),
     execute: async ({ query, limit }: { query: string; limit: number }) => {
-      return backendFetch<Finding[]>('/api/search', {
+      return safeFetch<Finding[]>('/api/search', {
         q: query,
         limit: String(limit),
         user: 'ramsay',
@@ -30,7 +38,7 @@ export const mcpTools = {
       if (agent) params.agent = agent
       if (importance) params.importance = importance
       if (date) params.date = date
-      return backendFetch<Finding[]>('/api/findings', params)
+      return safeFetch<Finding[]>('/api/findings', params)
     },
   },
 
@@ -38,7 +46,7 @@ export const mcpTools = {
     description: 'Get aggregate statistics: total findings, sources, patterns, skills, plus breakdowns by agent and by date. Use this when the user asks "how much data do we have" or "show me the overview".',
     inputSchema: z.object({}),
     execute: async () => {
-      return backendFetch<Stats>('/api/stats', { user: 'ramsay' })
+      return safeFetch<Stats>('/api/stats', { user: 'ramsay' })
     },
   },
 
@@ -46,7 +54,7 @@ export const mcpTools = {
     description: 'Get recurring themes and patterns identified across multiple research runs. Use this when the user asks about trends, recurring topics, or what themes keep coming up.',
     inputSchema: z.object({}),
     execute: async () => {
-      return backendFetch<Pattern[]>('/api/patterns', { user: 'ramsay' })
+      return safeFetch<Pattern[]>('/api/patterns', { user: 'ramsay' })
     },
   },
 
@@ -54,7 +62,7 @@ export const mcpTools = {
     description: 'Get the top research sources ranked by quality and frequency. Shows which domains produce the most high-value findings. Use when the user asks about where information comes from.',
     inputSchema: z.object({}),
     execute: async () => {
-      return backendFetch<Source[]>('/api/sources', { user: 'ramsay' })
+      return safeFetch<Source[]>('/api/sources', { user: 'ramsay' })
     },
   },
 
@@ -65,7 +73,7 @@ export const mcpTools = {
       limit: z.number().default(10),
     }),
     execute: async ({ query, limit }: { query: string; limit: number }) => {
-      return backendFetch<Skill[]>('/api/skills/search', {
+      return safeFetch<Skill[]>('/api/skills/search', {
         q: query,
         limit: String(limit),
         user: 'ramsay',
@@ -81,7 +89,7 @@ export const mcpTools = {
     execute: async ({ domain }: { domain?: string }) => {
       const params: Record<string, string> = { user: 'ramsay' }
       if (domain) params.domain = domain
-      return backendFetch<Skill[]>('/api/skills', params)
+      return safeFetch<Skill[]>('/api/skills', params)
     },
   },
 
@@ -89,7 +97,7 @@ export const mcpTools = {
     description: 'Get system health data: pipeline run quality scores (last 30 days), per-agent activity stats, recent errors/warnings, approval queue status. Use when the user asks about system performance, agent health, or "how are things running".',
     inputSchema: z.object({}),
     execute: async () => {
-      return backendFetch<HealthData>('/api/health', { user: 'ramsay' })
+      return safeFetch<HealthData>('/api/health', { user: 'ramsay' })
     },
   },
 
@@ -97,7 +105,7 @@ export const mcpTools = {
     description: 'List all daily newsletter reports with dates and titles. Use when the user asks "show me all newsletters", "what reports do we have", or wants to browse the archive.',
     inputSchema: z.object({}),
     execute: async () => {
-      return backendFetch<ReportListItem[]>('/api/reports', { user: 'ramsay' })
+      return safeFetch<ReportListItem[]>('/api/reports', { user: 'ramsay' })
     },
   },
 
@@ -107,7 +115,7 @@ export const mcpTools = {
       date: z.string().describe('Report date in YYYY-MM-DD format'),
     }),
     execute: async ({ date }: { date: string }) => {
-      return backendFetch<Report | null>(`/api/reports/${date}`, { user: 'ramsay' })
+      return safeFetch<Report | null>(`/api/reports/${date}`, { user: 'ramsay' })
     },
   },
 
@@ -118,7 +126,7 @@ export const mcpTools = {
       limit: z.number().default(10),
     }),
     execute: async ({ query, limit }: { query: string; limit: number }) => {
-      return backendFetch<ReportSearchResult[]>('/api/reports/search', {
+      return safeFetch<ReportSearchResult[]>('/api/reports/search', {
         q: query,
         limit: String(limit),
         user: 'ramsay',
