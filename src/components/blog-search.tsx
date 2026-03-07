@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { motion } from 'motion/react'
+import { Search, ChevronRight } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import type { ReportListItem } from '@/lib/types'
 
@@ -16,24 +17,26 @@ export function BlogSearch({ reports }: { reports: ReportListItem[] }) {
     : reports
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6">
       <div className="relative">
-        <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
         <Input
           type="text"
-          placeholder="Search reports by title..."
+          placeholder="SEARCH BRIEFINGS..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="pl-10 h-10 rounded-xl bg-card border-border"
+          className="pl-10 h-10 bg-card border-border uppercase tracking-wider text-xs placeholder:text-muted-foreground/50"
         />
       </div>
 
       {filtered.length === 0 ? (
-        <p className="text-sm text-muted-foreground text-center py-8">
-          No reports match your search.
-        </p>
+        <div className="bg-card border border-border dossier-card p-10 text-center">
+          <p className="text-xs text-muted-foreground uppercase tracking-[0.15em] font-bold">
+            [NO MATCHING BRIEFINGS]
+          </p>
+        </div>
       ) : (
-        <div className="space-y-2">
+        <div className="flex flex-col gap-2">
           {filtered.map((report, i) => (
             <motion.div
               key={report.date}
@@ -43,33 +46,17 @@ export function BlogSearch({ reports }: { reports: ReportListItem[] }) {
             >
               <Link
                 href={`/blog/${report.date}`}
-                className="flex items-center justify-between bg-card border border-border rounded-xl px-5 py-4 hover:border-primary/30 transition-colors group"
+                className="flex items-center justify-between bg-card border border-border dossier-card px-5 py-4 hover:border-primary/30 transition-colors group"
               >
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium group-hover:text-primary transition-colors truncate">
+                  <p className="text-xs font-bold group-hover:text-navy transition-colors truncate">
                     {report.title}
                   </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {formatDate(report.date)}
-                    {' \u00b7 ~'}
-                    {estimateReadTime(report.size)} min read
+                  <p className="text-[10px] text-muted-foreground mt-1 uppercase tracking-wider">
+                    [{report.date}] -- ~{estimateReadTime(report.size)} min read
                   </p>
                 </div>
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 14 14"
-                  fill="none"
-                  className="text-muted-foreground group-hover:text-primary shrink-0 ml-4"
-                >
-                  <path
-                    d="M5 3l4 4-4 4"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+                <ChevronRight className="text-muted-foreground group-hover:text-navy shrink-0 ml-4" />
               </Link>
             </motion.div>
           ))}
@@ -79,36 +66,6 @@ export function BlogSearch({ reports }: { reports: ReportListItem[] }) {
   )
 }
 
-function formatDate(dateStr: string): string {
-  const date = new Date(dateStr + 'T00:00:00')
-  return date.toLocaleDateString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  })
-}
-
 function estimateReadTime(size: number): number {
   return Math.max(1, Math.round(size / 5 / 200))
-}
-
-function SearchIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 16 16"
-      fill="none"
-      className={className}
-    >
-      <circle cx="7" cy="7" r="4.5" stroke="currentColor" strokeWidth="1.5" />
-      <path
-        d="M10.5 10.5L14 14"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-    </svg>
-  )
 }
