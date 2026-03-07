@@ -7,8 +7,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-mono);
+  --font-mono: var(--font-mono);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -38,6 +38,8 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  --color-navy: var(--navy);
+  --color-olive: var(--olive);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -48,39 +50,43 @@
 }
 
 :root {
-  --background: oklch(0.13 0.02 255);
-  --foreground: oklch(0.93 0.01 250);
-  --card: oklch(0.17 0.02 255);
-  --card-foreground: oklch(0.93 0.01 250);
-  --popover: oklch(0.17 0.02 255);
-  --popover-foreground: oklch(0.93 0.01 250);
-  --primary: oklch(0.62 0.18 255);
-  --primary-foreground: oklch(0.13 0.02 255);
-  --secondary: oklch(0.27 0.04 255);
-  --secondary-foreground: oklch(0.93 0.01 250);
-  --muted: oklch(0.25 0.03 250);
-  --muted-foreground: oklch(0.60 0.02 250);
-  --accent: oklch(0.62 0.18 255);
-  --accent-foreground: oklch(0.13 0.02 255);
-  --destructive: oklch(0.60 0.20 25);
-  --destructive-foreground: oklch(0.93 0.01 250);
-  --border: oklch(0.25 0.03 250);
-  --input: oklch(0.25 0.03 250);
-  --ring: oklch(0.62 0.18 255);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.15 0.02 255);
-  --sidebar-foreground: oklch(0.60 0.02 250);
-  --sidebar-primary: oklch(0.62 0.18 255);
-  --sidebar-primary-foreground: oklch(0.13 0.02 255);
-  --sidebar-accent: oklch(0.27 0.04 255);
-  --sidebar-accent-foreground: oklch(0.93 0.01 250);
-  --sidebar-border: oklch(0.22 0.03 250);
-  --sidebar-ring: oklch(0.62 0.18 255);
-  --chart-1: oklch(0.62 0.18 255);
-  --chart-2: oklch(0.68 0.16 165);
-  --chart-3: oklch(0.80 0.16 85);
-  --chart-4: oklch(0.62 0.18 300);
-  --chart-5: oklch(0.60 0.20 25);
+  --background: oklch(0.94 0.01 80);
+  --foreground: oklch(0.15 0.01 80);
+  --card: oklch(0.91 0.01 80);
+  --card-foreground: oklch(0.15 0.01 80);
+  --popover: oklch(0.93 0.01 80);
+  --popover-foreground: oklch(0.15 0.01 80);
+  --primary: oklch(0.45 0.18 25);
+  --primary-foreground: oklch(0.96 0.01 80);
+  --secondary: oklch(0.40 0.05 145);
+  --secondary-foreground: oklch(0.96 0.01 80);
+  --muted: oklch(0.88 0.01 80);
+  --muted-foreground: oklch(0.45 0.02 60);
+  --accent: oklch(0.35 0.08 250);
+  --accent-foreground: oklch(0.96 0.01 80);
+  --destructive: oklch(0.45 0.18 25);
+  --destructive-foreground: oklch(0.96 0.01 80);
+  --border: oklch(0.82 0.02 80);
+  --input: oklch(0.82 0.02 80);
+  --ring: oklch(0.45 0.18 25);
+  --radius: 0.25rem;
+  --navy: oklch(0.35 0.08 250);
+  --olive: oklch(0.40 0.05 145);
+
+  --sidebar: oklch(0.92 0.01 80);
+  --sidebar-foreground: oklch(0.45 0.02 60);
+  --sidebar-primary: oklch(0.45 0.18 25);
+  --sidebar-primary-foreground: oklch(0.96 0.01 80);
+  --sidebar-accent: oklch(0.88 0.02 80);
+  --sidebar-accent-foreground: oklch(0.15 0.01 80);
+  --sidebar-border: oklch(0.82 0.02 80);
+  --sidebar-ring: oklch(0.45 0.18 25);
+
+  --chart-1: oklch(0.40 0.05 145);
+  --chart-2: oklch(0.35 0.08 250);
+  --chart-3: oklch(0.45 0.18 25);
+  --chart-4: oklch(0.65 0.12 80);
+  --chart-5: oklch(0.30 0.02 80);
 }
 
 @layer base {
@@ -89,5 +95,37 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
   }
+}
+
+/* Stamp aesthetic */
+.stamp {
+  display: inline-block;
+  transform: rotate(-2deg);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+}
+
+/* Grid paper background for chart containers */
+.grid-paper {
+  background-image:
+    linear-gradient(to right, oklch(0.82 0.02 80 / 0.3) 1px, transparent 1px),
+    linear-gradient(to bottom, oklch(0.82 0.02 80 / 0.3) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* Typewriter cursor blink */
+@keyframes typewriter-blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+.typewriter-cursor {
+  animation: typewriter-blink 1s step-end infinite;
+}
+
+/* Dossier card inset shadow */
+.dossier-card {
+  box-shadow: inset 0 1px 3px oklch(0 0 0 / 0.06);
 }
