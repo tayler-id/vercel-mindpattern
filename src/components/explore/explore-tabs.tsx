@@ -182,7 +182,7 @@ function AllFindingsTab() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap gap-2">
-        <Select value={agentFilter} onValueChange={setAgentFilter}>
+        <Select value={agentFilter} onValueChange={(v) => setAgentFilter(v ?? 'all')}>
           <SelectTrigger size="sm" className="text-[10px] uppercase tracking-wider">
             <SelectValue />
           </SelectTrigger>
@@ -197,7 +197,7 @@ function AllFindingsTab() {
             </SelectGroup>
           </SelectContent>
         </Select>
-        <Select value={importanceFilter} onValueChange={setImportanceFilter}>
+        <Select value={importanceFilter} onValueChange={(v) => setImportanceFilter(v ?? 'all')}>
           <SelectTrigger size="sm" className="text-[10px] uppercase tracking-wider">
             <SelectValue />
           </SelectTrigger>
@@ -210,7 +210,7 @@ function AllFindingsTab() {
             </SelectGroup>
           </SelectContent>
         </Select>
-        <Select value={dateFilter} onValueChange={setDateFilter}>
+        <Select value={dateFilter} onValueChange={(v) => setDateFilter(v ?? 'all')}>
           <SelectTrigger size="sm" className="text-[10px] uppercase tracking-wider">
             <SelectValue />
           </SelectTrigger>
@@ -346,7 +346,7 @@ function SkillsTab() {
             className="pl-9 h-8 uppercase tracking-wider text-xs placeholder:text-muted-foreground/50"
           />
         </div>
-        <Select value={domainFilter} onValueChange={setDomainFilter}>
+        <Select value={domainFilter} onValueChange={(v) => setDomainFilter(v ?? 'all')}>
           <SelectTrigger size="sm" className="text-[10px] uppercase tracking-wider">
             <SelectValue />
           </SelectTrigger>

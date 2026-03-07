@@ -55,11 +55,9 @@ function SidebarNav() {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive('/') && !isActive('/blog') && !isActive('/explore')}>
-                  <Link href="/">
+                <SidebarMenuButton render={<Link href="/" />} isActive={isActive('/') && !isActive('/blog') && !isActive('/explore')}>
                     <Plus data-icon="inline-start" />
                     <span className="text-xs uppercase tracking-wider">New Case</span>
-                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
@@ -76,11 +74,9 @@ function SidebarNav() {
             <SidebarMenu>
               {NAV_ITEMS.map(({ href, label, icon: Icon }) => (
                 <SidebarMenuItem key={href}>
-                  <SidebarMenuButton asChild isActive={isActive(href)}>
-                    <Link href={href}>
+                  <SidebarMenuButton render={<Link href={href} />} isActive={isActive(href)}>
                       <Icon data-icon="inline-start" />
                       <span className="text-xs uppercase tracking-wider">{label}</span>
-                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
