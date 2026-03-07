@@ -12,7 +12,13 @@ export function ReportViewer({ data }: { data: unknown }) {
   const report = data as Report | null
   const [expanded, setExpanded] = useState(false)
 
-  if (!report) return <p className="text-sm text-muted-foreground">Report not found.</p>
+  if (!report) {
+    return (
+      <p className="text-xs text-muted-foreground uppercase tracking-wider font-bold">
+        [REPORT NOT FOUND]
+      </p>
+    )
+  }
 
   const wordCount = report.content.split(/\s+/).length
   const preview = report.content.slice(0, 800)
@@ -22,23 +28,22 @@ export function ReportViewer({ data }: { data: unknown }) {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="bg-card border border-border rounded-xl overflow-hidden"
+      className="bg-card border border-border dossier-card overflow-hidden"
     >
       <div className="px-4 py-3 border-b border-border flex items-center justify-between">
         <div>
-          <p className="text-xs text-muted-foreground">
-            {new Date(report.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-            {' · '}{wordCount.toLocaleString()} words
+          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
+            [{report.date}] -- {wordCount.toLocaleString()} words
           </p>
         </div>
         <Link href={`/blog/${report.date}`}>
-          <Button variant="outline" size="sm" className="text-xs h-7">
-            Open full report
+          <Button variant="outline" size="sm" className="text-[10px] h-7 uppercase tracking-wider font-bold">
+            Open full briefing
           </Button>
         </Link>
       </div>
       <div className={`px-4 py-4 ${!expanded && hasMore ? 'max-h-96 overflow-hidden relative' : ''}`}>
-        <div className="prose prose-invert prose-sm max-w-none prose-p:text-muted-foreground prose-a:text-primary prose-headings:text-foreground prose-strong:text-foreground">
+        <div className="prose prose-sm max-w-none prose-p:text-muted-foreground prose-a:text-navy prose-headings:text-foreground prose-headings:uppercase prose-headings:tracking-wider prose-strong:text-foreground prose-code:text-primary prose-code:bg-primary/5 prose-code:px-1">
           <Markdown
             remarkPlugins={[remarkGfm]}
             components={{
@@ -47,11 +52,11 @@ export function ReportViewer({ data }: { data: unknown }) {
               ),
               table: ({ children }) => (
                 <div className="overflow-x-auto my-3">
-                  <table className="w-full text-sm border-collapse">{children}</table>
+                  <table className="w-full text-xs border-collapse">{children}</table>
                 </div>
               ),
               th: ({ children }) => (
-                <th className="text-left px-3 py-1.5 border-b border-border font-medium text-foreground">{children}</th>
+                <th className="text-left px-3 py-1.5 border-b border-border font-bold text-foreground text-[10px] uppercase tracking-wider">{children}</th>
               ),
               td: ({ children }) => (
                 <td className="px-3 py-1.5 border-b border-border/50">{children}</td>
@@ -67,8 +72,8 @@ export function ReportViewer({ data }: { data: unknown }) {
       </div>
       {hasMore && !expanded && (
         <div className="px-4 py-3 border-t border-border">
-          <Button variant="ghost" size="sm" className="text-xs w-full" onClick={() => setExpanded(true)}>
-            Show full report ({wordCount.toLocaleString()} words)
+          <Button variant="ghost" size="sm" className="text-[10px] w-full uppercase tracking-wider font-bold" onClick={() => setExpanded(true)}>
+            Show full briefing ({wordCount.toLocaleString()} words)
           </Button>
         </div>
       )}

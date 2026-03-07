@@ -5,13 +5,19 @@ import type { Pattern } from '@/lib/types'
 
 export function PatternList({ data, limit }: { data: unknown; limit?: number }) {
   const patterns = data as Pattern[]
-  if (!patterns?.length) return <p className="text-sm text-muted-foreground">No patterns tracked yet.</p>
+  if (!patterns?.length) {
+    return (
+      <p className="text-xs text-muted-foreground uppercase tracking-wider font-bold">
+        [NO PATTERNS DETECTED]
+      </p>
+    )
+  }
 
   const displayed = limit ? patterns.slice(0, limit) : patterns
   const maxRecurrence = Math.max(...displayed.map((p) => p.recurrence_count), 1)
 
   return (
-    <div className="space-y-2">
+    <div className="flex flex-col gap-2">
       {displayed.map((p, i) => {
         const strength = p.recurrence_count / maxRecurrence
         const daySpan = Math.max(1, Math.round(
@@ -24,37 +30,33 @@ export function PatternList({ data, limit }: { data: unknown; limit?: number }) 
             initial={{ opacity: 0, x: -8 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: i * 0.04 }}
-            className="bg-card border border-border rounded-xl p-4 hover:border-primary/30 transition-colors"
+            className="bg-card border border-border dossier-card p-4 hover:border-primary/30 transition-colors"
           >
             <div className="flex items-start justify-between gap-3 mb-2">
-              <h4 className="text-sm font-medium text-foreground">{p.theme}</h4>
+              <h4 className="text-xs font-bold text-foreground uppercase tracking-wider">{p.theme}</h4>
               <div className="flex items-center gap-1.5 shrink-0">
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
+                <span className="text-[10px] px-2 py-0.5 border border-primary/20 bg-primary/10 text-primary font-bold uppercase tracking-wider">
                   {p.recurrence_count}x
                 </span>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
-                  {daySpan}d span
+                <span className="text-[10px] px-2 py-0.5 border border-border bg-muted text-muted-foreground uppercase tracking-wider">
+                  {daySpan}d
                 </span>
               </div>
             </div>
             {p.description && (
-              <p className="text-xs text-muted-foreground leading-relaxed mb-3">{p.description}</p>
+              <p className="text-[11px] text-muted-foreground leading-relaxed mb-3">{p.description}</p>
             )}
-            {/* Recurrence strength bar */}
             <div className="flex items-center gap-2">
-              <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
+              <div className="flex-1 h-1 bg-muted overflow-hidden">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${strength * 100}%` }}
                   transition={{ delay: 0.2 + i * 0.04, duration: 0.5 }}
-                  className="h-full rounded-full"
-                  style={{
-                    background: `linear-gradient(90deg, #60a5fa ${Math.round(strength * 100)}%, #a78bfa)`,
-                  }}
+                  className="h-full bg-olive"
                 />
               </div>
-              <span className="text-[10px] text-muted-foreground shrink-0">
-                {p.first_seen.slice(5)} — {p.last_seen.slice(5)}
+              <span className="text-[10px] text-muted-foreground shrink-0 uppercase tracking-wider">
+                {p.first_seen.slice(5)} -- {p.last_seen.slice(5)}
               </span>
             </div>
           </motion.div>

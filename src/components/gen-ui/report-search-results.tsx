@@ -6,10 +6,16 @@ import type { ReportSearchResult } from '@/lib/types'
 
 export function ReportSearchResults({ data }: { data: unknown }) {
   const results = data as ReportSearchResult[]
-  if (!results?.length) return <p className="text-sm text-muted-foreground">No matching reports found.</p>
+  if (!results?.length) {
+    return (
+      <p className="text-xs text-muted-foreground uppercase tracking-wider font-bold">
+        [NO MATCHING BRIEFINGS]
+      </p>
+    )
+  }
 
   return (
-    <div className="space-y-2">
+    <div className="flex flex-col gap-2">
       {results.map((r, i) => (
         <motion.div
           key={`${r.date}-${i}`}
@@ -19,13 +25,13 @@ export function ReportSearchResults({ data }: { data: unknown }) {
         >
           <Link
             href={`/blog/${r.date}`}
-            className="block bg-card border border-border rounded-xl p-4 hover:border-primary/30 transition-colors group"
+            className="block bg-card border border-border dossier-card p-4 hover:border-primary/30 transition-colors group"
           >
             <div className="flex items-center justify-between mb-2">
-              <h4 className="text-sm font-medium group-hover:text-primary transition-colors">{r.title}</h4>
-              <span className="text-[11px] text-muted-foreground shrink-0 ml-3">{r.date}</span>
+              <h4 className="text-xs font-bold group-hover:text-navy transition-colors">{r.title}</h4>
+              <span className="text-[10px] text-muted-foreground shrink-0 ml-3 uppercase tracking-wider">[{r.date}]</span>
             </div>
-            <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">{r.excerpt}</p>
+            <p className="text-[11px] text-muted-foreground leading-relaxed line-clamp-3">{r.excerpt}</p>
           </Link>
         </motion.div>
       ))}
