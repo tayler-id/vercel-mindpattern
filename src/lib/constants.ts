@@ -14,8 +14,14 @@ export const AGENTS = [
   { id: 'reddit-researcher', name: 'Reddit', focus: 'r/ML, r/LocalLLaMA, r/SaaS top posts' },
 ] as const
 
-export const IMPORTANCE_COLORS = {
-  high: 'text-red-400 bg-red-400/10 border-red-400/20',
-  medium: 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20',
-  low: 'text-green-400 bg-green-400/10 border-green-400/20',
-} as const
+export const IMPORTANCE_COLORS: Record<string, string> = {
+  high: 'text-primary bg-primary/10 border-primary/20',
+  medium: 'text-olive bg-olive/10 border-olive/20',
+  low: 'text-muted-foreground bg-muted border-border',
+}
+
+export const DIFFICULTY_COLORS: Record<string, string> = {
+  beginner: 'text-olive bg-olive/10 border-olive/20',
+  intermediate: 'text-chart-4 bg-chart-4/10 border-chart-4/20',
+  advanced: 'text-primary bg-primary/10 border-primary/20',
+}
