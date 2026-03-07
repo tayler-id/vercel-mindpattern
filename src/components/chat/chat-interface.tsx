@@ -3,14 +3,15 @@
 import { useChat } from '@ai-sdk/react'
 import { DefaultChatTransport } from 'ai'
 import { useRef, useEffect, useState, useMemo } from 'react'
+import { Send, Square } from 'lucide-react'
 import { EmptyState } from './empty-state'
 import { MessageContent } from './message-content'
 import { Button } from '@/components/ui/button'
 import { motion, AnimatePresence } from 'motion/react'
 
 const PROVIDERS = [
-  { id: 'openai', label: 'GPT-4o', icon: '◆' },
-  { id: 'anthropic', label: 'Claude Sonnet', icon: '◈' },
+  { id: 'openai', label: 'GPT-4o', code: 'OAI' },
+  { id: 'anthropic', label: 'Claude Sonnet', code: 'ANT' },
 ] as const
 
 type ProviderId = (typeof PROVIDERS)[number]['id']
@@ -65,7 +66,7 @@ export function ChatInterface() {
         {messages.length === 0 ? (
           <EmptyState onSuggestion={handleSuggestion} />
         ) : (
-          <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
+          <div className="max-w-3xl mx-auto px-4 py-6 flex flex-col gap-6">
             <AnimatePresence initial={false}>
               {messages.map((message) => (
                 <motion.div
@@ -75,16 +76,21 @@ export function ChatInterface() {
                   className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   <div
-                    className={`${
+                    className={
                       message.role === 'user'
-                        ? 'bg-primary text-primary-foreground rounded-2xl rounded-br-md px-4 py-2 max-w-[80%]'
+                        ? 'bg-card border border-border dossier-card px-4 py-2.5 max-w-[80%]'
                         : 'max-w-full w-full'
-                    }`}
+                    }
                   >
                     {message.role === 'user' ? (
-                      <p className="text-sm">
-                        {message.parts.find((p) => p.type === 'text')?.text}
-                      </p>
+                      <div className="flex flex-col gap-1">
+                        <span className="text-[10px] uppercase tracking-[0.15em] text-primary font-bold">
+                          Operator
+                        </span>
+                        <p className="text-xs text-foreground">
+                          {message.parts.find((p) => p.type === 'text')?.text}
+                        </p>
+                      </div>
                     ) : (
                       <MessageContent message={message} />
                     )}
@@ -94,18 +100,18 @@ export function ChatInterface() {
             </AnimatePresence>
 
             {isStreaming && messages[messages.length - 1]?.role !== 'assistant' && (
-              <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                <span className="inline-block w-2 h-2 rounded-full bg-primary animate-pulse" />
-                Thinking...
+              <div className="flex items-center gap-2 text-muted-foreground text-xs uppercase tracking-wider">
+                <span className="typewriter-cursor font-bold">_</span>
+                Processing query...
               </div>
             )}
           </div>
         )}
       </div>
 
-      <div className="border-t border-border bg-background/80 backdrop-blur-sm">
+      <div className="border-t border-border bg-card/80 backdrop-blur-sm">
         <form id="chat-form" onSubmit={handleSubmit} className="max-w-3xl mx-auto px-4 py-4">
-          <div className="relative flex items-end gap-2 bg-card border border-border rounded-2xl px-4 py-3 focus-within:border-primary/50 transition-colors">
+          <div className="relative flex items-end gap-2 bg-background border border-border px-4 py-3 focus-within:border-primary/50 transition-colors">
             <textarea
               ref={inputRef}
               value={input}
@@ -116,9 +122,9 @@ export function ChatInterface() {
                   handleSubmit(e as unknown as React.FormEvent)
                 }
               }}
-              placeholder="Ask about your research..."
+              placeholder="ENTER QUERY..."
               rows={1}
-              className="flex-1 bg-transparent resize-none outline-none text-sm max-h-32 min-h-[20px]"
+              className="flex-1 bg-transparent resize-none outline-none text-xs max-h-32 min-h-[20px] placeholder:text-muted-foreground/50 placeholder:uppercase placeholder:tracking-wider"
               style={{ height: 'auto', overflow: 'hidden' }}
               onInput={(e) => {
                 const target = e.target as HTMLTextAreaElement
@@ -132,28 +138,18 @@ export function ChatInterface() {
                 size="sm"
                 variant="ghost"
                 onClick={stop}
-                className="shrink-0 h-8 w-8 p-0 rounded-lg"
+                className="shrink-0 size-8 p-0"
               >
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
-                  <rect x="2" y="2" width="10" height="10" rx="2" />
-                </svg>
+                <Square data-icon="inline-start" />
               </Button>
             ) : (
               <Button
                 type="submit"
                 size="sm"
                 disabled={!input.trim()}
-                className="shrink-0 h-8 w-8 p-0 rounded-lg"
+                className="shrink-0 size-8 p-0"
               >
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <path
-                    d="M14 2L7 9M14 2l-4.5 12L7 9M14 2L2 6.5 7 9"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+                <Send data-icon="inline-start" />
               </Button>
             )}
           </div>
@@ -164,18 +160,18 @@ export function ChatInterface() {
                   key={p.id}
                   type="button"
                   onClick={() => setProvider(p.id)}
-                  className={`text-[11px] px-2.5 py-1 rounded-md transition-colors ${
+                  className={`text-[10px] px-2.5 py-1 uppercase tracking-wider font-bold transition-colors border ${
                     provider === p.id
-                      ? 'bg-primary/15 text-primary font-medium'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                      ? 'border-primary bg-primary/10 text-primary'
+                      : 'border-transparent text-muted-foreground hover:text-foreground'
                   }`}
                 >
-                  {p.icon} {p.label}
+                  [{p.code}] {p.label}
                 </button>
               ))}
             </div>
-            <p className="text-[11px] text-muted-foreground">
-              Using {currentProvider.label}
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
+              Channel: {currentProvider.code}
             </p>
           </div>
         </form>

@@ -30,18 +30,17 @@ const TOOL_COMPONENTS: Record<string, React.ComponentType<{ data: unknown }>> = 
 
 export function MessageContent({ message }: { message: UIMessage }) {
   return (
-    <div className="space-y-4">
+    <div className="flex flex-col gap-4">
       {message.parts.map((part, i) => {
         switch (part.type) {
           case 'text':
             return part.text ? (
-              <div key={i} className="prose prose-invert prose-sm max-w-none prose-p:text-muted-foreground prose-a:text-primary prose-strong:text-foreground prose-code:text-primary prose-code:bg-primary/5 prose-code:px-1 prose-code:rounded">
+              <div key={i} className="prose prose-sm max-w-none prose-p:text-muted-foreground prose-a:text-accent prose-strong:text-foreground prose-code:text-primary prose-code:bg-primary/5 prose-code:px-1 prose-code:rounded-sm prose-headings:uppercase prose-headings:tracking-wider prose-headings:text-foreground">
                 <MessageMarkdown text={part.text} />
               </div>
             ) : null
 
           default: {
-            // AI SDK v6: typed tools → 'tool-{name}', dynamic tools → 'dynamic-tool'
             let toolName: string | null = null
             if (part.type === 'dynamic-tool') {
               toolName = (part as unknown as { toolName: string }).toolName
@@ -64,12 +63,12 @@ export function MessageContent({ message }: { message: UIMessage }) {
             }
 
             return (
-              <div key={i} className="space-y-2">
-                <div className="text-xs text-muted-foreground flex items-center gap-2">
-                  <span className="inline-block w-2 h-2 rounded-full bg-primary animate-pulse" />
+              <div key={i} className="flex flex-col gap-2">
+                <div className="text-[10px] text-muted-foreground flex items-center gap-2 uppercase tracking-wider font-bold">
+                  <span className="typewriter-cursor">_</span>
                   Querying {toolName.replace(/_/g, ' ')}...
                 </div>
-                <Skeleton className="h-32 w-full rounded-xl" />
+                <Skeleton className="h-32 w-full" />
               </div>
             )
           }
@@ -89,11 +88,11 @@ function MessageMarkdown({ text }: { text: string }) {
         ),
         table: ({ children }) => (
           <div className="overflow-x-auto my-3">
-            <table className="w-full text-sm border-collapse">{children}</table>
+            <table className="w-full text-xs border-collapse">{children}</table>
           </div>
         ),
         th: ({ children }) => (
-          <th className="text-left px-3 py-1.5 border-b border-border font-medium text-foreground">{children}</th>
+          <th className="text-left px-3 py-1.5 border-b border-border font-bold text-foreground text-[10px] uppercase tracking-wider">{children}</th>
         ),
         td: ({ children }) => (
           <td className="px-3 py-1.5 border-b border-border/50">{children}</td>
