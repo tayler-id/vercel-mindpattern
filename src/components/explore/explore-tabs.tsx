@@ -388,7 +388,7 @@ const AGENT_TABLE = [
   { agent: 'hn-researcher', focus: 'Top HN stories (Algolia API)', output: '5-8 findings', category: 'API', color: 'text-green-400 bg-green-400/10 border-green-400/20' },
   { agent: 'arxiv-researcher', focus: 'cs.AI / cs.LG / cs.CL papers', output: '5-8 findings', category: 'API', color: 'text-green-400 bg-green-400/10 border-green-400/20' },
   { agent: 'github-pulse-researcher', focus: 'OSS repos gaining stars', output: '5-8 findings', category: 'API', color: 'text-green-400 bg-green-400/10 border-green-400/20' },
-  { agent: 'rss-researcher', focus: '15 authoritative AI feeds', output: '5-8 findings', category: 'RSS', color: 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20' },
+  { agent: 'rss-researcher', focus: '15 authoritative AI feeds', output: '5-8 findings', category: 'RSS', color: 'text-amber-400 bg-yellow-400/10 border-yellow-400/20' },
   { agent: 'reddit-researcher', focus: 'r/ML, r/LocalLLaMA, r/SaaS', output: '5-8 findings', category: 'API', color: 'text-green-400 bg-green-400/10 border-green-400/20' },
 ]
 
@@ -409,7 +409,7 @@ function SystemTab() {
     <div className="space-y-8">
       {/* Hero */}
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
-        <h3 className="text-2xl font-bold tracking-tight">System Architecture</h3>
+        <h3 className="text-2xl font-bold tracking-tight text-foreground">System Architecture</h3>
         <p className="text-muted-foreground mt-2 leading-relaxed max-w-3xl">
           MindPattern is a fully autonomous AI research pipeline that runs daily on macOS via launchd.
           It dispatches 13 parallel research agents, synthesizes findings into a newsletter, stores
@@ -420,7 +420,7 @@ function SystemTab() {
 
       {/* Execution Flow */}
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
-        <h4 className="text-lg font-semibold mb-3">Execution Flow</h4>
+        <h4 className="text-lg font-semibold mb-3 text-foreground">Execution Flow</h4>
         <div className="bg-[#0a0e14] border border-border rounded-xl p-5 overflow-x-auto">
           <pre className="text-sm font-mono leading-relaxed text-muted-foreground">
             <code>{`launchd (7:00 AM daily)
@@ -450,7 +450,7 @@ function SystemTab() {
 
       {/* Orchestrator Phases */}
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-        <h4 className="text-lg font-semibold mb-3">Orchestrator Phases</h4>
+        <h4 className="text-lg font-semibold mb-3 text-foreground">Orchestrator Phases</h4>
         <div className="space-y-3">
           {[
             { num: '1', title: 'Initialization', desc: 'Reads SOUL.md, vertical config, learnings.md, and user preferences from memory DB' },
@@ -465,7 +465,7 @@ function SystemTab() {
                 {phase.num}
               </span>
               <div>
-                <p className="text-sm font-medium">{phase.title}</p>
+                <p className="text-sm font-medium text-foreground">{phase.title}</p>
                 <p className="text-xs text-muted-foreground leading-relaxed">{phase.desc}</p>
               </div>
             </div>
@@ -475,7 +475,7 @@ function SystemTab() {
 
       {/* Research Agents Table */}
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-        <h4 className="text-lg font-semibold mb-3">Research Agents</h4>
+        <h4 className="text-lg font-semibold mb-3 text-foreground">Research Agents</h4>
         <div className="bg-card border border-border rounded-xl overflow-hidden">
           <table className="w-full text-sm">
             <thead>
@@ -489,7 +489,7 @@ function SystemTab() {
             <tbody>
               {AGENT_TABLE.map((a) => (
                 <tr key={a.agent} className="border-b border-border/50 last:border-0 hover:bg-muted/30">
-                  <td className="px-4 py-2.5 font-medium font-mono text-xs">{a.agent}</td>
+                  <td className="px-4 py-2.5 font-medium font-mono text-xs text-foreground">{a.agent}</td>
                   <td className="px-4 py-2.5 text-muted-foreground text-xs">{a.focus}</td>
                   <td className="px-4 py-2.5 text-muted-foreground text-xs">{a.output}</td>
                   <td className="px-4 py-2.5">
@@ -506,7 +506,7 @@ function SystemTab() {
 
       {/* Memory Database Table */}
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-        <h4 className="text-lg font-semibold mb-3">Memory Database</h4>
+        <h4 className="text-lg font-semibold mb-3 text-foreground">Memory Database</h4>
         <div className="bg-card border border-border rounded-xl overflow-hidden">
           <table className="w-full text-sm">
             <thead>
@@ -539,7 +539,7 @@ function SystemTab() {
 
       {/* Social Media Pipeline */}
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
-        <h4 className="text-lg font-semibold mb-3">Social Media Pipeline</h4>
+        <h4 className="text-lg font-semibold mb-3 text-foreground">Social Media Pipeline</h4>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {[
             {
@@ -552,7 +552,7 @@ function SystemTab() {
               title: 'Gate 1',
               desc: 'Sends curated selections to user via iMessage for approval before writing begins.',
               detail: 'iMessage approval',
-              color: 'text-yellow-400',
+              color: 'text-amber-400',
             },
             {
               title: 'Writers',
@@ -564,7 +564,7 @@ function SystemTab() {
               title: 'Gate 2 + Post',
               desc: 'Final approval via iMessage, then automated posting to configured platforms.',
               detail: 'iMessage + auto-post',
-              color: 'text-yellow-400',
+              color: 'text-amber-400',
             },
           ].map((phase) => (
             <div key={phase.title} className="bg-card border border-border rounded-xl p-4">
@@ -578,7 +578,7 @@ function SystemTab() {
 
       {/* Cloud & Infrastructure */}
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-        <h4 className="text-lg font-semibold mb-3">Cloud &amp; Infrastructure</h4>
+        <h4 className="text-lg font-semibold mb-3 text-foreground">Cloud &amp; Infrastructure</h4>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div className="bg-card border border-border rounded-xl p-4">
             <h5 className="text-sm font-semibold text-primary">Fly.io</h5>
@@ -593,7 +593,7 @@ function SystemTab() {
             </p>
           </div>
           <div className="bg-card border border-border rounded-xl p-4">
-            <h5 className="text-sm font-semibold text-yellow-400">Email (Resend)</h5>
+            <h5 className="text-sm font-semibold text-amber-400">Email (Resend)</h5>
             <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
               Daily newsletter delivered via Resend API. HTML-formatted email with all findings, patterns, and skills from the day.
             </p>
@@ -603,15 +603,15 @@ function SystemTab() {
 
       {/* File Map */}
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
-        <h4 className="text-lg font-semibold mb-3">File Map</h4>
+        <h4 className="text-lg font-semibold mb-3 text-foreground">File Map</h4>
         <div className="bg-[#0a0e14] border border-border rounded-xl p-5 overflow-x-auto">
           <pre className="text-sm font-mono leading-relaxed">
             <code>
               <span className="text-primary">daily-research-agent/</span>{'\n'}
-              <span className="text-muted-foreground">├── </span><span className="text-yellow-400">run-all-users.sh</span><span className="text-muted-foreground">        # Entry point (launchd)</span>{'\n'}
-              <span className="text-muted-foreground">├── </span><span className="text-yellow-400">run-user-research.sh</span><span className="text-muted-foreground">    # Per-user orchestration</span>{'\n'}
-              <span className="text-muted-foreground">├── </span><span className="text-yellow-400">run-social.sh</span><span className="text-muted-foreground">           # Social media pipeline</span>{'\n'}
-              <span className="text-muted-foreground">├── </span><span className="text-yellow-400">sync-to-fly.sh</span><span className="text-muted-foreground">          # DB upload to Fly.io</span>{'\n'}
+              <span className="text-muted-foreground">├── </span><span className="text-amber-400">run-all-users.sh</span><span className="text-muted-foreground">        # Entry point (launchd)</span>{'\n'}
+              <span className="text-muted-foreground">├── </span><span className="text-amber-400">run-user-research.sh</span><span className="text-muted-foreground">    # Per-user orchestration</span>{'\n'}
+              <span className="text-muted-foreground">├── </span><span className="text-amber-400">run-social.sh</span><span className="text-muted-foreground">           # Social media pipeline</span>{'\n'}
+              <span className="text-muted-foreground">├── </span><span className="text-amber-400">sync-to-fly.sh</span><span className="text-muted-foreground">          # DB upload to Fly.io</span>{'\n'}
               <span className="text-muted-foreground">├── </span><span className="text-green-400">memory.py</span><span className="text-muted-foreground">               # SQLite + embeddings CLI</span>{'\n'}
               <span className="text-muted-foreground">├── </span><span className="text-green-400">users.json</span><span className="text-muted-foreground">              # User registry</span>{'\n'}
               <span className="text-muted-foreground">├── </span><span className="text-primary">verticals/</span>{'\n'}
@@ -639,7 +639,7 @@ function SystemTab() {
 
       {/* Tech Stack */}
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
-        <h4 className="text-lg font-semibold mb-3">Tech Stack</h4>
+        <h4 className="text-lg font-semibold mb-3 text-foreground">Tech Stack</h4>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           <div className="bg-card border border-border rounded-xl p-4">
             <h5 className="text-sm font-semibold text-primary">Core AI</h5>
@@ -654,7 +654,7 @@ function SystemTab() {
             </p>
           </div>
           <div className="bg-card border border-border rounded-xl p-4">
-            <h5 className="text-sm font-semibold text-yellow-400">Social &amp; Infrastructure</h5>
+            <h5 className="text-sm font-semibold text-amber-400">Social &amp; Infrastructure</h5>
             <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
               Resend for email, Fly.io for hosting, sftp for DB sync, iMessage for human-in-the-loop approval gates.
             </p>

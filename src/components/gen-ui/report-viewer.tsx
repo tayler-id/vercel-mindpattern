@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { motion } from 'motion/react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
+import Markdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import type { Report } from '@/lib/types'
 
 export function ReportViewer({ data }: { data: unknown }) {
@@ -25,7 +27,7 @@ export function ReportViewer({ data }: { data: unknown }) {
       <div className="px-4 py-3 border-b border-border flex items-center justify-between">
         <div>
           <p className="text-xs text-muted-foreground">
-            {new Date(report.date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+            {new Date(report.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
             {' · '}{wordCount.toLocaleString()} words
           </p>
         </div>
@@ -37,7 +39,27 @@ export function ReportViewer({ data }: { data: unknown }) {
       </div>
       <div className={`px-4 py-4 ${!expanded && hasMore ? 'max-h-96 overflow-hidden relative' : ''}`}>
         <div className="prose prose-invert prose-sm max-w-none prose-p:text-muted-foreground prose-a:text-primary prose-headings:text-foreground prose-strong:text-foreground">
-          <ReportMarkdown content={expanded ? report.content : preview} />
+          <Markdown
+            remarkPlugins={[remarkGfm]}
+            components={{
+              a: ({ href, children }) => (
+                <a href={href} target="_blank" rel="noopener noreferrer">{children}</a>
+              ),
+              table: ({ children }) => (
+                <div className="overflow-x-auto my-3">
+                  <table className="w-full text-sm border-collapse">{children}</table>
+                </div>
+              ),
+              th: ({ children }) => (
+                <th className="text-left px-3 py-1.5 border-b border-border font-medium text-foreground">{children}</th>
+              ),
+              td: ({ children }) => (
+                <td className="px-3 py-1.5 border-b border-border/50">{children}</td>
+              ),
+            }}
+          >
+            {expanded ? report.content : preview}
+          </Markdown>
         </div>
         {!expanded && hasMore && (
           <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-card to-transparent" />
@@ -52,21 +74,4 @@ export function ReportViewer({ data }: { data: unknown }) {
       )}
     </motion.div>
   )
-}
-
-function ReportMarkdown({ content }: { content: string }) {
-  const html = content
-    .replace(/^### (.*$)/gm, '<h3>$1</h3>')
-    .replace(/^## (.*$)/gm, '<h2>$1</h2>')
-    .replace(/^# (.*$)/gm, '<h1>$1</h1>')
-    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\*(.*?)\*/g, '<em>$1</em>')
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
-    .replace(/`([^`]+)`/g, '<code>$1</code>')
-    .replace(/^---$/gm, '<hr/>')
-    .replace(/^- (.*$)/gm, '<li>$1</li>')
-    .replace(/^(?!<[hlu]|<li|<hr)(.*\S.*)$/gm, '<p>$1</p>')
-    .replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>')
-
-  return <div dangerouslySetInnerHTML={{ __html: html }} />
 }

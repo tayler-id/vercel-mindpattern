@@ -8,31 +8,58 @@ export function PatternList({ data, limit }: { data: unknown; limit?: number }) 
   if (!patterns?.length) return <p className="text-sm text-muted-foreground">No patterns tracked yet.</p>
 
   const displayed = limit ? patterns.slice(0, limit) : patterns
+  const maxRecurrence = Math.max(...displayed.map((p) => p.recurrence_count), 1)
 
   return (
     <div className="space-y-2">
-      {displayed.map((p, i) => (
-        <motion.div
-          key={p.theme}
-          initial={{ opacity: 0, x: -8 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: i * 0.04 }}
-          className="bg-card border border-border rounded-xl p-4"
-        >
-          <div className="flex items-center justify-between mb-1">
-            <h4 className="text-sm font-medium">{p.theme}</h4>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
-              {p.recurrence_count}x
-            </span>
-          </div>
-          {p.description && (
-            <p className="text-xs text-muted-foreground leading-relaxed">{p.description}</p>
-          )}
-          <div className="text-[11px] text-muted-foreground mt-2">
-            {p.first_seen} — {p.last_seen}
-          </div>
-        </motion.div>
-      ))}
+      {displayed.map((p, i) => {
+        const strength = p.recurrence_count / maxRecurrence
+        const daySpan = Math.max(1, Math.round(
+          (new Date(p.last_seen).getTime() - new Date(p.first_seen).getTime()) / (1000 * 60 * 60 * 24)
+        ))
+
+        return (
+          <motion.div
+            key={p.theme}
+            initial={{ opacity: 0, x: -8 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: i * 0.04 }}
+            className="bg-card border border-border rounded-xl p-4 hover:border-primary/30 transition-colors"
+          >
+            <div className="flex items-start justify-between gap-3 mb-2">
+              <h4 className="text-sm font-medium text-foreground">{p.theme}</h4>
+              <div className="flex items-center gap-1.5 shrink-0">
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
+                  {p.recurrence_count}x
+                </span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                  {daySpan}d span
+                </span>
+              </div>
+            </div>
+            {p.description && (
+              <p className="text-xs text-muted-foreground leading-relaxed mb-3">{p.description}</p>
+            )}
+            {/* Recurrence strength bar */}
+            <div className="flex items-center gap-2">
+              <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${strength * 100}%` }}
+                  transition={{ delay: 0.2 + i * 0.04, duration: 0.5 }}
+                  className="h-full rounded-full"
+                  style={{
+                    background: `linear-gradient(90deg, #60a5fa ${Math.round(strength * 100)}%, #a78bfa)`,
+                  }}
+                />
+              </div>
+              <span className="text-[10px] text-muted-foreground shrink-0">
+                {p.first_seen.slice(5)} — {p.last_seen.slice(5)}
+              </span>
+            </div>
+          </motion.div>
+        )
+      })}
     </div>
   )
 }
