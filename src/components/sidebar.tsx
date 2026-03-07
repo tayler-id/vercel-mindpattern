@@ -2,11 +2,29 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
+import { Plus, BookOpen, LayoutGrid, PanelLeftClose } from 'lucide-react'
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarSeparator,
+  SidebarTrigger,
+  useSidebar,
+} from '@/components/ui/sidebar'
 
-export function Sidebar() {
-  const [collapsed, setCollapsed] = useState(false)
+const NAV_ITEMS = [
+  { href: '/blog', label: 'Briefings', icon: BookOpen },
+  { href: '/explore', label: 'Archives', icon: LayoutGrid },
+] as const
+
+function SidebarNav() {
   const pathname = usePathname()
 
   const isActive = (path: string) => {
@@ -15,69 +33,67 @@ export function Sidebar() {
   }
 
   return (
-    <aside className={`${collapsed ? 'w-16' : 'w-64'} bg-sidebar border-r border-sidebar-border flex flex-col transition-all duration-200`}>
-      {/* Header */}
-      <div className="p-4 border-b border-sidebar-border flex items-center gap-3">
-        <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center shrink-0">
-          <span className="text-primary text-sm font-bold">M</span>
-        </div>
-        {!collapsed && <span className="font-semibold text-sm">MindPattern</span>}
-      </div>
-
-      {/* New Chat */}
-      <div className="p-3">
-        <Link href="/">
-          <Button variant={isActive('/') && !isActive('/blog') && !isActive('/explore') ? 'secondary' : 'outline'} className={`${collapsed ? 'w-10 px-0' : 'w-full'} justify-start gap-2`}>
-            <PlusIcon />
-            {!collapsed && 'New Chat'}
-          </Button>
+    <Sidebar>
+      <SidebarHeader className="px-3 py-4">
+        <Link href="/" className="flex items-center gap-2.5">
+          <div className="flex items-center justify-center size-7 border border-primary bg-primary/10">
+            <span className="text-primary text-xs font-bold">MP</span>
+          </div>
+          <span className="text-xs font-bold uppercase tracking-[0.15em] text-foreground">
+            MindPattern
+          </span>
         </Link>
-      </div>
+      </SidebarHeader>
 
-      {/* Nav */}
-      <nav className="flex-1 overflow-y-auto px-3 space-y-1">
-        {/* Chat history will go here in a later task */}
-      </nav>
+      <SidebarSeparator />
 
-      {/* Footer */}
-      <div className="p-3 border-t border-sidebar-border space-y-1">
-        <Link href="/blog">
-          <Button variant={isActive('/blog') ? 'secondary' : 'ghost'} className={`${collapsed ? 'w-10 px-0' : 'w-full'} justify-start gap-2 text-muted-foreground`}>
-            <BookIcon />
-            {!collapsed && 'Blog'}
-          </Button>
-        </Link>
-        <Link href="/explore">
-          <Button variant={isActive('/explore') ? 'secondary' : 'ghost'} className={`${collapsed ? 'w-10 px-0' : 'w-full'} justify-start gap-2 text-muted-foreground`}>
-            <GridIcon />
-            {!collapsed && 'Explore'}
-          </Button>
-        </Link>
-        <Button
-          variant="ghost"
-          className={`${collapsed ? 'w-10 px-0' : 'w-full'} justify-start gap-2 text-muted-foreground`}
-          onClick={() => setCollapsed(!collapsed)}
-        >
-          <ChevronIcon collapsed={collapsed} />
-          {!collapsed && 'Collapse'}
-        </Button>
-      </div>
-    </aside>
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-bold">
+            Operations
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={isActive('/') && !isActive('/blog') && !isActive('/explore')}>
+                  <Link href="/">
+                    <Plus data-icon="inline-start" />
+                    <span className="text-xs uppercase tracking-wider">New Case</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarSeparator />
+
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-bold">
+            File Index
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {NAV_ITEMS.map(({ href, label, icon: Icon }) => (
+                <SidebarMenuItem key={href}>
+                  <SidebarMenuButton asChild isActive={isActive(href)}>
+                    <Link href={href}>
+                      <Icon data-icon="inline-start" />
+                      <span className="text-xs uppercase tracking-wider">{label}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+
+      <SidebarFooter className="px-3 py-3">
+        <SidebarTrigger className="w-full justify-start gap-2 text-xs uppercase tracking-wider text-muted-foreground" />
+      </SidebarFooter>
+    </Sidebar>
   )
 }
 
-function PlusIcon() {
-  return <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
-}
-
-function BookIcon() {
-  return <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 3h4.5a2 2 0 012 2v8a1.5 1.5 0 00-1.5-1.5H2V3zM14 3H9.5a2 2 0 00-2 2v8A1.5 1.5 0 019 11.5H14V3z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-}
-
-function GridIcon() {
-  return <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" rx="1" stroke="currentColor" strokeWidth="1.5"/><rect x="9" y="2" width="5" height="5" rx="1" stroke="currentColor" strokeWidth="1.5"/><rect x="2" y="9" width="5" height="5" rx="1" stroke="currentColor" strokeWidth="1.5"/><rect x="9" y="9" width="5" height="5" rx="1" stroke="currentColor" strokeWidth="1.5"/></svg>
-}
-
-function ChevronIcon({ collapsed }: { collapsed: boolean }) {
-  return <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className={`transition-transform ${collapsed ? 'rotate-180' : ''}`}><path d="M10 12L6 8l4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-}
+export { SidebarNav }
