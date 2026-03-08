@@ -35,7 +35,7 @@ export function MessageContent({ message }: { message: UIMessage }) {
         switch (part.type) {
           case 'text':
             return part.text ? (
-              <div key={i} className="prose prose-sm max-w-none prose-p:text-muted-foreground prose-a:text-accent prose-strong:text-foreground prose-code:text-primary prose-code:bg-primary/5 prose-code:px-1 prose-code:rounded-sm prose-headings:uppercase prose-headings:tracking-wider prose-headings:text-foreground">
+              <div key={i}>
                 <MessageMarkdown text={part.text} />
               </div>
             ) : null
@@ -83,19 +83,52 @@ function MessageMarkdown({ text }: { text: string }) {
     <Markdown
       remarkPlugins={[remarkGfm]}
       components={{
+        h1: ({ children }) => (
+          <h1 className="text-sm font-bold uppercase tracking-[0.15em] text-foreground border-b border-border pb-2 mb-4">{children}</h1>
+        ),
+        h2: ({ children }) => (
+          <h2 className="text-xs font-bold uppercase tracking-[0.12em] text-foreground mt-6 mb-3 border-l-3 border-primary pl-2">{children}</h2>
+        ),
+        h3: ({ children }) => (
+          <h3 className="text-xs font-bold uppercase tracking-[0.1em] text-foreground mt-5 mb-2">{children}</h3>
+        ),
+        p: ({ children }) => (
+          <p className="text-[13px] leading-[1.75] text-muted-foreground mb-4">{children}</p>
+        ),
+        strong: ({ children }) => (
+          <strong className="text-foreground font-bold">{children}</strong>
+        ),
         a: ({ href, children }) => (
-          <a href={href} target="_blank" rel="noopener noreferrer">{children}</a>
+          <a href={href} target="_blank" rel="noopener noreferrer" className="text-navy underline underline-offset-2 hover:text-primary transition-colors">{children}</a>
+        ),
+        ul: ({ children }) => (
+          <ul className="flex flex-col gap-1.5 mb-4 ml-4 list-disc marker:text-primary/40">{children}</ul>
+        ),
+        ol: ({ children }) => (
+          <ol className="flex flex-col gap-1.5 mb-4 ml-4 list-decimal marker:text-primary/40">{children}</ol>
+        ),
+        li: ({ children }) => (
+          <li className="text-[13px] leading-[1.75] text-muted-foreground">{children}</li>
+        ),
+        hr: () => (
+          <hr className="my-6 border-t border-border" />
+        ),
+        blockquote: ({ children }) => (
+          <blockquote className="border-l-3 border-olive pl-3 my-4 italic text-muted-foreground/80">{children}</blockquote>
+        ),
+        code: ({ children }) => (
+          <code className="text-primary bg-primary/5 px-1.5 py-0.5 text-xs">{children}</code>
         ),
         table: ({ children }) => (
-          <div className="overflow-x-auto my-3">
+          <div className="overflow-x-auto my-4">
             <table className="w-full text-xs border-collapse">{children}</table>
           </div>
         ),
         th: ({ children }) => (
-          <th className="text-left px-3 py-1.5 border-b border-border font-bold text-foreground text-[10px] uppercase tracking-wider">{children}</th>
+          <th className="text-left px-3 py-2 border-b-2 border-border font-bold text-foreground text-[10px] uppercase tracking-wider bg-muted/30">{children}</th>
         ),
         td: ({ children }) => (
-          <td className="px-3 py-1.5 border-b border-border/50">{children}</td>
+          <td className="px-3 py-2 border-b border-border/50 text-[13px]">{children}</td>
         ),
       }}
     >
