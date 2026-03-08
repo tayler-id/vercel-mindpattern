@@ -1,4 +1,4 @@
-import { streamText, stepCountIs, convertToModelMessages } from 'ai'
+import { streamText, smoothStream, stepCountIs, convertToModelMessages } from 'ai'
 import { openai } from '@ai-sdk/openai'
 import { anthropic } from '@ai-sdk/anthropic'
 import { mcpTools } from '@/lib/mcp-tools'
@@ -26,6 +26,7 @@ export async function POST(req: Request) {
     messages: modelMessages,
     tools: mcpTools,
     stopWhen: stepCountIs(5),
+    experimental_transform: smoothStream({ chunking: 'word' }),
   })
 
   return result.toUIMessageStreamResponse()

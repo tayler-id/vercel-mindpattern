@@ -30,7 +30,7 @@ export function ChatInterface() {
     [],
   )
 
-  const { messages, sendMessage, status, stop } = useChat({ transport })
+  const { messages, sendMessage, status, stop } = useChat({ transport, experimental_throttle: 50 })
 
   const [input, setInput] = useState('')
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -92,7 +92,7 @@ export function ChatInterface() {
                         </p>
                       </div>
                     ) : (
-                      <MessageContent message={message} />
+                      <MessageContent message={message} isStreaming={isStreaming && message.id === messages[messages.length - 1]?.id} />
                     )}
                   </div>
                 </motion.div>
