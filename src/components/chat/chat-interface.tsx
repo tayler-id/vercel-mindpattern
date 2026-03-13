@@ -17,7 +17,7 @@ const PROVIDERS = [
 type ProviderId = (typeof PROVIDERS)[number]['id']
 
 export function ChatInterface() {
-  const [provider, setProvider] = useState<ProviderId>('openai')
+  const [provider, setProvider] = useState<ProviderId>('anthropic')
   const providerRef = useRef(provider)
   providerRef.current = provider
 
