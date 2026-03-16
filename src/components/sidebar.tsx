@@ -55,7 +55,7 @@ function SidebarNav() {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton render={<Link href="/" />} isActive={isActive('/') && !isActive('/blog') && !isActive('/explore')}>
+                <SidebarMenuButton render={<Link href="/chat" />} isActive={isActive('/chat')}>
                     <Plus data-icon="inline-start" />
                     <span className="text-xs uppercase tracking-wider">New Case</span>
                 </SidebarMenuButton>
