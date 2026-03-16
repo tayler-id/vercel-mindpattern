@@ -14,5 +14,11 @@ export async function backendFetch<T>(
     next: { revalidate: 60 },
   })
   if (!res.ok) throw new Error(`Backend ${res.status}: ${path}`)
-  return res.json()
+  const data = await res.json()
+  // The new FastAPI returns paginated responses as {items: [...], total, limit, offset}
+  // Unwrap to flat arrays for frontend compatibility
+  if (data && typeof data === 'object' && 'items' in data && Array.isArray(data.items)) {
+    return data.items as T
+  }
+  return data as T
 }
