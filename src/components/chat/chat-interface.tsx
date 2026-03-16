@@ -50,6 +50,21 @@ export function ChatInterface() {
     sendMessage({ text })
   }
 
+  const handleBlur = () => {
+    // iOS Safari zooms in on inputs < 16px but doesn't zoom back out on keyboard dismiss.
+    // Briefly constrain max scale to force zoom reset, then restore.
+    const viewport = document.querySelector('meta[name="viewport"]')
+    if (viewport) {
+      const original = viewport.getAttribute('content') || ''
+      viewport.setAttribute('content', original + ', maximum-scale=1')
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          viewport.setAttribute('content', original)
+        }, 100)
+      })
+    }
+  }
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!input.trim()) return
@@ -122,6 +137,7 @@ export function ChatInterface() {
                   handleSubmit(e as unknown as React.FormEvent)
                 }
               }}
+              onBlur={handleBlur}
               placeholder="ENTER QUERY..."
               rows={1}
               className="flex-1 bg-transparent resize-none outline-none text-xs max-h-32 min-h-[20px] placeholder:text-muted-foreground/50 placeholder:uppercase placeholder:tracking-wider"
