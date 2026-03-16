@@ -32,6 +32,11 @@ function SidebarNav() {
     return pathname.startsWith(path)
   }
 
+  const handleNewCase = (e: React.MouseEvent) => {
+    e.preventDefault()
+    window.location.href = '/'
+  }
+
   return (
     <Sidebar>
       <SidebarHeader className="px-3 py-4">
@@ -55,7 +60,7 @@ function SidebarNav() {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton render={<Link href="/" />} isActive={isActive('/') && !isActive('/blog') && !isActive('/explore')}>
+                <SidebarMenuButton onClick={handleNewCase} isActive={isActive('/') && !isActive('/blog') && !isActive('/explore')}>
                     <Plus data-icon="inline-start" />
                     <span className="text-xs uppercase tracking-wider">New Case</span>
                 </SidebarMenuButton>
