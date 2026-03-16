@@ -39,3 +39,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# tooling artifacts
+.playwright-mcp/
+.superpowers/
+.claude/agents/
+.claude/commands/
+context/
+*.png
