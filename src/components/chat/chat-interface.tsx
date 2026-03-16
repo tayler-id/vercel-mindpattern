@@ -50,44 +50,23 @@ export function ChatInterface() {
     sendMessage({ text })
   }
 
-  // iOS Safari zooms in on inputs < 16px but doesn't zoom back out on keyboard dismiss.
-  // Listen for visualViewport scale changes to detect when to force reset.
-  useEffect(() => {
-    const vv = window.visualViewport
-    if (!vv) return
-
-    let lastScale = vv.scale
-
-    const handleResize = () => {
-      // Scale went from zoomed back toward 1 — keyboard dismissed but zoom stuck
-      if (lastScale > 1 && vv.scale <= 1) {
-        const meta = document.querySelector('meta[name="viewport"]')
-        if (meta) {
-          const original = meta.getAttribute('content') || 'width=device-width, initial-scale=1'
-          meta.setAttribute('content', original + ', maximum-scale=1')
-          setTimeout(() => meta.setAttribute('content', original), 200)
-        }
-      }
-      lastScale = vv.scale
+  // iOS Safari: zoom in on focus (font < 16px), zoom back out on blur.
+  // On blur, lock maximum-scale=1 to force Safari to zoom out.
+  // On next focus, unlock it so Safari can zoom in again.
+  const handleFocus = () => {
+    const meta = document.querySelector('meta[name="viewport"]')
+    if (meta) {
+      meta.setAttribute('content', 'width=device-width, initial-scale=1')
     }
-
-    vv.addEventListener('resize', handleResize)
-    return () => vv.removeEventListener('resize', handleResize)
-  }, [])
+  }
 
   const handleBlur = () => {
-    // Fallback: wait for keyboard to finish dismissing, then reset zoom
     setTimeout(() => {
-      const vv = window.visualViewport
-      if (vv && vv.scale > 1) {
-        const meta = document.querySelector('meta[name="viewport"]')
-        if (meta) {
-          const original = meta.getAttribute('content') || 'width=device-width, initial-scale=1'
-          meta.setAttribute('content', original + ', maximum-scale=1')
-          setTimeout(() => meta.setAttribute('content', original), 200)
-        }
+      const meta = document.querySelector('meta[name="viewport"]')
+      if (meta) {
+        meta.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1')
       }
-    }, 400)
+    }, 300)
   }
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -162,6 +141,7 @@ export function ChatInterface() {
                   handleSubmit(e as unknown as React.FormEvent)
                 }
               }}
+              onFocus={handleFocus}
               onBlur={handleBlur}
               placeholder="ENTER QUERY..."
               rows={1}
