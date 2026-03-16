@@ -55,13 +55,7 @@ async function proxyFetch<T>(path: string, params?: Record<string, string>): Pro
   }
   const res = await fetch(url.toString())
   if (!res.ok) throw new Error(`Fetch failed: ${res.status}`)
-  const data = await res.json()
-  // The new FastAPI returns paginated responses as {items: [...], total, limit, offset}
-  // Unwrap to flat arrays for frontend compatibility
-  if (data && typeof data === 'object' && 'items' in data && Array.isArray(data.items)) {
-    return data.items as T
-  }
-  return data as T
+  return res.json()
 }
 
 function LoadingSkeleton({ rows = 5 }: { rows?: number }) {
@@ -164,7 +158,7 @@ function AllFindingsTab() {
   const fetchFindings = useCallback(() => {
     setLoading(true)
     setError(null)
-    const params: Record<string, string> = { user: 'ramsay', limit: '2000' }
+    const params: Record<string, string> = { user: 'ramsay' }
     if (agentFilter !== 'all') params.agent = agentFilter
     if (importanceFilter !== 'all') params.importance = importanceFilter
     if (dateFilter !== 'all') params.date = dateFilter
@@ -263,7 +257,7 @@ function SourcesTab() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    proxyFetch<Source[]>('sources', { user: 'ramsay', limit: '500' })
+    proxyFetch<Source[]>('sources', { user: 'ramsay' })
       .then((data) => {
         setSources(data.sort((a, b) => b.high_value_count - a.high_value_count))
       })
@@ -331,7 +325,7 @@ function SkillsTab() {
         .catch((e) => setError(e.message))
         .finally(() => setLoading(false))
     } else {
-      const params: Record<string, string> = { user: 'ramsay', limit: '200' }
+      const params: Record<string, string> = { user: 'ramsay' }
       if (domainFilter !== 'all') params.domain = domainFilter
       proxyFetch<Skill[]>('skills', params)
         .then(setSkills)

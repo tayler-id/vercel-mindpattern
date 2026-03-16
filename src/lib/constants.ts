@@ -16,12 +16,12 @@ export const AGENTS = [
 
 export const IMPORTANCE_COLORS: Record<string, string> = {
   high: 'text-primary bg-primary/10 border-primary/20',
-  medium: 'text-muted-foreground bg-muted border-border',
-  low: 'text-muted-foreground/60 bg-muted border-border',
+  medium: 'text-olive bg-olive/10 border-olive/20',
+  low: 'text-muted-foreground bg-muted border-border',
 }
 
 export const DIFFICULTY_COLORS: Record<string, string> = {
-  beginner: 'text-muted-foreground bg-muted border-border',
-  intermediate: 'text-foreground bg-muted border-border',
+  beginner: 'text-olive bg-olive/10 border-olive/20',
+  intermediate: 'text-chart-4 bg-chart-4/10 border-chart-4/20',
   advanced: 'text-primary bg-primary/10 border-primary/20',
 }
