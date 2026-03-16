@@ -50,24 +50,6 @@ export function ChatInterface() {
     sendMessage({ text })
   }
 
-  // iOS Safari: zoom in on focus (font < 16px), zoom back out on blur.
-  // On blur, lock maximum-scale=1 to force Safari to zoom out.
-  // On next focus, unlock it so Safari can zoom in again.
-  const handleFocus = () => {
-    const meta = document.querySelector('meta[name="viewport"]')
-    if (meta) {
-      meta.setAttribute('content', 'width=device-width, initial-scale=1')
-    }
-  }
-
-  const handleBlur = () => {
-    setTimeout(() => {
-      const meta = document.querySelector('meta[name="viewport"]')
-      if (meta) {
-        meta.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1')
-      }
-    }, 300)
-  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -141,11 +123,9 @@ export function ChatInterface() {
                   handleSubmit(e as unknown as React.FormEvent)
                 }
               }}
-              onFocus={handleFocus}
-              onBlur={handleBlur}
               placeholder="ENTER QUERY..."
               rows={1}
-              className="flex-1 bg-transparent resize-none outline-none text-xs max-h-32 min-h-[20px] placeholder:text-muted-foreground/50 placeholder:uppercase placeholder:tracking-wider"
+              className="flex-1 bg-transparent resize-none outline-none text-[16px] sm:text-xs max-h-32 min-h-[20px] placeholder:text-muted-foreground/50 placeholder:uppercase placeholder:tracking-wider"
               style={{ height: 'auto', overflow: 'hidden' }}
               onInput={(e) => {
                 const target = e.target as HTMLTextAreaElement
