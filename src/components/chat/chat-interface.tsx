@@ -50,19 +50,44 @@ export function ChatInterface() {
     sendMessage({ text })
   }
 
-  const handleBlur = () => {
-    // iOS Safari zooms in on inputs < 16px but doesn't zoom back out on keyboard dismiss.
-    // Briefly constrain max scale to force zoom reset, then restore.
-    const viewport = document.querySelector('meta[name="viewport"]')
-    if (viewport) {
-      const original = viewport.getAttribute('content') || ''
-      viewport.setAttribute('content', original + ', maximum-scale=1')
-      requestAnimationFrame(() => {
-        setTimeout(() => {
-          viewport.setAttribute('content', original)
-        }, 100)
-      })
+  // iOS Safari zooms in on inputs < 16px but doesn't zoom back out on keyboard dismiss.
+  // Listen for visualViewport scale changes to detect when to force reset.
+  useEffect(() => {
+    const vv = window.visualViewport
+    if (!vv) return
+
+    let lastScale = vv.scale
+
+    const handleResize = () => {
+      // Scale went from zoomed back toward 1 — keyboard dismissed but zoom stuck
+      if (lastScale > 1 && vv.scale <= 1) {
+        const meta = document.querySelector('meta[name="viewport"]')
+        if (meta) {
+          const original = meta.getAttribute('content') || 'width=device-width, initial-scale=1'
+          meta.setAttribute('content', original + ', maximum-scale=1')
+          setTimeout(() => meta.setAttribute('content', original), 200)
+        }
+      }
+      lastScale = vv.scale
     }
+
+    vv.addEventListener('resize', handleResize)
+    return () => vv.removeEventListener('resize', handleResize)
+  }, [])
+
+  const handleBlur = () => {
+    // Fallback: wait for keyboard to finish dismissing, then reset zoom
+    setTimeout(() => {
+      const vv = window.visualViewport
+      if (vv && vv.scale > 1) {
+        const meta = document.querySelector('meta[name="viewport"]')
+        if (meta) {
+          const original = meta.getAttribute('content') || 'width=device-width, initial-scale=1'
+          meta.setAttribute('content', original + ', maximum-scale=1')
+          setTimeout(() => meta.setAttribute('content', original), 200)
+        }
+      }
+    }, 400)
   }
 
   const handleSubmit = (e: React.FormEvent) => {
