@@ -925,13 +925,11 @@ h2 {
   .panel-num { font-size: 36px; }
 
   /* Stack two-col grids */
-  .two-col { grid-template-columns: 1fr; }
-  .two-col > *:nth-child(odd) {
-    padding-right: 0;
-    border-right: none;
-  }
-  .two-col > *:nth-child(even) {
-    padding-left: 0;
+  .two-col { grid-template-columns: 1fr !important; }
+  .two-col > * {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    border-right: none !important;
   }
 
   /* Stack stat strip */
@@ -991,6 +989,67 @@ h2 {
 
   /* Nav */
   .nav { margin-top: 16px; }
+}
+
+  /* Force ALL 2-col inline grids to stack (overrides inline styles) */
+  [style*="grid-template-columns: 1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+  [style*="grid-template-columns: 1fr 1fr"] > div {
+    padding: 16px 0 !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--rule-fine);
+  }
+
+  /* Dimensions grid — stack and give room */
+  .dimensions-grid {
+    grid-template-columns: 1fr !important;
+    gap: 20px 0 !important;
+  }
+  .dimensions-grid > div {
+    padding: 0 0 20px 0 !important;
+    border-bottom: 1px solid var(--rule-fine);
+    border-right: none !important;
+  }
+  .dimensions-grid > div:last-child {
+    border-bottom: none;
+    padding-bottom: 0 !important;
+  }
+
+  /* 4-col grids (MARE framework) */
+  [style*="grid-template-columns: 1fr 1fr 1fr 1fr"] {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 12px !important;
+  }
+
+  /* Comparison bars (panel 4) */
+  .reliability-viz {
+    flex-direction: column !important;
+    gap: 24px !important;
+  }
+  .rel-bar-container {
+    height: 80px !important;
+  }
+  .rel-pct {
+    font-size: 28px !important;
+  }
+
+  /* Dimension bars (panel 7) labels */
+  .dim-name {
+    width: 80px !important;
+    font-size: 11px !important;
+  }
+  .dim-val {
+    width: 40px !important;
+    font-size: 11px !important;
+  }
+
+  /* Warning block text */
+  .warning-block p { font-size: 13px !important; }
+
+  /* Callout text */
+  .callout p { font-size: 13px !important; }
+
 }
 
 @media (max-width: 480px) {
@@ -1333,7 +1392,7 @@ h2 {
     <div class="gap-md"></div>
     <div class="section-label">4 Dimensions, 12 Metrics</div>
 
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px 40px;">
+    <div class="dimensions-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px 40px;">
       <div>
         <div style="font-size: var(--text-xl); font-weight: 800; letter-spacing: -0.02em; margin-bottom: 10px;">Consistency</div>
         <div style="font-size: var(--text-sm); color: var(--muted); line-height: 1.7;">
