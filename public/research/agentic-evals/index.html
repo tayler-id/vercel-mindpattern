@@ -63,6 +63,7 @@ body {
   color: var(--ink);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
 }
 
 /* ============================================================
@@ -71,7 +72,6 @@ body {
 .carousel-wrapper {
   position: relative;
   width: 1080px;
-  max-width: 100vw;
 }
 
 .carousel {
@@ -893,6 +893,121 @@ h2 {
   color: var(--accent);
 }
 
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 1100px) {
+  body { padding: 20px 0; }
+  .carousel-wrapper { width: 100%; }
+  .carousel { scroll-snap-type: x mandatory; }
+  .panel {
+    flex: 0 0 100vw;
+    width: 100vw;
+    height: auto;
+    min-height: 100vh;
+    padding: 0;
+  }
+  .panel-inner {
+    padding: 48px 32px 24px;
+  }
+  .panel-footer {
+    padding: 16px 32px;
+  }
+
+  /* Type scale down */
+  h1, .panel-1-title { font-size: 42px !important; }
+  h2 { font-size: 32px !important; }
+  .lead { font-size: 16px; }
+  .stat-val { font-size: 28px; }
+  .stat-val .unit { font-size: 16px; }
+  .big-num { font-size: 52px; }
+  .panel-num { font-size: 36px; }
+
+  /* Stack two-col grids */
+  .two-col { grid-template-columns: 1fr; }
+  .two-col > *:nth-child(odd) {
+    padding-right: 0;
+    border-right: none;
+  }
+  .two-col > *:nth-child(even) {
+    padding-left: 0;
+  }
+
+  /* Stack stat strip */
+  .stat-strip { flex-direction: column; }
+  .stat-cell { padding: 24px 0; }
+  .stat-cell + .stat-cell {
+    padding-left: 0;
+    border-left: none;
+    border-top: 1px solid var(--rule);
+  }
+
+  /* Speakers strip stack */
+  .speakers-strip { flex-direction: column; }
+  .speaker-cell {
+    padding: 12px 0;
+    border-right: none;
+    border-bottom: 1px solid var(--rule-fine);
+  }
+  .speaker-cell:not(:first-child) { padding-left: 0; }
+
+  /* Theme list single column */
+  .theme-list { grid-template-columns: 1fr; }
+  .theme-item:nth-child(odd) {
+    padding-right: 0;
+    border-right: none;
+  }
+  .theme-item:nth-child(even) {
+    padding-left: 0;
+  }
+
+  /* Dimension bars */
+  .dim-name { width: 90px; font-size: 12px; }
+
+  /* Comparison bars */
+  .reliability-viz { flex-direction: column; gap: 24px; }
+  .rel-bar-container { height: 100px; }
+
+  /* CTA grid single column */
+  .cta-grid, .final-cta-grid { grid-template-columns: 1fr; }
+  .cta-cell:nth-child(odd),
+  .final-cta-item:nth-child(odd) {
+    padding-right: 0;
+    border-right: none;
+  }
+  .cta-cell:nth-child(even),
+  .final-cta-item:nth-child(even) {
+    padding-left: 0;
+  }
+
+  /* Footer grid */
+  .panel-footer { grid-template-columns: 1fr; gap: 8px; text-align: center; }
+  .panel-footer > span:last-child { text-align: center; }
+  .panel-footer .brand { justify-content: center; }
+
+  /* MARE pills wrap */
+  .mare-arch { flex-wrap: wrap; }
+
+  /* Nav */
+  .nav { margin-top: 16px; }
+}
+
+@media (max-width: 480px) {
+  .panel-inner { padding: 36px 20px 16px; }
+  .panel-footer { padding: 12px 20px; }
+  h1, .panel-1-title { font-size: 32px !important; }
+  h2 { font-size: 26px !important; }
+  .lead { font-size: 15px; }
+  .stat-val { font-size: 24px; }
+  .panel-num { font-size: 28px; }
+  .section-label { font-size: 10px; }
+  .metric-group { gap: 6px; }
+  .metric-pill { font-size: 10px; padding: 4px 10px; }
+  .tag { font-size: 10px; padding: 4px 10px; }
+  .tag-row { gap: 6px; }
+}
+
 </style>
 </head>
 <body><div style="position:fixed;top:0;left:0;right:0;background:#101010;padding:16px 0;text-align:center;z-index:100;">
@@ -1666,7 +1781,7 @@ for (let i = 0; i < total; i++) {
 }
 
 function getCurrentIndex() {
-  return Math.round(carousel.scrollLeft / 1080);
+  return Math.round(carousel.scrollLeft / (carousel.querySelector('.panel')?.offsetWidth || 1080));
 }
 
 function scrollPanel(direction) {
@@ -1745,13 +1860,15 @@ var lastPanel = -1;
 var carousel = document.getElementById('carousel');
 if (carousel) {
   carousel.addEventListener('scroll', function() {
-    var idx = Math.round(carousel.scrollLeft / 1080);
+    var idx = Math.round(carousel.scrollLeft / (carousel.querySelector('.panel')?.offsetWidth || 1080));
     if (idx !== lastPanel) {
       lastPanel = idx;
       trackEvent('panel_view', { panel: idx + 1 });
     }
   });
 }
+
+// Responsive: viewport meta tag handles scaling for mobile
 </script>
 
 </body>
