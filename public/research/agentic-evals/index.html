@@ -1715,7 +1715,44 @@ async function downloadAll() {
 </script>
 
 <script defer src="/_vercel/insights/script.js"></script>
-
+<script>
+// Track custom events for link clicks
+function trackEvent(name, props) {
+  if (window.va) window.va('event', { name: name, ...props });
+}
+document.addEventListener('click', function(e) {
+  var link = e.target.closest('a');
+  if (!link) return;
+  var href = link.getAttribute('href') || '';
+  if (href.includes('/blog')) {
+    trackEvent('newsletter_click', { location: link.closest('.panel-footer') ? 'footer' : 'banner' });
+  }
+  if (href.includes('mindpattern.ai/research')) {
+    trackEvent('brand_click', { page: link.closest('[data-panel]')?.dataset.panel || 'unknown' });
+  }
+});
+// Track PDF download
+document.addEventListener('click', function(e) {
+  if (e.target.closest('.dl-btn')) {
+    trackEvent('png_download');
+  }
+  if (e.target.closest('a[href*=".pdf"]')) {
+    trackEvent('pdf_download');
+  }
+});
+// Track panel views
+var lastPanel = -1;
+var carousel = document.getElementById('carousel');
+if (carousel) {
+  carousel.addEventListener('scroll', function() {
+    var idx = Math.round(carousel.scrollLeft / 1080);
+    if (idx !== lastPanel) {
+      lastPanel = idx;
+      trackEvent('panel_view', { panel: idx + 1 });
+    }
+  });
+}
+</script>
 
 </body>
 </html>
