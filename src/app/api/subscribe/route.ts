@@ -41,5 +41,20 @@ export async function POST(request: NextRequest) {
     )
   }
 
+  // Notify Tayler of new signup (fire-and-forget)
+  fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${RESEND_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      from: 'MindPattern <feedback@tayler.id>',
+      to: ['ramsay.tayler@gmail.com'],
+      subject: `New subscriber: ${email}`,
+      text: `${email} just subscribed to the daily briefing via mindpattern.ai.`,
+    }),
+  }).catch(() => {})
+
   return NextResponse.json({ ok: true })
 }
