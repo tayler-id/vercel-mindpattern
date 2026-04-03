@@ -41,14 +41,14 @@ function SidebarNav() {
   return (
     <Sidebar>
       <SidebarHeader className="px-3 py-4">
-        <Link href="/" className="flex items-center gap-2.5">
+        <a href="/" onClick={handleNewCase} className="flex items-center gap-2.5">
           <div className="flex items-center justify-center size-7 border border-primary bg-primary/10">
             <span className="text-primary text-xs font-bold">MP</span>
           </div>
           <span className="text-xs font-bold uppercase tracking-[0.15em] text-foreground">
             MindPattern
           </span>
-        </Link>
+        </a>
       </SidebarHeader>
 
       <SidebarSeparator />

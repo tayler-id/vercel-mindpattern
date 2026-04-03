@@ -3,34 +3,25 @@
 import { useChat } from '@ai-sdk/react'
 import { DefaultChatTransport } from 'ai'
 import { useRef, useEffect, useState, useMemo } from 'react'
-import { Send, Square } from 'lucide-react'
+import { Send, Square, AlertTriangle } from 'lucide-react'
 import { EmptyState } from './empty-state'
 import { MessageContent } from './message-content'
 import { Button } from '@/components/ui/button'
 import { motion, AnimatePresence } from 'motion/react'
 
-const PROVIDERS = [
-  { id: 'openai', label: 'GPT-4o', code: 'OAI' },
-  { id: 'anthropic', label: 'Claude Sonnet', code: 'ANT' },
-] as const
-
-type ProviderId = (typeof PROVIDERS)[number]['id']
-
 export function ChatInterface() {
-  const [provider, setProvider] = useState<ProviderId>('anthropic')
-  const providerRef = useRef(provider)
-  providerRef.current = provider
+  const provider = 'anthropic'
 
   const transport = useMemo(
     () =>
       new DefaultChatTransport({
         api: '/api/chat',
-        body: () => ({ provider: providerRef.current }),
+        body: () => ({ provider }),
       }),
     [],
   )
 
-  const { messages, sendMessage, status, stop } = useChat({ transport, experimental_throttle: 50 })
+  const { messages, sendMessage, status, stop, error } = useChat({ transport, experimental_throttle: 50 })
 
   const [input, setInput] = useState('')
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -59,7 +50,6 @@ export function ChatInterface() {
   }
 
   const isStreaming = status === 'streaming'
-  const currentProvider = PROVIDERS.find((p) => p.id === provider)!
 
   return (
     <div className="flex flex-col h-full">
@@ -110,6 +100,26 @@ export function ChatInterface() {
         )}
       </div>
 
+      {error && (
+        <div className="border-t border-primary/30 bg-primary/5 px-4 py-3">
+          <div className="max-w-3xl mx-auto flex items-start gap-3">
+            <AlertTriangle className="size-3.5 text-primary mt-0.5 shrink-0" />
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-primary mb-1">
+                API Error
+              </p>
+              <p className="text-[11px] text-foreground leading-snug">
+                {error.message.includes('429')
+                  ? 'Claude API rate limit reached. Please wait a moment and try again.'
+                  : error.message.includes('401')
+                    ? 'Claude API authentication failed. Check your API key.'
+                    : `Something went wrong: ${error.message}`}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="border-t border-border bg-card/80 backdrop-blur-sm">
         <form id="chat-form" onSubmit={handleSubmit} className="max-w-3xl mx-auto px-4 py-4">
           <div className="relative flex items-end gap-2 bg-background border border-border px-4 py-3 focus-within:border-primary/50 transition-colors">
@@ -154,25 +164,9 @@ export function ChatInterface() {
               </Button>
             )}
           </div>
-          <div className="flex items-center justify-between mt-2 px-1">
-            <div className="flex items-center gap-1">
-              {PROVIDERS.map((p) => (
-                <button
-                  key={p.id}
-                  type="button"
-                  onClick={() => setProvider(p.id)}
-                  className={`text-[10px] px-2.5 py-1 uppercase tracking-wider font-bold transition-colors border ${
-                    provider === p.id
-                      ? 'border-primary bg-primary/10 text-primary'
-                      : 'border-transparent text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  [{p.code}] {p.label}
-                </button>
-              ))}
-            </div>
+          <div className="flex items-center justify-end mt-2 px-1">
             <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
-              Channel: {currentProvider.code}
+              Channel: Claude Sonnet
             </p>
           </div>
         </form>
