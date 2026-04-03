@@ -1,5 +1,6 @@
 import { backendFetch } from '@/lib/api'
 import { BlogSearch } from '@/components/blog-search'
+import { NewsletterSignup } from '@/components/newsletter-signup'
 import type { ReportListItem } from '@/lib/types'
 
 export const revalidate = 60
@@ -25,6 +26,16 @@ export default async function BlogPage() {
         <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-1">
           Daily AI research intelligence reports
         </p>
+      </div>
+
+      <div className="border border-border dossier-card p-4">
+        <p className="text-xs font-bold uppercase tracking-[0.15em] mb-1">
+          Get the briefing delivered
+        </p>
+        <p className="text-[10px] text-muted-foreground mb-3">
+          Daily AI research intelligence — 13 agents, 8 sources, one briefing.
+        </p>
+        <NewsletterSignup />
       </div>
 
       {error || reports.length === 0 ? (

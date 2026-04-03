@@ -2,7 +2,8 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Plus, BookOpen, LayoutGrid, PanelLeftClose } from 'lucide-react'
+import { Plus, BookOpen, LayoutGrid } from 'lucide-react'
+import { NewsletterSignup } from '@/components/newsletter-signup'
 import {
   Sidebar,
   SidebarContent,
@@ -91,7 +92,9 @@ function SidebarNav() {
       </SidebarContent>
 
       <SidebarFooter className="px-3 py-3">
-        <SidebarTrigger className="w-full justify-start gap-2 text-xs uppercase tracking-wider text-muted-foreground" />
+        <NewsletterSignup className="mb-3" />
+        <SidebarSeparator />
+        <SidebarTrigger className="w-full justify-start gap-2 text-xs uppercase tracking-wider text-muted-foreground mt-2" />
       </SidebarFooter>
     </Sidebar>
   )
