@@ -17,7 +17,6 @@ import {
   SidebarMenuItem,
   SidebarSeparator,
   SidebarTrigger,
-  useSidebar,
 } from '@/components/ui/sidebar'
 
 const NAV_ITEMS = [
@@ -41,14 +40,14 @@ function SidebarNav() {
   return (
     <Sidebar>
       <SidebarHeader className="px-3 py-4">
-        <a href="/" onClick={handleNewCase} className="flex items-center gap-2.5">
+        <Link href="/" onClick={handleNewCase} className="flex items-center gap-2.5">
           <div className="flex items-center justify-center size-7 border border-primary bg-primary/10">
             <span className="text-primary text-xs font-bold">MP</span>
           </div>
           <span className="text-xs font-bold uppercase tracking-[0.15em] text-foreground">
             MindPattern
           </span>
-        </a>
+        </Link>
       </SidebarHeader>
 
       <SidebarSeparator />

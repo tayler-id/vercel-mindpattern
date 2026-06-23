@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { motion } from 'motion/react'
 import { AGENTS } from '@/lib/constants'
 
@@ -23,9 +24,9 @@ export function EmptyState({ onSuggestion }: { onSuggestion: (text: string) => v
       >
         <div className="relative mx-auto mb-5 inline-block">
           <div className="border-2 border-primary px-6 py-3 stamp">
-            <span className="text-primary text-base sm:text-lg font-bold tracking-[0.2em]">
+            <h1 className="text-primary text-base sm:text-lg font-bold tracking-[0.2em]">
               MINDPATTERN
-            </span>
+            </h1>
           </div>
         </div>
         <p className="text-foreground text-xs sm:text-sm font-bold uppercase tracking-[0.12em] mb-4">
@@ -90,8 +91,8 @@ export function EmptyState({ onSuggestion }: { onSuggestion: (text: string) => v
             <strong className="text-foreground">patterns</strong> across runs,
             extracts actionable <strong className="text-foreground">developer skills</strong>,
             and generates a daily <strong className="text-foreground">3,000–5,000 word
-            intelligence briefing</strong> archived at{' '}
-            <a href="/blog" className="text-navy underline underline-offset-2 hover:text-primary transition-colors">/briefings</a>.
+            intelligence briefing</strong> archived in the{' '}
+            <Link href="/blog" className="text-navy underline underline-offset-2 hover:text-primary transition-colors">Briefings archive</Link>.
           </p>
           <p>
             The pipeline self-improves — agents learn from their own outputs,
@@ -172,9 +173,9 @@ export function EmptyState({ onSuggestion }: { onSuggestion: (text: string) => v
           </div>
 
           <div>
-            <a href="/blog" className="text-navy underline underline-offset-2 hover:text-primary transition-colors font-bold">
+            <Link href="/blog" className="text-navy underline underline-offset-2 hover:text-primary transition-colors font-bold">
               Briefings
-            </a>{' '}
+            </Link>{' '}
             — the daily intelligence reports. Every pipeline run produces a 3,000–5,000
             word briefing covering top stories, breaking news, vibe coding updates,
             agent frameworks, security alerts, and thought leader takes. Fully
@@ -182,9 +183,9 @@ export function EmptyState({ onSuggestion }: { onSuggestion: (text: string) => v
           </div>
 
           <div>
-            <a href="/explore" className="text-navy underline underline-offset-2 hover:text-primary transition-colors font-bold">
+            <Link href="/explore" className="text-navy underline underline-offset-2 hover:text-primary transition-colors font-bold">
               Archives
-            </a>{' '}
+            </Link>{' '}
             — the raw research database, browsable without chat. Seven views into the
             data:
           </div>

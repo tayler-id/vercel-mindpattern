@@ -1,17 +1,63 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import Markdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { backendFetch } from '@/lib/api'
+import { JsonLd } from '@/components/json-ld'
+import { absoluteUrl, shortReportDescription, SITE_NAME } from '@/lib/site'
 import type { Report, ReportListItem } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
 
+type BlogPostParams = {
+  params: Promise<{ date: string }>
+}
+
+export async function generateMetadata({
+  params,
+}: BlogPostParams): Promise<Metadata> {
+  const { date } = await params
+
+  try {
+    const report = await backendFetch<Report>(`/api/reports/${date}`, {
+      user: 'ramsay',
+    })
+    const description = shortReportDescription(report.title, date)
+
+    return {
+      title: report.title,
+      description,
+      alternates: {
+        canonical: `/blog/${date}`,
+      },
+      openGraph: {
+        type: 'article',
+        title: report.title,
+        description,
+        url: `/blog/${date}`,
+        publishedTime: date,
+        modifiedTime: date,
+      },
+    }
+  } catch {
+    return {
+      title: 'AI Research Briefing Not Found',
+      description: `The MindPattern AI research briefing for ${date} could not be loaded.`,
+      alternates: {
+        canonical: `/blog/${date}`,
+      },
+      robots: {
+        index: false,
+        follow: false,
+      },
+    }
+  }
+}
+
 export default async function BlogPostPage({
   params,
-}: {
-  params: Promise<{ date: string }>
-}) {
+}: BlogPostParams) {
   const { date } = await params
 
   let report: Report | null = null
@@ -50,6 +96,8 @@ export default async function BlogPostPage({
 
   const wordCount = report.content.split(/\s+/).length
   const readTime = Math.max(1, Math.round(wordCount / 200))
+  const description = shortReportDescription(report.title, date)
+  const citations = extractCitations(report.content)
 
   const sortedDates = reportList.map((r) => r.date).sort()
   const currentIndex = sortedDates.indexOf(date)
@@ -61,6 +109,34 @@ export default async function BlogPostPage({
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
+      <JsonLd
+        data={{
+          '@context': 'https://schema.org',
+          '@type': 'Article',
+          '@id': absoluteUrl(`/blog/${date}#article`),
+          headline: report.title,
+          description,
+          url: absoluteUrl(`/blog/${date}`),
+          datePublished: date,
+          dateModified: date,
+          wordCount,
+          inLanguage: 'en-US',
+          author: {
+            '@type': 'Organization',
+            name: SITE_NAME,
+            url: absoluteUrl('/'),
+          },
+          publisher: {
+            '@type': 'Organization',
+            name: SITE_NAME,
+            url: absoluteUrl('/'),
+          },
+          isPartOf: {
+            '@id': absoluteUrl('/blog#archive'),
+          },
+          citation: citations,
+        }}
+      />
       <Link
         href="/blog"
         className="inline-flex items-center gap-1.5 text-[10px] text-muted-foreground hover:text-foreground transition-colors uppercase tracking-wider font-bold"
@@ -110,19 +186,26 @@ export default async function BlogPostPage({
   )
 }
 
+function extractCitations(content: string) {
+  return [...content.matchAll(/https?:\/\/[^\s)]+/g)]
+    .map((match) => match[0].replace(/[.,;]+$/, ''))
+    .filter((url, index, urls) => urls.indexOf(url) === index)
+    .slice(0, 25)
+}
+
 function ReportMarkdown({ content }: { content: string }) {
   return (
     <Markdown
       remarkPlugins={[remarkGfm]}
       components={{
         h1: ({ children }) => (
-          <h1 className="text-base font-bold uppercase tracking-[0.15em] text-foreground border-b-2 border-primary/30 pb-3 mb-6">{children}</h1>
+          <h2 className="text-base font-bold uppercase tracking-[0.15em] text-foreground border-b-2 border-primary/30 pb-3 mb-6">{children}</h2>
         ),
         h2: ({ children }) => (
-          <h2 className="text-sm font-bold uppercase tracking-[0.15em] text-foreground mt-10 mb-4 border-l-3 border-primary pl-3">{children}</h2>
+          <h3 className="text-sm font-bold uppercase tracking-[0.15em] text-foreground mt-10 mb-4 border-l-3 border-primary pl-3">{children}</h3>
         ),
         h3: ({ children }) => (
-          <h3 className="text-xs font-bold uppercase tracking-[0.12em] text-foreground mt-8 mb-3">{children}</h3>
+          <h4 className="text-xs font-bold uppercase tracking-[0.12em] text-foreground mt-8 mb-3">{children}</h4>
         ),
         p: ({ children }) => (
           <p className="text-[13px] leading-[1.8] text-muted-foreground mb-5">{children}</p>
