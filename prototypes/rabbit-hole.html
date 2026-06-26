@@ -1,0 +1,550 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>MindPattern — prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#fbfcfd;--surface:#ffffff;--panel:#f4f6f9;--ink:#0b0d12;--ink-soft:#545a64;--ink-faint:#929aa5;
+    --line:#ebedf1;--line-soft:#f3f4f7;--accent:#2f6bff;--accent-wash:#eef3ff;--spine:#f5f7fa;--ok:#0a7d4f;
+    --measure:40rem;--r:12px;
+    --sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;
+    --mono:'JetBrains Mono',ui-monospace,'SF Mono',Menlo,monospace;
+    --serif:'Newsreader',Georgia,'Times New Roman',serif;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html{-webkit-text-size-adjust:100%;}
+  html,body{margin:0;height:100%;}
+  body{background:var(--paper);color:var(--ink);font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;display:flex;flex-direction:column;height:100dvh;overflow:hidden;overscroll-behavior:none;}
+
+  /* ── header ───────────────────────────────────────── */
+  header{flex:0 0 auto;border-bottom:1px solid var(--line);padding:env(safe-area-inset-top) 22px 0;min-height:54px;height:calc(54px + env(safe-area-inset-top));display:flex;align-items:center;gap:16px;background:rgba(251,252,253,.85);backdrop-filter:blur(8px);}
+  .brand{font-family:var(--mono);font-weight:700;letter-spacing:-.02em;font-size:14px;cursor:pointer;}
+  .brand b{color:var(--accent);}
+  nav.tabs{display:flex;gap:2px;}
+  .tab{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);padding:6px 11px;border-radius:8px;cursor:pointer;font-weight:600;}
+  .tab:hover{background:var(--spine);color:var(--ink);}
+  .tab.on{background:var(--accent-wash);color:var(--accent);}
+  .hint{font-family:var(--mono);font-size:11px;color:var(--ink-faint);}
+  .crumbs{margin-left:auto;display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);overflow:hidden;white-space:nowrap;}
+  .crumbs span{max-width:160px;overflow:hidden;text-overflow:ellipsis;}
+  .crumbs .sep{color:var(--line);}.crumbs .here{color:var(--ink-soft);font-weight:600;}
+  .sub-btn{margin-left:auto;font-size:12.5px;font-weight:600;color:#fff;background:var(--accent);border:0;border-radius:9px;padding:8px 14px;cursor:pointer;}
+  .sub-btn:hover{filter:brightness(1.06);}
+  .crumbs + .sub-btn{margin-left:14px;}
+  main#main{flex:1 1 auto;min-height:0;}
+
+  /* ── WIRE ─────────────────────────────────────────── */
+  .wire{height:100%;overflow-y:auto;}
+  .wire-head{max-width:1080px;margin:0 auto;padding:34px 32px 0;}
+  .wire-head .ey{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);font-weight:600;}
+  .wire-head .h{font-size:30px;font-weight:800;letter-spacing:-.03em;margin-top:8px;}
+  .wire-head .sub{margin-top:9px;font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);}
+  .wire-head .sub b{color:var(--ink-soft);font-weight:600;}
+  .wfilter{display:flex;gap:4px;margin-top:18px;border-bottom:1px solid var(--line);}
+  .wfilter .f{font-size:12.5px;font-weight:600;color:var(--ink-faint);padding:9px 12px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;}
+  .wfilter .f.on{color:var(--accent);border-bottom-color:var(--accent);}
+  .wlist{max-width:1080px;margin:0 auto;padding:6px 16px 70px;}
+  .wrow{display:grid;grid-template-columns:30px 1fr 104px;gap:18px;align-items:center;padding:15px 16px;border-bottom:1px solid var(--line-soft);cursor:pointer;border-radius:10px;transition:background .1s,box-shadow .1s;}
+  .wrow:hover{background:var(--surface);box-shadow:0 1px 2px rgba(11,13,18,.05),0 12px 32px -22px rgba(11,13,18,.32);border-bottom-color:transparent;}
+  .wrow .rank{font-family:var(--mono);font-size:14px;font-weight:500;color:var(--ink-faint);text-align:right;}
+  .wrow .rank.hot{color:var(--accent);font-weight:700;}
+  .wmain .kick{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);font-weight:600;}
+  .wmain .wh{font-size:16.5px;font-weight:600;line-height:1.32;letter-spacing:-.01em;color:var(--ink);margin-top:5px;}
+  .wmain .wmeta{display:flex;align-items:center;margin-top:9px;}
+  .favs{display:inline-flex;align-items:center;}
+  .fav{width:16px;height:16px;border-radius:5px;margin-right:-5px;border:1.5px solid var(--paper);background:#fff;display:inline-block;vertical-align:middle;}
+  img.fav{object-fit:cover;}
+  .fav.fb{color:#fff;background:var(--accent);font-family:var(--mono);font-size:8px;font-weight:700;text-align:center;line-height:13px;}
+  .cfav{width:13px;height:13px;border-radius:3px;vertical-align:-2px;margin-right:5px;}
+  .viac{display:inline-flex;align-items:center;gap:5px;margin-left:11px;font-family:var(--mono);font-size:10.5px;color:var(--ink-faint);}
+  .vav{width:16px;height:16px;border-radius:50%;object-fit:cover;background:var(--spine);}
+  .readvia{display:flex;align-items:center;gap:10px;margin-top:18px;}
+  .readvia img{width:30px;height:30px;border-radius:50%;object-fit:cover;background:var(--spine);}
+  .readvia .n{font-size:13px;font-weight:600;letter-spacing:-.01em;}
+  .readvia .h{font-family:var(--mono);font-size:11px;color:var(--ink-faint);margin-top:1px;}
+  .smeta{font-family:var(--mono);font-size:10.5px;color:var(--ink-faint);margin-left:11px;}
+  .act{text-align:right;}
+  .act .opens{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--ink-soft);}
+  .act .opens span{font-size:9px;color:var(--ink-faint);font-weight:500;}
+  .act .vel{font-family:var(--mono);font-size:10.5px;color:var(--ok);font-weight:600;margin-top:3px;}
+  .act .vel.flat{color:var(--ink-faint);}
+
+  /* ── subscribe inline band ────────────────────────── */
+  .sub-band{max-width:1080px;margin:10px auto 44px;padding:22px 26px;border:1px solid var(--line);border-radius:14px;background:var(--surface);display:flex;align-items:center;gap:22px;flex-wrap:wrap;box-shadow:0 1px 2px rgba(11,13,18,.04);}
+  .sub-band .st{font-size:18px;font-weight:700;letter-spacing:-.02em;}
+  .sub-band .sd{font-size:13px;color:var(--ink-soft);margin-top:4px;max-width:46ch;}
+  .sub-form{margin-left:auto;display:flex;gap:9px;}
+  .sub-form input{font-size:14px;padding:11px 14px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;min-width:230px;outline:none;transition:border-color .1s,box-shadow .1s;}
+  .sub-form input::placeholder{color:var(--ink-faint);}
+  .sub-form input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-wash);}
+  .sub-form button{font-size:14px;font-weight:600;color:#fff;background:var(--accent);border:0;border-radius:10px;padding:11px 20px;cursor:pointer;}
+  .sub-form button:hover{filter:brightness(1.06);}
+
+  /* ── BRIEFING (Dispatch serif reading) ────────────── */
+  .brief{height:100%;display:flex;overflow:hidden;}
+  .issues{width:248px;border-right:1px solid var(--line);overflow-y:auto;flex:0 0 auto;background:var(--panel);}
+  .issues .ih{padding:18px 20px 10px;font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);}
+  .iitem{padding:12px 20px;border-top:1px solid var(--line-soft);cursor:pointer;}
+  .iitem:hover{background:var(--surface);}
+  .iitem.on{background:var(--surface);}
+  .iitem.on .d{color:var(--accent);}
+  .iitem .d{font-family:var(--mono);font-size:13px;font-weight:600;}
+  .iitem .n{font-size:11px;color:var(--ink-faint);margin-top:2px;}
+  .issue{flex:1;overflow-y:auto;background:var(--surface);}
+  .issue-wrap{max-width:42rem;margin:0 auto;padding:48px 40px 100px;}
+  .issue .ey{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600;}
+  .issue h1{font-family:var(--serif);font-size:40px;font-weight:600;line-height:1.1;margin:12px 0 0;letter-spacing:-.02em;}
+  .byline{display:flex;align-items:center;gap:11px;margin-top:22px;padding-bottom:22px;border-bottom:1px solid var(--line);}
+  .byline .av{width:36px;height:36px;border-radius:50%;background:var(--accent);color:#fff;font-family:var(--mono);font-weight:700;font-size:12px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
+  .byline .bn{font-size:13px;font-weight:600;}
+  .byline .bm{font-family:var(--mono);font-size:11px;color:var(--ink-faint);margin-top:2px;}
+  .issue .lede{font-family:var(--serif);font-size:19px;line-height:1.5;color:var(--ink-soft);margin-top:24px;font-style:italic;}
+  .issue .shead{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:700;margin:42px 0 0;padding-bottom:8px;border-bottom:1px solid var(--line);}
+  .issue .item{margin-top:26px;}
+  .issue .item h4{font-family:var(--serif);font-size:22px;font-weight:600;line-height:1.25;margin:0;letter-spacing:-.01em;}
+  .issue .item p{font-family:var(--serif);font-size:17px;line-height:1.7;color:#23262c;margin:12px 0 0;}
+  .issue .item .src{margin-top:10px;font-family:var(--mono);font-size:11px;}
+  .issue .item .src a{color:var(--accent);text-decoration:none;margin-right:12px;}
+  .issue hr{border:0;border-top:1px solid var(--line);margin:30px 0;}
+
+  /* ── DRILL (rabbit-hole columns) ──────────────────── */
+  .scroller{height:100%;display:flex;overflow-x:auto;overflow-y:hidden;scroll-behavior:smooth;}
+  .col{flex:0 0 auto;height:100%;overflow-y:auto;border-right:1px solid var(--line);}
+  .col.spine{width:210px;background:var(--panel);cursor:pointer;transition:background .12s;}
+  .col.spine:hover{background:var(--spine);}
+  .col.spine .sp-inner{padding:20px 18px;}
+  .col.spine .depth{font-family:var(--mono);font-size:10px;color:var(--ink-faint);letter-spacing:.08em;}
+  .col.spine .sect{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-top:12px;}
+  .col.spine .t{font-size:14.5px;font-weight:500;line-height:1.4;margin-top:7px;color:var(--ink-soft);}
+  .col.spine .reopen{font-family:var(--mono);margin-top:14px;font-size:10px;color:var(--ink-faint);}
+  .col.active{width:min(44rem,94vw);background:var(--surface);box-shadow:-20px 0 50px -34px rgba(11,13,18,.4);}
+  .col.active.enter{animation:slidein .16s ease;}
+  @keyframes slidein{from{opacity:0;transform:translateX(10px);}to{opacity:1;transform:none;}}
+  .read{padding:44px 52px 80px;max-width:var(--measure);}
+  .read .sect{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:700;}
+  .read h1{font-family:var(--serif);font-weight:600;font-size:32px;line-height:1.15;letter-spacing:-.02em;margin:12px 0 0;}
+  .read .dek{font-family:var(--serif);font-size:18px;line-height:1.5;color:var(--ink-soft);margin-top:14px;font-style:italic;}
+  .read .body{margin-top:22px;}
+  .read .body p{font-family:var(--serif);font-size:17px;line-height:1.72;color:#23262c;margin:0 0 18px;}
+  .read .action{margin-top:24px;padding:16px 18px;background:var(--accent-wash);border:1px solid #dce4ff;border-radius:12px;font-size:14.5px;line-height:1.55;color:#1f2430;}
+  .read .action b{color:var(--accent);}
+  .sources{margin-top:28px;padding-top:16px;border-top:1px solid var(--line);}
+  .sources .lbl{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);}
+  .sources a{display:inline-block;margin:9px 8px 0 0;font-family:var(--mono);font-size:11.5px;color:var(--accent);text-decoration:none;border:1px solid var(--line);border-radius:8px;padding:5px 10px;}
+  .sources a:hover{border-color:var(--accent);background:var(--accent-wash);}
+  .thread{margin-top:36px;padding-top:18px;border-top:1px solid var(--line);}
+  .thread .lbl{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);font-weight:700;display:flex;align-items:center;gap:8px;}
+  .thread .lbl .arr{color:var(--accent);}
+  .rel{margin-top:12px;display:flex;flex-direction:column;gap:8px;}
+  .rel-item{padding:14px 15px;border:1px solid var(--line);border-radius:10px;cursor:pointer;display:block;transition:border-color .1s,background .1s;background:var(--surface);}
+  .rel-item:hover{border-color:var(--accent);background:var(--accent-wash);}
+  .rel-item .why{font-family:var(--mono);font-size:10px;letter-spacing:.04em;text-transform:uppercase;color:var(--accent);font-weight:600;}
+  .rel-item .rt{font-size:15px;font-weight:600;line-height:1.35;margin-top:6px;color:var(--ink);letter-spacing:-.01em;}
+  .rel-item .rmeta{font-family:var(--mono);font-size:10.5px;color:var(--ink-faint);margin-top:6px;}
+  .rel-item .go{float:right;color:var(--accent);opacity:.4;}.rel-item:hover .go{opacity:1;}
+
+  /* ── subscribe modal (New Yorker centered card) ───── */
+  .modal{position:fixed;inset:0;background:rgba(11,13,18,.45);display:none;align-items:center;justify-content:center;z-index:50;backdrop-filter:blur(2px);}
+  .modal.open{display:flex;}
+  .modal .box{background:var(--surface);border-radius:16px;padding:34px 34px 28px;max-width:440px;width:90%;text-align:center;box-shadow:0 30px 80px -20px rgba(11,13,18,.5);position:relative;}
+  .modal .x{position:absolute;top:15px;right:18px;cursor:pointer;color:var(--ink-faint);font-size:16px;line-height:1;}
+  .modal .ic{font-size:18px;letter-spacing:8px;color:var(--accent);}
+  .modal h3{font-family:var(--serif);font-size:26px;margin:12px 0 0;font-weight:600;letter-spacing:-.01em;}
+  .modal p{font-size:13.5px;color:var(--ink-soft);line-height:1.55;margin:10px auto 18px;max-width:34ch;}
+  .modal .row{display:flex;gap:8px;}
+  .modal input{flex:1;font-size:14px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;outline:none;}
+  .modal input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-wash);}
+  .modal button.go{font-size:14px;font-weight:600;color:#fff;background:var(--accent);border:0;border-radius:10px;padding:12px 18px;cursor:pointer;}
+  .modal .fine{font-family:var(--mono);font-size:10px;color:var(--ink-faint);margin-top:13px;}
+  .modal .ok{color:var(--ok);font-size:13px;margin-top:12px;min-height:16px;}
+
+  footer{flex:0 0 auto;border-top:1px solid var(--line);padding:8px 22px;font-family:var(--mono);font-size:10.5px;color:var(--ink-faint);}
+  @media (prefers-reduced-motion:reduce){.col.active.enter{animation:none;}.scroller{scroll-behavior:auto;}}
+
+  /* ── app feel: bottom tab bar + native polish (mobile) ── */
+  .tabbar{display:none;}
+  .backbar{display:none;}
+  .wire,.issue,.issues,.scroller,.col{-webkit-overflow-scrolling:touch;}
+  @media (max-width:760px){
+    header .tabs,header .hint,header .crumbs,.sub-btn{display:none;}
+    .brand{margin-right:auto;}
+    .col.spine{display:none;}.col.active{width:100vw;}.read{padding:22px 20px 100px;}
+    .issues{width:116px;}.wrow{grid-template-columns:24px 1fr;}.act{display:none;}
+    .wire-head{padding:22px 18px 0;}.wlist{padding:6px 6px 100px;}
+    .issue-wrap{padding:28px 20px 116px;}
+    .sub-form input,.modal input{font-size:16px;}
+    .backbar{display:block;margin-bottom:16px;}
+    .backbar .bk{font-family:var(--mono);font-size:12.5px;color:var(--accent);cursor:pointer;font-weight:600;}
+    .tabbar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:40;
+      height:calc(58px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);
+      background:rgba(251,252,253,.94);backdrop-filter:blur(12px);border-top:1px solid var(--line);}
+    .tabbar .tb{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;
+      font-family:var(--mono);font-size:9px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-faint);font-weight:600;}
+    .tabbar .tb.on{color:var(--accent);}
+    .tabbar .tb .ico{font-size:18px;line-height:1;}
+  }
+</style>
+</head>
+<body>
+<header>
+  <span class="brand" id="home"><b>MIND</b>PATTERN</span>
+  <nav class="tabs"><span class="tab" id="tab-wire">Wire</span><span class="tab" id="tab-brief">Briefings</span></nav>
+  <span class="hint" id="hint"></span>
+  <nav class="crumbs" id="crumbs"></nav>
+  <button class="sub-btn" id="subBtn">Subscribe</button>
+</header>
+<main id="main"></main>
+<footer>Prototype · Signal system, grounded in Mobbin references · Wire feed → drill-down rabbit hole → Briefings</footer>
+<nav class="tabbar" id="tabbar">
+  <div class="tb on" id="tb-wire"><span class="ico">≣</span>Wire</div>
+  <div class="tb" id="tb-brief"><span class="ico">▤</span>Briefings</div>
+  <div class="tb" id="tb-sub"><span class="ico">✉</span>Subscribe</div>
+</nav>
+
+<div class="modal" id="modal"><div class="box">
+  <span class="x">✕</span>
+  <div class="ic">◆ ◇ ◆</div>
+  <h3>Join the briefing</h3>
+  <p>One email a day — the top stories, written long-form, with their sources. No noise; unsubscribe anytime.</p>
+  <form class="row" onsubmit="return modalSub(event,this)"><input type="email" placeholder="you@domain.com" required><button class="go" type="submit">Subscribe</button></form>
+  <div class="fine">By subscribing you agree to the terms. We never sell your email.</div>
+  <div class="ok" id="modalMsg"></div>
+</div></div>
+
+<script>
+/* ---- story graph (real content + real related links) ---- */
+const S = {
+  glm52:{sect:"Models · Top story",h:"GLM-5.2 is the moment frontier agentic coding stops being a closed-model thing",importance:"high",
+    via:["Nathan Lambert","twitter","natolambert"],
+    dek:"The last moat — long-horizon coding inside real harnesses — just fell to open weights.",
+    body:["Nathan Lambert doesn't hand out “step change” lightly, so when his Interconnects essay called GLM-5.2 “the step change for open agents,” I read it twice. Static intelligence benchmarks stopped mattering months ago. The one area closed labs could still defend was long-horizon, sustained-planning work inside real coding harnesses. Claude Code and Codex owned it. Lambert's claim is that GLM-5.2 is the first open-weights model to trade blows there.",
+      "The numbers backed him up the same week. Z.ai's GLM-5.2 posts 62.1 on SWE-bench Pro against GPT-5.5's 58.6, at roughly $4.40 per million output tokens versus $30. That's one-sixth the cost while scoring higher. The catch: the MIT-licensed weights need a minimum of eight H100s, so “open” here means open if you have a serious GPU budget or a provider who does.",
+      "The point isn't that you'll self-host it tomorrow. The point is the moat moved. The contested ground is now distribution and RLHF pipelines, not the base model — which is becoming a commodity a Chinese lab will hand you under an MIT license with a 1M-token context window."],
+    action:"<b>What I'd do:</b> if you run agentic coding loops daily, run GLM-5.2 against your own task set this week before you renew any frontier commitment. Trust your own diffs, not the SWE-bench number.",
+    src:[["Interconnects","https://www.interconnects.ai/p/glm-52-step-change-open-agents"],["Unsloth / HN","https://unsloth.ai/docs/models/glm-5.2"]],
+    rel:[["reflection","supply side of this story"],["minimax","benchmark caveat"],["fable5","the cost math"],["devcost","practitioner read"],["gemini35","the other big model this week"]]},
+
+  anthropic400k:{sect:"Research · Top story",h:"Anthropic studied 400,000 Claude Code sessions and found the thing you bring isn't code",importance:"high",
+    dek:"Across 235,000 people, domain understanding — not coding skill — predicted who wins with agents.",
+    body:["Anthropic analyzed roughly 400,000 Claude Code sessions across 235,000 people from October 2025 to April 2026. Expert users hit 33% verified task success versus 28% for intermediate and 15% for novice — more than 2x from bottom to top.",
+      "But “expert” doesn't mean “writes better code.” Experts trigger about 12 Claude actions per prompt and write ~3,200 words, against 5 actions and ~600 words for novices. They're doing more steering, more decomposition. And the line that stopped me cold: nearly every occupation succeeds at coding tasks at roughly the same rate as software engineers, as long as they understand the problem deeply.",
+      "The scarce input is understanding the problem well enough to specify it, verify it, and catch the model when it confidently goes sideways. So stop optimizing the wrong muscle — if you want to get better at agentic coding, get deeper in a domain."],
+    action:"<b>What I'd do:</b> learn what “correct” looks like in a field where you can verify it. The model closes the syntax gap; it can't close the taste gap.",
+    src:[["Anthropic","https://www.anthropic.com/research/claude-code-expertise"]],
+    rel:[["tokencount","the mechanism behind it"],["samsung","this thesis as a 270k-person bet"],["codexmax","how experts drive the tool"],["berman","solo-builder version"]]},
+
+  samsung:{sect:"Markets · Top story",h:"Samsung deployed ChatGPT Enterprise and Codex to everyone, three years after banning it",importance:"high",
+    dek:"A company that banned generative AI over a code leak just handed Codex to non-engineers worldwide.",
+    body:["In 2023 Samsung banned generative AI internally after engineers leaked source code into ChatGPT. On June 21, 2026, OpenAI confirmed Samsung is deploying ChatGPT Enterprise and Codex to all employees in South Korea and across its worldwide Device eXperience division — a full reversal and one of OpenAI's largest rollouts.",
+      "The detail that matters most: Codex is going to non-developers — R&D, manufacturing, corporate functions. Connect this to the Anthropic study and a pattern shows up. If domain expertise decides success, handing Codex to a manufacturing engineer who deeply understands a process line isn't reckless. It might be the highest-leverage move Samsung makes this year."],
+    action:"<b>What I'd do:</b> plan your tooling and security story for a world where the answer to “can I use a coding agent at work” is yes by default.",
+    src:[["OpenAI","https://openai.com/index/samsung-electronics-chatgpt-codex-deployment/"]],
+    rel:[["anthropic400k","the research behind the bet"],["copilot","the competing form factor"],["codexmax","driving Codex long-horizon"]]},
+
+  geminicli:{sect:"Tools · Top story",h:"Google shut down the open-source Gemini CLI and the backlash is the story",importance:"high",
+    dek:"A vendor-owned “open” CLI is open until it's commercially inconvenient — and 105K stars just learned that.",
+    body:["As of June 18, 2026, Gemini CLI stopped serving free, Pro, and Ultra tier users. Google replaced it with a closed-source Antigravity CLI invoked via `agy`, and the free-tier quota collapsed from ~1,000 requests a day to roughly 20. Google spent nearly a year merging 6,000+ community PRs into a 105K-star project, then restricted it to enterprise licenses.",
+      "Now put that next to OpenCode quietly crossing ~165K GitHub stars. Every developer burned by the rug-pull is shopping for a harness whose governance can't be yanked out from under them. The lesson: when you build automation on a free tier of a vendor's open-source tool, you're not building on open source — you're building on a marketing budget that can be cut."],
+    action:"<b>What I'd do:</b> migrate toward a harness whose model layer is swappable. The durable bet isn't a CLI, it's a loop you control where the model is a config value.",
+    src:[["Google Devs Blog","https://developers.googleblog.com/an-important-update-transitioning-gemini-cli-to-antigravity-cli/"],["byteiota","https://byteiota.com/opencode-open-source-ai-coding-agent-guide-2026/"]],
+    rel:[["multicli","the neutral cockpit answer"],["fallback","resilience as config"],["omnigent","meta-harness above vendors"],["mcpsaas","the swappable-primitive trend"]]},
+
+  tokencount:{sect:"Agents · Top story",h:"Stop managing agents by context-window length. Manage them by token count.",importance:"high",
+    dek:"Tokens-in-play, not model choice, is the single biggest predictor of whether your agent succeeds.",
+    body:["Databricks observed correctness degrading around 32k tokens even on large-window models. So a 200k window is maybe 32k of good reasoning and a long tail of “context rot.” Separately, Anthropic found token usage explains roughly 80% of multi-agent performance variance — more than model choice, more than tool-call count.",
+      "HumanLayer's ACE-FCA playbook puts a number on it: keep coding-agent context utilization between 40 and 60%, and force compaction before ~60%. The compaction step distills progress into a structured doc and restarts on a fresh window. One practitioner shipped 35k lines into a 300k-line Rust codebase in 7 hours using exactly this discipline."],
+    action:"<b>What I'd do today:</b> add a tokens-in-play counter to your agent loop and treat it like error rate. Cross ~60%? Compact and restart before reaching for a bigger model.",
+    src:[["Digital Applied","https://www.digitalapplied.com/blog/context-engineering-agent-reliability-playbook-2026"],["HumanLayer ACE-FCA","https://github.com/humanlayer/advanced-context-engineering-for-coding-agents/blob/main/ace-fca.md"]],
+    rel:[["anthropic400k","why experts win"],["gemini35","2M context ≠ 2M reasoning"],["skilltoolsearch","cut the tools tax"],["skilltoken","make it a habit"]]},
+
+  minimax:{sect:"Agents",h:"MiniMax-M3 tops vendor SWE-Bench Pro at 59% — but Scale's standardized harness tells another story",importance:"high",
+    dek:"Vendor-tuned harnesses inflate scores 10–30 points. Read every benchmark against its scaffolding.",
+    body:["MiniMax-M3's 59.0% edges Kimi K2.6's 58.6% — but those come from vendor-tuned harnesses. On Scale AI's standardized leaderboard with identical scaffolding, the top open-weights entry is qwen3-coder-480b at just 38.7%. That gap is mostly context-retrieval and tool-use quality in the harness, not raw model capability.",
+      "This is the single most important caveat to every coding benchmark you'll read this week — including the GLM-5.2 numbers up top."],
+    action:"<b>What I'd do:</b> read scores against the scaffolding that produced them, and instrument your own runs.",
+    src:[["MorphLLM","https://www.morphllm.com/swe-bench-pro"]],
+    rel:[["glm52","the number this caveats"],["devcost","the practitioner mirror"]]},
+
+  omnigent:{sect:"Agents",h:"Databricks open-sources Omnigent, a meta-harness that composes Claude Code, Codex, and custom agents",importance:"medium",
+    dek:"One-line switching across harnesses, plus the production controls you actually need.",
+    body:["Apache 2.0, published June 13. Omnigent sits above existing harnesses for one-line switching between Claude Code, Codex, Pi, and custom agents, and adds contextual security policies, per-session LLM budget caps (pause at $100 spend), an OS sandbox with network interception, and live multi-user collaboration on an agent's workspace.",
+      "The per-session budget cap alone is worth the install if you've ever watched an agent quietly burn credits in a loop."],
+    action:"<b>What I'd steal:</b> the budget cap and the require-approval-after-package-download policy.",
+    src:[["Databricks","https://www.databricks.com/blog/introducing-omnigent-meta-harness-combine-control-and-share-your-agents"]],
+    rel:[["multicli","the consumer-grade version"],["geminicli","why neutrality matters now"],["fallback","resilience primitive"]]},
+
+  codexmax:{sect:"Agents",h:"OpenAI publishes “Codex-Maxxing for Long-Running Work,” a rare first-party methodology doc",importance:"medium",
+    via:["Jason Liu","github","jxnl"],
+    dek:"Treat Codex as a persistent workspace, not a one-shot generator.",
+    body:["Jason Liu's whitepaper decomposes goals into discrete, independently verifiable steps, maintains continuity across parallel workstreams, and defines explicit boundaries for when to delegate versus keep human oversight. It's the same independently-verifiable-steps discipline showing up everywhere this week."],
+    action:"<b>What I'd do:</b> when the lab that ships the tool writes down how to drive it, read it.",
+    src:[["OpenAI","https://openai.com/index/codex-maxxing-long-running-work/"]],
+    rel:[["anthropic400k","the same thesis, measured"],["berman","solo-scale version"],["samsung","Codex at enterprise scale"]]},
+
+  injection:{sect:"Security",h:"Every published prompt-injection defense gets bypassed above 90% under adaptive attack",importance:"high",
+    dek:"There's no magic filter coming. Treat injection as containment, not detection.",
+    body:["A joint study across OpenAI, Anthropic, and Google DeepMind found no single filter or classifier holds up against an adaptive attacker. Treat injection as a containment problem: separate trusted from untrusted text, validate output structure before acting, sandbox capabilities, enforce least-authority tools, and gate high-impact actions on human approval."],
+    action:"<b>What I'd do:</b> design for defense-in-depth or accept the breach.",
+    src:[["Help Net Security","https://www.helpnetsecurity.com/2026/06/11/owasp-prompt-injection-ai-security-failures/"]],
+    rel:[["destyle","the cheap layer that helps"],["cursorcve","what a bypass looks like in the wild"],["skilldestyle","ship it this week"]]},
+
+  destyle:{sect:"Security",h:"“Destyling” untrusted input drops injection success from ~61% to ~10%",importance:"medium",
+    via:["Simon Willison","github","simonw"],
+    dek:"Injection works because models infer the speaker from style, not labeled role.",
+    body:["Simon Willison's write-up surfaces “Prompt Injection as Role Confusion” (ICML 2026): rewrite untrusted input into a neutral voice before the model sees it, which cut attack success from ~61% to ~10% across open and closed models. It's not a complete fix — per the OWASP finding nothing is — but it's a cheap layer."],
+    action:"<b>What I'd do:</b> add a destyle pass to your input pipeline, wrapped in untrusted-content tags with per-tool byte caps.",
+    src:[["Simon Willison","https://simonwillison.net/2026/Jun/22/prompt-injection-as-role-confusion/"]],
+    rel:[["injection","why no filter is enough"],["skilldestyle","the recipe"]]},
+
+  cursorcve:{sect:"Security",h:"CVE-2026-22708 weaponized `git branch` inside Cursor's allowlist",importance:"medium",
+    dek:"Command allowlists are not a sandbox — they auto-approved exactly the command the attacker needed.",
+    body:["A disclosed Cursor vulnerability let an attacker poison the agent's execution environment so an allowlisted command delivered an arbitrary payload. The allowlist made the attack easier. OWASP catalogs this alongside CVE-2026-2256, a command-injection flaw in ModelScope's MS-Agent shell tool."],
+    action:"<b>What I'd do:</b> audit your “safe command” list for anything an attacker could repurpose, and run the agent in a real jail.",
+    src:[["Lushbinary","https://lushbinary.com/blog/ai-agent-prompt-injection-defense-production-playbook/"]],
+    rel:[["injection","containment over detection"],["mastra","IDE config as attack surface"]]},
+
+  mastra:{sect:"Security",h:"Microsoft pins the 144-package @mastra npm worm on North Korea — payload targets AI IDE configs",importance:"high",
+    dek:"Your AI coding assistant's config is now an explicit persistence target, not collateral.",
+    body:["Microsoft attributed the 88-minute @mastra supply-chain attack with high confidence to Sapphire Sleet. The new and nasty detail: the payload injects persistent backdoor files that execute whenever a developer opens the project in an AI-assisted IDE, with dedicated hooks for Claude Code, Cursor, and Gemini."],
+    action:"<b>What I'd do:</b> audit what your IDE auto-loads on project open. That agent-config directory is executable surface.",
+    src:[["TechTimes","https://www.techtimes.com/articles/318767/20260621/npm-supply-chain-attack-north-korea-backdoored-144-ai-packages-88-minutes.htm"]],
+    rel:[["cursorcve","allowlist abuse"],["injection","the broader threat model"]]},
+
+  reflection:{sect:"Infrastructure",h:"SpaceX signs a compute deal worth up to $6.3B with open-source lab Reflection AI",importance:"high",
+    dek:"The supply side of the GLM-5.2 story: open weights need someone willing to spend billions on GPUs.",
+    body:["Reflection gets access to SpaceX's Colossus 2 data center near Memphis at $150M/month starting July 1, with immediate Nvidia GB300 access. Reflection — last valued at $25B and building American open-source frontier models — joins Anthropic, Google, and Cursor as Colossus tenants. The strategically loud part: an open-source lab rents frontier-scale compute exactly as enterprises reassess closed-model dependence."],
+    action:"<b>What I'd watch:</b> which other open labs land frontier-scale compute next.",
+    src:[["CNBC","https://www.cnbc.com/2026/06/22/spacex-ai-colossus-data-center-reflection.html"]],
+    rel:[["glm52","the demand side"],["nvidia","the hardware + tooling"]]},
+
+  nvidia:{sect:"Infrastructure",h:"NVIDIA drops a massive open bundle: Nemotron models, 10T tokens, and an LLM Router blueprint",importance:"medium",
+    dek:"Model routing by task is becoming standard architecture — here's a reference implementation.",
+    body:["NVIDIA released open models, datasets, and tools across the Nemotron family, including an updated LLM Router blueprint that auto-directs requests to the best model for a job. The broader contribution spans 10 trillion language tokens, 500K robotics trajectories, and 100TB of vehicle sensor data."],
+    action:"<b>What I'd use:</b> the Router blueprint — match the model to the subtask instead of paying frontier prices for everything.",
+    src:[["NVIDIA","https://blogs.nvidia.com/blog/open-models-data-tools-accelerate-ai/"]],
+    rel:[["reflection","the compute behind open models"],["maiflash","routing as product strategy"]]},
+
+  multicli:{sect:"Tools",h:"Multi-CLI “cowork” desktop apps are unifying Claude Code, Codex, Gemini CLI, and OpenCode",importance:"medium",
+    dek:"Developers don't want to pick one agent — they want a neutral cockpit that routes across several.",
+    body:["AionUi (free, local, 20+ CLIs), HolyClaude, and DeepChat all wrap multiple vendor CLIs behind one local interface. Orchestration value is shifting from the individual CLI to the layer that schedules and steers them. After the Gemini CLI rug-pull, a cockpit that treats every vendor as swappable looks less like convenience and more like insurance."],
+    action:"<b>What I'd do:</b> treat your harness layer as vendor-neutral by default.",
+    src:[["AionUi","https://github.com/iOfficeAI/AionUi"]],
+    rel:[["geminicli","why this matters now"],["fallback","resilience at the model layer"],["omnigent","the enterprise version"]]},
+
+  fallback:{sect:"Tools",h:"Claude Code's fallbackModel chains up to three models for resilience",importance:"medium",
+    dek:"Stops a single provider hiccup from killing a long-running session mid-task.",
+    body:["Recent releases added a `fallbackModel` config that tries up to three models in order when the primary is unavailable or rate-limited. Combined with nested-subagent support (background trees capped at 5 levels), Claude Code is becoming a real orchestration layer, not just a chat loop."],
+    action:"<b>What I'd do:</b> put a cheap model last in the chain so degraded runs continue instead of erroring out.",
+    src:[["Claude Code Docs","https://code.claude.com/docs/en/changelog"]],
+    rel:[["multicli","neutral cockpit"],["geminicli","swappable model layer"],["omnigent","budget + sandbox controls"]]},
+
+  copilot:{sect:"Tools",h:"GitHub Copilot ships a standalone desktop app to GA on Mac, Windows, and Linux",importance:"medium",
+    dek:"The IDE-plugin era of Copilot is officially over — everyone's converging on the standalone agent.",
+    body:["The Copilot app is a desktop home for agent-driven development, pairing with the now-GA Copilot SDK and sandboxes for headless workflows. This positions Copilot as a CLI/app-first agent platform competing directly with Claude Code and Codex, not an editor plugin."],
+    action:"<b>What I'd note:</b> the standalone-agent form factor is now the default across vendors.",
+    src:[["GitHub","https://github.blog/changelog/2026-06-17-github-copilot-app-generally-available/"]],
+    rel:[["samsung","Codex at scale"],["maiflash","the model under the surface"]]},
+
+  maiflash:{sect:"Tools",h:"Microsoft spreads MAI-Code-1-Flash across every Copilot surface",importance:"low",
+    dek:"A fast, cheap first-party model routed to low-latency subtasks instead of frontier APIs.",
+    body:["GitHub made its purpose-built small coding model available across the Copilot app, CLI, Chat, Visual Studio, JetBrains, Eclipse, GitHub Mobile, and Xcode. That's the cost-tiered routing pattern NVIDIA's Router blueprint formalizes, showing up as product strategy."],
+    action:"<b>What I'd do:</b> match the model to the subtask — don't pay frontier prices for autocomplete.",
+    src:[["GitHub","https://github.blog/changelog/2026-06-18-mai-code-1-flash-available-on-more-copilot-surfaces/"]],
+    rel:[["nvidia","routing, formalized"],["copilot","the surface it ships on"]]},
+
+  fable5:{sect:"Models",h:"Claude Fable 5 comes off Pro/Max/Team/Enterprise plans — now usage-credit only",importance:"high",
+    dek:"The top SWE-bench Verified model (95%) is metered again, and the math just got interesting for open weights.",
+    body:["As of today Fable 5 is no longer bundled at no extra cost in seat-based plans; continued use draws on usage credits. The wrinkle: Fable 5 was offline June 12 to ~June 18 under the US export-control directive, so subscribers effectively got 4–5 of the advertised 13 free days."],
+    action:"<b>What I'd do:</b> weigh credit burn against Opus 4.8 or open-weight options like GLM-5.2.",
+    src:[["Developers Digest","https://www.developersdigest.tech/blog/claude-fable-5-june-22-deadline"]],
+    rel:[["glm52","the open-weight alternative"],["gemini35","the other frontier option"]]},
+
+  gemini35:{sect:"Models",h:"Google Gemini 3.5 Pro's GA window is pegged at June 23–30 with a 2M-token context",importance:"medium",
+    dek:"The largest context in any production frontier model — but bigger window ≠ more usable reasoning.",
+    body:["Analyst tracking puts Gemini 3.5 Pro inside a GA window of roughly this week, with a confirmed 2-million-token context, a Deep Think mode reserved for the $250/month Ultra tier, and multimodal support. Remember the context-rot finding: 2M of window is not 2M of usable reasoning. Bigger context raises the ceiling; it doesn't fix the rot."],
+    action:"<b>What I'd do:</b> treat the date as an estimate, but plan for the 2M tier — and still compact aggressively.",
+    src:[["Google","https://gemini.google/release-notes/"]],
+    rel:[["tokencount","why 2M isn't 2M"],["fable5","the pricing context"]]},
+
+  devcost:{sect:"Vibe Coding",h:"Developer consensus shifted from “which agent is smartest” to “which won't torch my credits”",importance:"medium",
+    dek:"Tool fit depends on task shape, not leaderboard supremacy. The number that matters is your bill.",
+    body:["HN and Reddit threads through June show practitioner evaluation maturing past benchmark rankings toward cost efficiency, token efficiency, and first-pass reliability. No single agent dominates every task category. This is the practitioner-side mirror of the MiniMax/Scale harness gap."],
+    action:"<b>What I'd do:</b> pick agents by per-task economics and context discipline, and instrument your own runs.",
+    src:[["Developers Digest","https://www.developersdigest.tech/blog/what-hacker-news-gets-right-about-ai-coding-agents-2026"]],
+    rel:[["glm52","the per-task economics shift"],["minimax","the benchmark caveat"],["berman","disciplined workflow"]]},
+
+  berman:{sect:"Vibe Coding",h:"Matthew Berman's vibe-coding loop is the disciplined version: spec, build one feature, test, fix, commit",importance:"low",
+    via:["Matthew Berman","twitter","matthewberman"],
+    dek:"The builders shipping real things have more structure, not less.",
+    body:["Berman's workflow: write a hyper-specific spec, encode stack/patterns/constraints in your IDE's rules file, then loop build-one-feature → AI-writes-tests → run-full-suite → fix → commit. It's the same independently-verifiable-steps discipline OpenAI's Codex-Maxxing doc preaches, just at solo-builder scale."],
+    action:"<b>What I'd do:</b> put your constraints in a rules file and make “AI writes the test” a required step.",
+    src:[["Forward Future","https://www.youtube.com/watch?v=wwfJlSF34n8"]],
+    rel:[["codexmax","the lab's version"],["devcost","why discipline wins"],["anthropic400k","experts steer more"]]},
+
+  mcpsaas:{sect:"SaaS",h:"The unit of distribution is becoming an MCP-native API, not an app",importance:"high",
+    dek:"Ship the skill or API other agents consume — not the dashboard.",
+    body:["The same shape showed up in three unrelated categories this week: Supabase ships an agent plugin, Publora ships an MCP-native social API, and dev.to practitioners describe “MCP servers are the new SaaS.” June's Product Hunt winners ship as primitives other agents consume, not standalone apps."],
+    action:"<b>What I'd do, as an indie builder:</b> ship the clean, well-scoped tool. Agent traffic flows to whoever exposes it.",
+    src:[["DEV Community","https://dev.to/krisying/mcp-servers-are-the-new-saas-how-im-monetizing-ai-tool-integrations-in-2026-2e9e"]],
+    rel:[["geminicli","swappable primitives"],["solo","the cost side"]]},
+
+  solo:{sect:"SaaS",h:"The solo-founder agent stack runs a production SaaS for ~$85–200/month",importance:"medium",
+    dek:"The constraint stopped being money or headcount. It's taste and the hours to apply it.",
+    body:["Practitioner write-ups put running a production-grade SaaS at roughly $85–200/month, versus at least ~$5K/month for a minimal remote team in 2019. Paired with accounts of replacing a 10-person GTM team with 20 agents managed by ~1.2 humans, this is the economic engine behind solo builders entering team-sized categories."],
+    action:"<b>What I'd internalize:</b> the cost collapse is real — three solo products in a year, 360K lines. Taste is the bottleneck now.",
+    src:[["mean.ceo","https://blog.mean.ceo/the-solo-founder-ai-agent-stack-that-is-replacing-entire-startup-teams/"]],
+    rel:[["mcpsaas","what to ship"],["devcost","keeping the bill low"]]},
+
+  skilltoken:{sect:"Skill of the day",h:"Track tokens-in-play as your primary agent health metric and compact before 60% utilization",importance:"medium",
+    dek:"Beats reaching for a bigger model nine times out of ten.",
+    body:["Databricks saw correctness rot around 32k tokens and Anthropic found tokens explain ~80% of multi-agent variance. Add a token counter to your loop, and when you cross ~60% of a usable window, distill progress into a structured doc (goal, approach, completed steps, blockers) and restart fresh."],
+    action:"<b>Do it today:</b> instrument tokens-in-play and wire a compaction trigger at 60%.",
+    src:[["Anthropic / Databricks","https://www.digitalapplied.com/blog/context-engineering-agent-reliability-playbook-2026"]],
+    rel:[["tokencount","the full argument"],["skilltoolsearch","cut the tools tax too"]]},
+
+  skilltoolsearch:{sect:"Skill of the day",h:"Turn on the Tool Search Tool to defer MCP schemas instead of front-loading them",importance:"medium",
+    dek:"A “tools tax” of 15k–60k tokens per turn, gone — and selection accuracy goes up.",
+    body:["Exposing only a tool_search / tool_describe / tool_call bridge and loading schemas on demand raised selection accuracy from 79.5% to 88.1% on Opus 4.5 while cutting tool-definition tokens ~85%. If you run many MCP servers, flip this on before adding the next one."],
+    action:"<b>Do it:</b> defer schemas; load on demand.",
+    src:[["Anthropic","https://www.digitalapplied.com/blog/context-engineering-agent-reliability-playbook-2026"]],
+    rel:[["tokencount","the same root cause"],["skilltoken","make it a metric"]]},
+
+  skilldestyle:{sect:"Skill of the day",h:"Destyle untrusted input before the model sees it",importance:"medium",
+    via:["Simon Willison","github","simonw"],
+    dek:"One cheap layer that dropped injection success from ~61% to ~10%.",
+    body:["Rewrite scraped pages, webhook payloads, and user content into a neutral voice — injection exploits inferred speaker style, not role labels. Pair it with untrusted-content wrappers and per-tool byte caps. It's one layer, not a fix, but a cheap one."],
+    action:"<b>Do it this week:</b> add the destyle pass to your input pipeline.",
+    src:[["Simon Willison","https://simonwillison.net/2026/Jun/22/prompt-injection-as-role-confusion/"]],
+    rel:[["destyle","the research"],["injection","why one layer isn't enough"]]}
+};
+
+const TOP = ["glm52","anthropic400k","samsung","geminicli","tokencount"];
+const SECTION_ORDER = ["Security","Agents","Models","Tools","Infrastructure","Vibe Coding","SaaS","Skill of the day"];
+const ISSUE_DATES = ["2026-06-24","2026-06-23","2026-06-22","2026-06-21","2026-06-20","2026-06-19","2026-06-18"];
+const INTRO = "Today reads like the open ecosystem finally landed a punch. An open-weight model traded blows with frontier coding agents. Google killed its open CLI and got dogpiled for it. Anthropic published the most honest data yet on who actually wins with coding agents — and it isn't who you'd guess. And the cheapest performance fix in the building still isn't a bigger model. It's counting tokens. Five stories, then the deep dives, then ten things you can do this week.";
+
+let trail = [];
+const main = document.getElementById('main');
+const crumbsEl = document.getElementById('crumbs');
+const hintEl = document.getElementById('hint');
+const FAVCOLORS = ['#2f6bff','#e5484d','#0a7d4f','#d97706','#7c3aed','#0891b2'];
+
+function el(t,c,h){const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;}
+function sec(id){return S[id].sect.split(' · ')[0];}
+function setTab(t){['tab-wire','tb-wire'].forEach(id=>{const e=document.getElementById(id);if(e)e.classList.toggle('on',t==='wire');});['tab-brief','tb-brief'].forEach(id=>{const e=document.getElementById(id);if(e)e.classList.toggle('on',t==='brief');});}
+function domainOf(u){try{return new URL(u).hostname.replace(/^www\./,'');}catch(e){return '';}}
+function fav(u){return 'https://www.google.com/s2/favicons?domain='+domainOf(u)+'&sz=64';}
+function fav16(u){return domainOf(u)?'<img class="cfav" src="'+fav(u)+'" onerror="this.style.display=\'none\'" alt="">':'';}
+function avatarUrl(v){return 'https://unavatar.io/'+v[1]+'/'+v[2];}
+function viaChip(v){return v?'<span class="viac"><img class="vav" src="'+avatarUrl(v)+'" onerror="this.style.display=\'none\'" alt="">via '+v[0]+'</span>':'';}
+function favs(src){if(!src||!src.length)return'';
+  const ic=src.slice(0,3).map(x=>domainOf(x[1])?'<img class="fav" src="'+fav(x[1])+'" onerror="this.style.display=\'none\'" alt="">':'<span class="fav fb">'+x[0][0]+'</span>').join('');
+  return '<span class="favs">'+ic+'</span><span class="smeta">'+src.length+' source'+(src.length>1?'s':'')+' · '+src[0][0]+'</span>';}
+function readTime(s){const w=(s.body||[]).join(' ').split(/\s+/).length;return Math.max(2,Math.round(w/180))+' min read';}
+
+function openStory(id){trail=[id];renderDrill(true);}
+function drill(id){trail=[...trail,id];renderDrill(true);}
+function backTo(i){trail=trail.slice(0,i+1);renderDrill(false);}
+function backOne(){if(trail.length>1)backTo(trail.length-2);else renderWire();}
+
+/* ---------- WIRE: global trending front page ---------- */
+function trendScore(id){const s=S[id];let v=(s.rel?s.rel.length:0)*120;if(TOP.includes(id))v+=900;v+=({high:300,medium:140,low:40}[s.importance]||90);return v;}
+function renderWire(){
+  setTab('wire'); crumbsEl.innerHTML=''; hintEl.textContent='Ranked by reader opens — global, anonymous';
+  const ids=Object.keys(S).sort((a,b)=>trendScore(b)-trendScore(a));
+  let h='<div class="wire-head"><div class="ey">The Wire · live</div><div class="h">Trending now</div>'
+    +'<div class="sub"><b>14,799</b> findings indexed · <b>1,943</b> sources · <b>+118</b>/day · ranked by reader opens</div>'
+    +'<div class="wfilter"><span class="f on">Trending</span><span class="f">Latest</span><span class="f">Topics</span></div></div><div class="wlist">';
+  ids.forEach((id,i)=>{const s=S[id],sc=trendScore(id),opens=Math.round(sc*5.3+180),up=(i%3!==2),vel=5+(sc%34);
+    h+='<div class="wrow" data-id="'+id+'"><div class="rank'+(i<3?' hot':'')+'">'+(i+1)+'</div>'
+      +'<div class="wmain"><div class="kick">'+sec(id)+'</div><div class="wh">'+s.h+'</div>'
+      +'<div class="wmeta">'+favs(s.src)+viaChip(s.via)+'</div></div>'
+      +'<div class="act"><div class="opens">'+opens.toLocaleString()+' <span>opens</span></div>'
+      +(up?'<div class="vel">▲ '+vel+'%</div>':'<div class="vel flat">— stable</div>')+'</div></div>';});
+  h+='</div><div class="wlist"><div class="sub-band"><div><div class="st">Get the daily briefing in your inbox</div>'
+    +'<div class="sd">One email a day — the top stories, written long-form, with their sources. No noise.</div></div>'
+    +'<form class="sub-form" onsubmit="return modalSub(event,this)"><input type="email" placeholder="you@domain.com" required><button>Subscribe</button></form></div></div>';
+  main.innerHTML='<div class="wire">'+h+'</div>';
+  main.querySelectorAll('.wrow').forEach(n=>n.onclick=()=>openStory(n.dataset.id));
+}
+
+/* ---------- BRIEFING: the formatted newsletter, its own section ---------- */
+function renderBriefing(){
+  setTab('brief'); crumbsEl.innerHTML=''; hintEl.textContent='The full daily briefing — written long-form, same stories as the Wire';
+  let il='<div class="issues"><div class="ih">Briefings · 146</div>';
+  ISSUE_DATES.forEach((d,i)=>il+='<div class="iitem'+(i===0?' on':'')+'"><div class="d">'+d+'</div><div class="n">Ramsay Research Agent</div></div>');
+  il+='</div>';
+  let b='<div class="issue"><div class="issue-wrap"><div class="ey">Daily Briefing</div>'
+    +'<h1>Ramsay Research Agent</h1>'
+    +'<div class="byline"><div class="av">MP</div><div><div class="bn">MindPattern · 13-agent research pipeline</div>'
+    +'<div class="bm">June 24, 2026 · 12 min read · 25 stories</div></div></div>'
+    +'<div class="lede">'+INTRO+'</div>';
+  b+='<div class="shead">Top 5 Stories Today</div>';
+  TOP.forEach((id,i)=>{const s=S[id];b+='<div class="item"><h4>'+s.h+'</h4>'+s.body.map(p=>'<p>'+p+'</p>').join('');
+    if(s.src)b+='<div class="src">'+s.src.map(x=>'<a href="'+x[1]+'" target="_blank" rel="noopener">'+fav16(x[1])+x[0]+' ↗</a>').join('')+'</div>';
+    b+='</div>'+(i<TOP.length-1?'<hr>':'');});
+  const bySec={};Object.keys(S).forEach(id=>{if(TOP.includes(id))return;const k=sec(id);(bySec[k]=bySec[k]||[]).push(id);});
+  SECTION_ORDER.forEach(k=>{if(!bySec[k])return;b+='<div class="shead">'+k+'</div>';
+    bySec[k].forEach(id=>{const s=S[id];b+='<div class="item"><h4>'+s.h+'</h4>'+(s.dek?'<p><em>'+s.dek+'</em></p>':'')+s.body.map(p=>'<p>'+p+'</p>').join('');
+      if(s.src)b+='<div class="src">'+s.src.map(x=>'<a href="'+x[1]+'" target="_blank" rel="noopener">'+fav16(x[1])+x[0]+' ↗</a>').join('')+'</div>';b+='</div>';});});
+  b+='</div></div>';
+  main.innerHTML='<div class="brief">'+il+b+'</div>';
+}
+
+/* ---------- DRILL: the rabbit-hole columns ---------- */
+function renderDrill(animateLast){
+  setTab(''); hintEl.textContent='Following the thread — click a related story, or a spine / “Top” to go back';
+  const scroller=el('div','scroller');
+  trail.forEach((id,i)=>{const s=S[id],last=(i===trail.length-1);
+    if(!last){const sp=el('div','col spine');
+      sp.innerHTML='<div class="sp-inner"><div class="depth">↳ depth '+(i+1)+'</div><div class="sect">'+sec(id)+'</div><div class="t">'+s.h+'</div><div class="reopen">← click to come back here</div></div>';
+      sp.onclick=()=>backTo(i);scroller.appendChild(sp);
+    } else {const ac=el('div','col active'+(animateLast?' enter':''));
+      let h='<div class="backbar"><span class="bk" id="bk">‹ Back</span></div><div class="sect">'+s.sect+'</div><h1>'+s.h+'</h1>';
+      if(s.dek)h+='<div class="dek">'+s.dek+'</div>';
+      if(s.via)h+='<div class="readvia"><img src="'+avatarUrl(s.via)+'" onerror="this.style.display=\'none\'" alt=""><div><div class="n">'+s.via[0]+'</div><div class="h">@'+s.via[2]+' · you follow</div></div></div>';
+      h+='<div class="body">'+s.body.map(p=>'<p>'+p+'</p>').join('')+'</div>';
+      if(s.action)h+='<div class="action">'+s.action+'</div>';
+      if(s.src&&s.src.length)h+='<div class="sources"><div class="lbl">Sources</div>'+s.src.map(x=>'<a href="'+x[1]+'" target="_blank" rel="noopener">'+fav16(x[1])+x[0]+' ↗</a>').join('')+'</div>';
+      if(s.rel&&s.rel.length){h+='<div class="thread"><div class="lbl"><span class="arr">↳</span> More like this</div><div class="rel">';
+        s.rel.forEach(([rid,why],j)=>{const rs=S[rid];if(!rs)return;
+          h+='<div class="rel-item" data-id="'+rid+'"><span class="go">→</span><div class="why">'+why+' · '+sec(rid)+'</div><div class="rt">'+rs.h+'</div><div class="rmeta">'+readTime(rs)+' · ~'+(96-j*3)+'% match</div></div>';});
+        h+='</div></div>';}
+      const r=el('div','read');r.innerHTML=h;ac.appendChild(r);
+      r.querySelectorAll('.rel-item').forEach(n=>n.onclick=()=>drill(n.dataset.id));
+      const bk=r.querySelector('#bk');if(bk)bk.onclick=backOne;
+      scroller.appendChild(ac);}});
+  main.innerHTML='';main.appendChild(scroller);
+  crumbsEl.innerHTML='';
+  const root=el('span',null,'Top');root.style.cursor='pointer';root.onclick=renderWire;crumbsEl.appendChild(root);
+  trail.forEach((id,i)=>{crumbsEl.appendChild(el('span','sep','›'));
+    const c=el('span',(i===trail.length-1?'here':''),S[id].h);c.style.cursor='pointer';c.onclick=()=>backTo(i);crumbsEl.appendChild(c);});
+  requestAnimationFrame(()=>{scroller.scrollLeft=scroller.scrollWidth;});
+}
+
+/* ---------- nav + subscribe ---------- */
+document.getElementById('home').onclick=renderWire;
+document.getElementById('tab-wire').onclick=renderWire;
+document.getElementById('tab-brief').onclick=renderBriefing;
+document.getElementById('tb-wire').onclick=renderWire;
+document.getElementById('tb-brief').onclick=renderBriefing;
+const modal=document.getElementById('modal');
+const openModal=()=>{modal.classList.add('open');document.getElementById('modalMsg').textContent='';};
+document.getElementById('subBtn').onclick=openModal;
+document.getElementById('tb-sub').onclick=openModal;
+modal.onclick=(e)=>{if(e.target===modal||e.target.classList.contains('x'))modal.classList.remove('open');};
+window.modalSub=function(e,form){e.preventDefault();const v=form.querySelector('input').value;
+  const msg=document.getElementById('modalMsg');if(msg)msg.textContent='✓ Subscribed '+v+' — tomorrow’s briefing is on its way. (demo)';
+  if(form.closest('.sub-band')){form.innerHTML='<span style="color:#0a7d4f;font-size:13px;font-weight:600">✓ Subscribed '+v+' (demo)</span>';}
+  return false;};
+
+renderWire();
+</script>
+</body>
+</html>
