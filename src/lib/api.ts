@@ -52,3 +52,13 @@ export function getSources(opts: { limit?: number } = {}) {
   if (opts.limit != null) params.limit = String(opts.limit)
   return backendFetch<Source[]>('/api/sources', params)
 }
+
+/**
+ * Fetch a single finding by id.
+ * TODO(T8): replace the batch-find with a real `/api/findings/{id}` v3 endpoint;
+ * this covers the Wire's recent findings only.
+ */
+export async function getFinding(id: number): Promise<Finding | null> {
+  const findings = await getFindings({ limit: 300 })
+  return findings.find((f) => f.id === id) ?? null
+}
