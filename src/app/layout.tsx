@@ -1,13 +1,17 @@
-import type { Metadata } from 'next'
-import { JetBrains_Mono } from 'next/font/google'
+import type { Metadata, Viewport } from 'next'
+import { Inter, JetBrains_Mono, Newsreader } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL } from '@/lib/site'
 import './globals.css'
 
-const jetbrainsMono = JetBrains_Mono({
-  variable: '--font-mono',
+const inter = Inter({ variable: '--font-inter', subsets: ['latin'], display: 'swap' })
+const jetbrainsMono = JetBrains_Mono({ variable: '--font-jetbrains', subsets: ['latin'], display: 'swap' })
+const newsreader = Newsreader({
+  variable: '--font-newsreader',
   subsets: ['latin'],
+  style: ['normal', 'italic'],
+  display: 'swap',
 })
 
 export const metadata: Metadata = {
@@ -46,10 +50,18 @@ export const metadata: Metadata = {
   },
 }
 
+export const viewport: Viewport = {
+  themeColor: '#fbfcfd',
+  viewportFit: 'cover',
+}
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body className={`${jetbrainsMono.variable} font-mono antialiased`}>
+    <html
+      lang="en"
+      className={`${inter.variable} ${jetbrainsMono.variable} ${newsreader.variable}`}
+    >
+      <body className="font-sans antialiased">
         <TooltipProvider>{children}</TooltipProvider>
         <Analytics />
       </body>
