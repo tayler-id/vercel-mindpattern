@@ -11,11 +11,13 @@ export interface Finding {
 }
 
 export interface Source {
+  id?: number
   url_domain: string
   display_name: string
   hit_count: number
   high_value_count: number
   last_seen: string
+  created_at?: string
 }
 
 export interface Pattern {
@@ -78,6 +80,7 @@ export interface HealthData {
 export interface ReportListItem {
   date: string
   title: string
+  subtitle?: string
   filename: string
   size: number
 }
