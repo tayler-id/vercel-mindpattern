@@ -185,6 +185,12 @@
   contain-intrinsic-size: auto 120px;
 }
 
+/* Rabbit-hole column entrance (respects reduce-motion via the global rule). */
+@keyframes fadein {
+  from { opacity: 0; transform: translateX(10px); }
+  to { opacity: 1; transform: none; }
+}
+
 /* Post-interaction validity affordances (no left bar; border tint only). */
 input:user-invalid { border-color: var(--destructive); }
 input:user-valid { border-color: var(--ok); }
