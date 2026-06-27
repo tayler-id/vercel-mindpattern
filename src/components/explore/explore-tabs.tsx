@@ -1,5 +1,10 @@
 'use client'
 
+/* eslint-disable react-hooks/set-state-in-effect --
+   Inherited from the legacy /explore page. The effects set loading/clear flags
+   before kicking off a fetch — an intentional, behavior-preserving pattern.
+   (This page predates the rabbit-hole rebuild and will be revisited/retired.) */
+
 import { useState, useEffect, useCallback } from 'react'
 import { motion } from 'motion/react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
