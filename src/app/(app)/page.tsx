@@ -3,15 +3,46 @@ import type { Finding, Stats } from '@/lib/types'
 import { WireRow } from '@/components/wire/wire-row'
 import { WireTabs } from '@/components/wire/wire-tabs'
 import { SubscribeBand } from '@/components/subscribe/subscribe-band'
+import { sectionLabel } from '@/lib/sections'
 
 export const revalidate = 60
 
-export default async function WirePage() {
-  const [findings, stats] = await Promise.all([
-    getFindings({ importance: 'high', limit: 40 }).catch(() => [] as Finding[]),
-    getStats().catch(() => null as Stats | null),
-  ])
+const VIEWS = new Set(['trending', 'latest', 'topics'])
+
+const HEADING: Record<string, { h1: string; sub: string }> = {
+  trending: { h1: 'Trending now', sub: 'high-signal first' },
+  latest: { h1: 'Latest signals', sub: 'most recent first' },
+  topics: { h1: 'By topic', sub: 'grouped by section' },
+}
+
+export default async function WirePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ view?: string }>
+}) {
+  const sp = await searchParams
+  const view = VIEWS.has(sp.view ?? '') ? (sp.view as string) : 'trending'
+
+  const stats = await getStats().catch(() => null as Stats | null)
   const today = stats ? (Object.entries(stats.by_date).sort().at(-1)?.[1] ?? 0) : 0
+
+  let findings: Finding[] = []
+  try {
+    findings =
+      view === 'latest'
+        ? await getFindings({ limit: 40 })
+        : await getFindings({ importance: 'high', limit: 40 })
+  } catch {
+    /* empty state below */
+  }
+
+  const grouped: Record<string, Finding[]> = {}
+  if (view === 'topics') {
+    for (const f of findings) {
+      const s = sectionLabel(f.agent)
+      ;(grouped[s] ??= []).push(f)
+    }
+  }
 
   return (
     <div className="h-full overflow-y-auto">
@@ -21,30 +52,50 @@ export default async function WirePage() {
           The Wire · Live
         </p>
         <h1 className="mt-2 text-[1.875rem] font-extrabold tracking-[-0.03em] text-ink">
-          Trending now
+          {HEADING[view].h1}
         </h1>
         {stats && (
           <p className="mt-2 font-mono text-[0.71875rem] text-ink-faint">
             <b className="font-semibold text-ink-soft">{stats.findings.toLocaleString()}</b> findings
             indexed · <b className="font-semibold text-ink-soft">{stats.sources.toLocaleString()}</b>{' '}
-            sources · <b className="font-semibold text-ink-soft">+{today}</b>/day · high-signal first
+            sources · <b className="font-semibold text-ink-soft">+{today}</b>/day · {HEADING[view].sub}
           </p>
         )}
-        <WireTabs />
+        <WireTabs active={view} />
       </header>
 
-      <ol className="mx-auto max-w-[1080px] px-4 pb-[90px] pt-1.5 max-sm:px-1.5">
-        {findings.map((f, i) => (
-          <li key={f.id}>
-            <WireRow finding={f} rank={i + 1} />
-          </li>
-        ))}
-        {!findings.length && (
-          <li className="px-4 py-10 text-center font-mono text-[0.8125rem] text-ink-faint">
-            The wire is quiet — couldn&rsquo;t reach the pipeline.
-          </li>
+      <div className="mx-auto max-w-[1080px] px-4 pb-[90px] pt-1.5 max-sm:px-1.5">
+        {view === 'topics' ? (
+          Object.entries(grouped).map(([section, items]) => (
+            <section key={section} className="mb-5">
+              <h2 className="px-3 pb-1 pt-5 font-mono text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-primary">
+                {section}
+                <span className="ml-2 text-ink-faint">{items.length}</span>
+              </h2>
+              <ol>
+                {items.map((f, i) => (
+                  <li key={f.id}>
+                    <WireRow finding={f} rank={i + 1} />
+                  </li>
+                ))}
+              </ol>
+            </section>
+          ))
+        ) : (
+          <ol>
+            {findings.map((f, i) => (
+              <li key={f.id}>
+                <WireRow finding={f} rank={i + 1} />
+              </li>
+            ))}
+          </ol>
         )}
-      </ol>
+        {!findings.length && (
+          <p className="px-4 py-10 text-center font-mono text-[0.8125rem] text-ink-faint">
+            The wire is quiet — couldn&rsquo;t reach the pipeline.
+          </p>
+        )}
+      </div>
 
       <SubscribeBand />
     </div>
