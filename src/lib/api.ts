@@ -40,11 +40,11 @@ export function getFindings(opts: {
 }
 
 export function getReports() {
-  return backendFetch<ReportListItem[]>('/api/reports')
+  return backendFetch<ReportListItem[]>('/api/reports', { user: 'ramsay' })
 }
 
 export function getReport(date: string) {
-  return backendFetch<Report>(`/api/reports/${date}`)
+  return backendFetch<Report>(`/api/reports/${date}`, { user: 'ramsay' })
 }
 
 export function getSources(opts: { limit?: number } = {}) {
