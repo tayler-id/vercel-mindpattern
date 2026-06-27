@@ -1,25 +1,20 @@
 import Link from 'next/link'
 import type { Finding } from '@/lib/types'
-import { faviconFor } from '@/lib/favicon'
-import { agentLabel } from '@/lib/format'
-
-const IMPORTANCE: Record<Finding['importance'], string> = {
-  high: 'text-primary',
-  medium: 'text-ink-soft',
-  low: 'text-ink-faint',
-}
+import { sectionLabel, leaderFrom } from '@/lib/sections'
+import { SourceFavicon } from './source-favicon'
+import { ViaAvatar } from './via-avatar'
 
 export function WireRow({ finding, rank }: { finding: Finding; rank: number }) {
-  const fav = faviconFor(finding.source_url)
-  const hot = finding.importance === 'high'
+  const hot = rank <= 3
+  const leader = leaderFrom(finding.source_url)
 
   return (
     <Link
       href={`/f/${finding.id}`}
-      className="cv-auto grid grid-cols-[26px_1fr_auto] items-center gap-4 rounded-[10px] border-b border-line-soft px-3 py-3.5 transition-[background,box-shadow] hover:border-b-transparent hover:bg-card hover:shadow-[0_1px_2px_rgba(11,13,18,.05),0_12px_32px_-22px_rgba(11,13,18,.32)] sm:px-4"
+      className="group grid grid-cols-[30px_1fr] items-start gap-4 rounded-xl border-b border-line-soft px-3 py-[15px] transition-[background,box-shadow] hover:border-b-transparent hover:bg-surface hover:shadow-[0_1px_2px_rgba(11,13,18,.05),0_12px_32px_-22px_rgba(11,13,18,.32)] active:bg-spine sm:gap-[18px] sm:px-4"
     >
       <span
-        className={`text-right font-mono text-sm tabular-nums ${
+        className={`pt-px text-right font-mono text-sm tabular-nums ${
           hot ? 'font-bold text-primary' : 'font-medium text-ink-faint'
         }`}
       >
@@ -28,32 +23,19 @@ export function WireRow({ finding, rank }: { finding: Finding; rank: number }) {
 
       <div className="min-w-0">
         <div className="font-mono text-[0.625rem] font-semibold uppercase tracking-[0.1em] text-primary">
-          {agentLabel(finding.agent)}
+          {sectionLabel(finding.agent)}
         </div>
-        <h3 className="mt-1 text-[1.0625rem] font-semibold leading-snug tracking-[-0.01em] text-ink">
+        <h3 className="mt-[5px] text-[1.03125rem] font-semibold leading-[1.32] tracking-[-0.01em] text-ink">
           {finding.title}
         </h3>
-        <div className="mt-2 flex items-center gap-1.5 font-mono text-[0.65625rem] text-ink-faint">
-          {fav && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={fav}
-              alt=""
-              width={13}
-              height={13}
-              loading="lazy"
-              className="size-[13px] rounded-[3px] bg-spine"
-            />
-          )}
-          <span className="truncate">{finding.source_name ?? 'source'}</span>
+        <div className="mt-[9px] flex flex-wrap items-center gap-x-3 gap-y-1.5 font-mono text-[0.65625rem] text-ink-faint">
+          <span className="inline-flex min-w-0 items-center gap-1.5">
+            <SourceFavicon url={finding.source_url} name={finding.source_name} />
+            <span className="truncate">{finding.source_name ?? 'web'}</span>
+          </span>
+          {leader && <ViaAvatar name={leader.name} avatar={leader.avatar} />}
         </div>
       </div>
-
-      <span
-        className={`hidden font-mono text-[0.625rem] font-semibold uppercase tracking-[0.08em] sm:block ${IMPORTANCE[finding.importance]}`}
-      >
-        {finding.importance}
-      </span>
     </Link>
   )
 }

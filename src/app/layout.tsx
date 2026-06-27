@@ -59,9 +59,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${inter.variable} ${jetbrainsMono.variable} ${newsreader.variable}`}
     >
-      <body className="font-sans antialiased">
+      <body suppressHydrationWarning className="font-sans antialiased">
         <TooltipProvider>{children}</TooltipProvider>
         <Analytics />
       </body>

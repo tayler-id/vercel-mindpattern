@@ -2,8 +2,9 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { Radio, Newspaper, Mail } from 'lucide-react'
 
-const TABS = [
+const HEADER_TABS = [
   { href: '/', label: 'Wire', match: (p: string) => p === '/' },
   { href: '/briefings', label: 'Briefings', match: (p: string) => p.startsWith('/briefings') },
 ]
@@ -12,8 +13,8 @@ const TABS = [
 export function HeaderNav() {
   const pathname = usePathname()
   return (
-    <nav className="hidden items-center gap-0.5 sm:flex" aria-label="Primary">
-      {TABS.map((t) => {
+    <nav className="hidden items-center gap-1 sm:flex" aria-label="Primary">
+      {HEADER_TABS.map((t) => {
         const on = t.match(pathname)
         return (
           <Link
@@ -21,9 +22,7 @@ export function HeaderNav() {
             href={t.href}
             aria-current={on ? 'page' : undefined}
             className={`rounded-lg px-3 py-1.5 font-mono text-[0.6875rem] font-semibold uppercase tracking-[0.06em] transition-colors ${
-              on
-                ? 'bg-accent-wash text-primary'
-                : 'text-ink-faint hover:bg-spine hover:text-ink'
+              on ? 'bg-accent-wash text-primary' : 'text-ink-faint hover:bg-spine hover:text-ink'
             }`}
           >
             {t.label}
@@ -34,34 +33,34 @@ export function HeaderNav() {
   )
 }
 
-/** Fixed bottom tab bar (mobile, app-feel). */
+const TAB_ITEMS = [
+  { href: '/', label: 'Wire', icon: Radio, match: (p: string) => p === '/' },
+  { href: '/briefings', label: 'Briefings', icon: Newspaper, match: (p: string) => p.startsWith('/briefings') },
+  { href: '/#subscribe', label: 'Subscribe', icon: Mail, match: () => false },
+]
+
+/** Native-feel bottom tab bar (mobile). */
 export function BottomTabBar() {
   const pathname = usePathname()
-  const items = [
-    { href: '/', label: 'Wire', icon: '≣', match: (p: string) => p === '/' },
-    { href: '/briefings', label: 'Briefings', icon: '▤', match: (p: string) => p.startsWith('/briefings') },
-    { href: '/#subscribe', label: 'Subscribe', icon: '✉', match: () => false },
-  ]
   return (
     <nav
-      className="pb-safe fixed inset-x-0 bottom-0 z-40 flex border-t border-line bg-paper/95 backdrop-blur-md sm:hidden"
+      className="pb-safe fixed inset-x-0 bottom-0 z-40 flex border-t border-line bg-paper/80 backdrop-blur-xl sm:hidden"
       aria-label="Primary"
     >
-      {items.map((t) => {
+      {TAB_ITEMS.map((t) => {
         const on = t.match(pathname)
+        const Icon = t.icon
         return (
           <Link
             key={t.label}
             href={t.href}
             aria-current={on ? 'page' : undefined}
-            className={`flex flex-1 flex-col items-center justify-center gap-0.5 py-2.5 font-mono text-[0.5625rem] font-semibold uppercase tracking-[0.05em] ${
+            className={`flex flex-1 flex-col items-center justify-center gap-1 pb-1.5 pt-2.5 transition-transform active:scale-90 ${
               on ? 'text-primary' : 'text-ink-faint'
             }`}
           >
-            <span aria-hidden className="text-lg leading-none">
-              {t.icon}
-            </span>
-            {t.label}
+            <Icon size={24} strokeWidth={on ? 2.4 : 1.9} aria-hidden />
+            <span className="text-[0.625rem] font-semibold tracking-[0.01em]">{t.label}</span>
           </Link>
         )
       })}

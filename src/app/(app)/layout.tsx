@@ -21,7 +21,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         </div>
         <Link
           href="/#subscribe"
-          className="ml-auto hidden rounded-lg bg-primary px-3.5 py-2 text-[0.8125rem] font-semibold text-primary-foreground transition-[filter] hover:brightness-105 sm:inline-block"
+          className="ml-auto hidden rounded-full bg-primary px-4 py-2 text-[0.8125rem] font-semibold text-primary-foreground shadow-sm transition-transform hover:brightness-105 active:scale-95 sm:inline-block"
         >
           Subscribe
         </Link>
