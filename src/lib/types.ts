@@ -98,3 +98,31 @@ export interface ReportSearchResult {
   excerpt: string
   filename: string
 }
+
+export interface AudioSourceNote {
+  label: string
+  url: string
+}
+
+export interface AudioBriefing {
+  id: string
+  type: 'audio_briefing'
+  date: string
+  user: string
+  status: 'ready' | 'degraded' | 'failed' | string
+  generated_at: string
+  provider: string
+  model: string
+  voice: string
+  source_count: number
+  duration_seconds: number
+  has_audio_file: boolean
+  audio_placeholder: boolean
+  source_report_hash: string
+  script_hash: string
+  audio_hash: string
+  labels: string[]
+  show_notes: AudioSourceNote[]
+  public_url: string
+  transcript_url: string
+}

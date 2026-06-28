@@ -1,4 +1,4 @@
-import type { Finding, Report, ReportListItem, Source, Stats } from './types'
+import type { AudioBriefing, Finding, Report, ReportListItem, Source, Stats } from './types'
 
 const BACKEND_URL = process.env.BACKEND_API_URL || 'https://mindpattern.fly.dev'
 
@@ -17,6 +17,10 @@ export async function backendFetch<T>(
   })
   if (!res.ok) throw new Error(`Backend ${res.status}: ${path}`)
   return res.json()
+}
+
+export function backendAssetUrl(path: string): string {
+  return new URL(path, BACKEND_URL).toString()
 }
 
 // ── Typed helpers over the live backend (reused by Server Components) ──────────
@@ -45,6 +49,18 @@ export function getReports() {
 
 export function getReport(date: string) {
   return backendFetch<Report>(`/api/reports/${date}`, { user: 'ramsay' })
+}
+
+export function getAudioBriefings() {
+  return backendFetch<AudioBriefing[]>('/api/audio-briefings', { user: 'ramsay' })
+}
+
+export async function getAudioBriefing(date: string): Promise<AudioBriefing | null> {
+  try {
+    return await backendFetch<AudioBriefing>(`/api/audio-briefings/${date}`, { user: 'ramsay' })
+  } catch {
+    return null
+  }
 }
 
 export function getSources(opts: { limit?: number } = {}) {

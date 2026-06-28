@@ -1,7 +1,8 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { getReports } from '@/lib/api'
-import type { ReportListItem } from '@/lib/types'
+import { AudioBriefingPlayer } from '@/components/briefing/audio-briefing-player'
+import { getAudioBriefings, getReports } from '@/lib/api'
+import type { AudioBriefing, ReportListItem } from '@/lib/types'
 import { shortDate } from '@/lib/format'
 
 export const revalidate = 60
@@ -13,12 +14,20 @@ export const metadata: Metadata = {
 
 export default async function BriefingsPage() {
   let reports: ReportListItem[] = []
+  let audioBriefings: AudioBriefing[] = []
   let error = false
   try {
     reports = await getReports()
   } catch {
     error = true
   }
+  try {
+    audioBriefings = await getAudioBriefings()
+  } catch {
+    audioBriefings = []
+  }
+
+  const audioByDate = new Map(audioBriefings.map((audio) => [audio.date, audio]))
 
   return (
     <div className="h-full overflow-y-auto">
@@ -35,24 +44,30 @@ export default async function BriefingsPage() {
       </header>
 
       <ol className="mx-auto max-w-[44rem] px-8 pb-24 pt-6 max-sm:px-5">
-        {reports.map((r) => (
-          <li key={r.date}>
-            <Link
-              href={`/briefings/${r.date}`}
-              className="block border-b border-line-soft py-4 transition-colors hover:bg-card"
-            >
-              <div className="font-mono text-[0.71875rem] font-semibold text-primary">
-                {shortDate(r.date)}
-              </div>
-              <div className="mt-1 font-serif text-[1.25rem] font-semibold leading-snug tracking-[-0.01em] text-ink">
-                {r.title}
-              </div>
-              {r.subtitle && (
-                <p className="mt-1 line-clamp-2 text-[0.875rem] text-ink-soft">{r.subtitle}</p>
-              )}
-            </Link>
-          </li>
-        ))}
+        {reports.map((r) => {
+          const audio = audioByDate.get(r.date)
+          return (
+            <li key={r.date} className="border-b border-line-soft py-4">
+              <Link
+                href={`/briefings/${r.date}`}
+                className="block transition-colors hover:bg-card"
+              >
+                <div className="font-mono text-[0.71875rem] font-semibold text-primary">
+                  {shortDate(r.date)}
+                </div>
+                <div className="mt-1 font-serif text-[1.25rem] font-semibold leading-snug tracking-[-0.01em] text-ink">
+                  {r.title}
+                </div>
+                {r.subtitle && (
+                  <p className="mt-1 line-clamp-2 text-[0.875rem] text-ink-soft">
+                    {r.subtitle}
+                  </p>
+                )}
+              </Link>
+              {audio && <AudioBriefingPlayer audio={audio} compact />}
+            </li>
+          )
+        })}
         {error && (
           <li className="py-10 text-center font-mono text-[0.8125rem] text-ink-faint">
             Couldn&rsquo;t load the archive. Refresh in a moment.
