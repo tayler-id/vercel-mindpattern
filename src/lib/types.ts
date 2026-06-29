@@ -1,13 +1,43 @@
 export interface Finding {
   id: number
+  kind?: 'finding'
   run_date: string
   agent: string
   title: string
   summary: string
   importance: 'high' | 'medium' | 'low'
+  category?: string
   source_url: string | null
   source_name: string | null
   similarity?: number
+  score?: number
+  relationship?: string
+  reason?: string
+  target_url?: string
+}
+
+export interface RelatedResponse {
+  kind: 'related'
+  finding_id: number
+  mode: 'semantic' | string
+  items: Finding[]
+  total: number
+}
+
+export interface FeedItem extends Finding {
+  rank: number
+  target_type: 'finding' | 'story' | string
+  target_id: string
+  target_url: string
+  confidence?: string
+}
+
+export interface FeedResponse {
+  kind: 'feed'
+  items: FeedItem[]
+  total: number
+  limit: number
+  offset: number
 }
 
 export interface Source {

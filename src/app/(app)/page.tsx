@@ -1,5 +1,5 @@
-import { getFindings, getStats } from '@/lib/api'
-import type { Finding, Stats } from '@/lib/types'
+import { getFeed, getFindings, getStats } from '@/lib/api'
+import type { FeedItem, Finding, Stats } from '@/lib/types'
 import { WireRow } from '@/components/wire/wire-row'
 import { WireTabs } from '@/components/wire/wire-tabs'
 import { SubscribeBand } from '@/components/subscribe/subscribe-band'
@@ -26,17 +26,26 @@ export default async function WirePage({
   const stats = await getStats().catch(() => null as Stats | null)
   const today = stats ? (Object.entries(stats.by_date).sort().at(-1)?.[1] ?? 0) : 0
 
-  let findings: Finding[] = []
+  let findings: Array<Finding | FeedItem> = []
   try {
-    findings =
-      view === 'latest'
-        ? await getFindings({ limit: 40 })
-        : await getFindings({ importance: 'high', limit: 40 })
+    if (view === 'topics') {
+      findings = await getFindings({ importance: 'high', limit: 80 })
+    } else {
+      const feed = await getFeed({ limit: 40 })
+      findings = feed.items
+    }
   } catch {
-    /* empty state below */
+    try {
+      findings =
+        view === 'latest'
+          ? await getFindings({ limit: 40 })
+          : await getFindings({ importance: 'high', limit: 40 })
+    } catch {
+      /* empty state below */
+    }
   }
 
-  const grouped: Record<string, Finding[]> = {}
+  const grouped: Record<string, Array<Finding | FeedItem>> = {}
   if (view === 'topics') {
     for (const f of findings) {
       const s = sectionLabel(f.agent)

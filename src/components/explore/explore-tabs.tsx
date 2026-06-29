@@ -25,7 +25,6 @@ import { PatternList } from '@/components/gen-ui/pattern-list'
 import { SourceTable } from '@/components/gen-ui/source-table'
 import { SkillCards } from '@/components/gen-ui/skill-cards'
 import { HealthDashboard } from '@/components/gen-ui/health-dashboard'
-import { AGENTS } from '@/lib/constants'
 import type { Finding, Source, Pattern, Skill, HealthData } from '@/lib/types'
 import {
   Search,

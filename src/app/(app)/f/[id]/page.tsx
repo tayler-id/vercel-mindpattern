@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { getFinding, getFindings } from '@/lib/api'
-import type { Finding } from '@/lib/types'
+import { getFinding, getRelated } from '@/lib/api'
 import { RabbitHole } from '@/components/story/rabbit-hole'
 
 export const revalidate = 60
@@ -17,26 +16,15 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 
 export default async function FindingPage({ params }: Params) {
   const { id } = await params
-  const [finding, high, recent] = await Promise.all([
+  const [finding, related] = await Promise.all([
     getFinding(Number(id)),
-    getFindings({ importance: 'high', limit: 80 }).catch(() => [] as Finding[]),
-    getFindings({ limit: 120 }).catch(() => [] as Finding[]),
+    getRelated(Number(id), { limit: 8 }),
   ])
   if (!finding) notFound()
 
-  // Dedupe a pool for placeholder relatedness (swapped for /api/related later).
-  const seen = new Set<number>()
-  const pool: Finding[] = []
-  for (const f of [finding, ...high, ...recent]) {
-    if (!seen.has(f.id)) {
-      seen.add(f.id)
-      pool.push(f)
-    }
-  }
-
   return (
     <div className="h-full">
-      <RabbitHole initial={finding} pool={pool} />
+      <RabbitHole initial={finding} initialRelated={related.items} />
     </div>
   )
 }

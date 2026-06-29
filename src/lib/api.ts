@@ -1,4 +1,13 @@
-import type { AudioBriefing, Finding, Report, ReportListItem, Source, Stats } from './types'
+import type {
+  AudioBriefing,
+  FeedResponse,
+  Finding,
+  RelatedResponse,
+  Report,
+  ReportListItem,
+  Source,
+  Stats,
+} from './types'
 
 const BACKEND_URL = process.env.BACKEND_API_URL || 'https://mindpattern.fly.dev'
 
@@ -43,6 +52,20 @@ export function getFindings(opts: {
   return backendFetch<Finding[]>('/api/findings', params)
 }
 
+export function getFeed(opts: {
+  limit?: number
+  offset?: number
+  date?: string
+  since?: string
+} = {}) {
+  const params: Record<string, string> = { user: 'ramsay' }
+  if (opts.limit != null) params.limit = String(opts.limit)
+  if (opts.offset != null) params.offset = String(opts.offset)
+  if (opts.date) params.date = opts.date
+  if (opts.since) params.since = opts.since
+  return backendFetch<FeedResponse>('/api/feed', params)
+}
+
 export function getReports() {
   return backendFetch<ReportListItem[]>('/api/reports', { user: 'ramsay' })
 }
@@ -69,12 +92,57 @@ export function getSources(opts: { limit?: number } = {}) {
   return backendFetch<Source[]>('/api/sources', params)
 }
 
-/**
- * Fetch a single finding by id.
- * TODO(T8): replace the batch-find with a real `/api/findings/{id}` v3 endpoint;
- * this covers the Wire's recent findings only.
- */
+export async function getSourceByDomain(domain: string): Promise<Source | null> {
+  const normalized = domain.toLowerCase().replace(/^www\./, '')
+  const sources = await getSources({ limit: 500 })
+  return (
+    sources.find((source) => source.url_domain.toLowerCase().replace(/^www\./, '') === normalized) ??
+    null
+  )
+}
+
+export async function getFindingsForSource(domain: string, opts: { limit?: number } = {}) {
+  const normalized = domain.toLowerCase().replace(/^www\./, '')
+  const findings = await getFindings({ limit: 2000 })
+  return findings
+    .filter((finding) => {
+      if (!finding.source_url) return false
+      try {
+        return new URL(finding.source_url).hostname.replace(/^www\./, '').toLowerCase() === normalized
+      } catch {
+        return false
+      }
+    })
+    .slice(0, opts.limit ?? 40)
+}
+
 export async function getFinding(id: number): Promise<Finding | null> {
-  const findings = await getFindings({ limit: 300 })
-  return findings.find((f) => f.id === id) ?? null
+  try {
+    return await backendFetch<Finding>(`/api/finding/${id}`, { user: 'ramsay' })
+  } catch {
+    try {
+      const findings = await getFindings({ limit: 300 })
+      return findings.find((f) => f.id === id) ?? null
+    } catch {
+      return null
+    }
+  }
+}
+
+export async function getRelated(id: number, opts: { limit?: number } = {}): Promise<RelatedResponse> {
+  try {
+    return await backendFetch<RelatedResponse>(`/api/related/${id}`, {
+      user: 'ramsay',
+      mode: 'semantic',
+      limit: String(opts.limit ?? 8),
+    })
+  } catch {
+    return {
+      kind: 'related',
+      finding_id: id,
+      mode: 'semantic',
+      items: [],
+      total: 0,
+    }
+  }
 }

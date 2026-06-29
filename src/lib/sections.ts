@@ -22,6 +22,35 @@ export function sectionLabel(agent: string): string {
   )
 }
 
+/**
+ * Clean, consistent source label. Many `source_name`s are
+ * "Publisher — Article Title (2026)"; show just the publisher (or the domain).
+ */
+export function sourceLabel(name: string | null, url: string | null): string {
+  if (name) {
+    const cut = name.split(/\s+[—–|]\s+|\s+-\s+/)[0].trim()
+    const clean = cut.replace(/\s*\(20\d\d\)\s*$/, '').trim()
+    if (clean) return clean
+  }
+  if (url) {
+    try {
+      return new URL(url).hostname.replace(/^www\./, '')
+    } catch {
+      /* ignore */
+    }
+  }
+  return 'web'
+}
+
+export function sourceDomain(url: string | null): string | null {
+  if (!url) return null
+  try {
+    return new URL(url).hostname.replace(/^www\./, '').toLowerCase()
+  } catch {
+    return null
+  }
+}
+
 const RESERVED = new Set([
   'i', 'home', 'search', 'status', 'intent', 'share', 'hashtag', 'explore', 'about',
 ])
