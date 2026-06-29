@@ -1,5 +1,6 @@
-import { getFeed, getFindings, getStats } from '@/lib/api'
-import type { FeedItem, Finding, Stats } from '@/lib/types'
+import { getFeed, getFindings, getStats, getStories } from '@/lib/api'
+import type { FeedItem, Finding, PublicStory, Stats } from '@/lib/types'
+import { StoryWireRow } from '@/components/wire/story-wire-row'
 import { WireRow } from '@/components/wire/wire-row'
 import { WireTabs } from '@/components/wire/wire-tabs'
 import { SubscribeBand } from '@/components/subscribe/subscribe-band'
@@ -27,12 +28,17 @@ export default async function WirePage({
   const today = stats ? (Object.entries(stats.by_date).sort().at(-1)?.[1] ?? 0) : 0
 
   let findings: Array<Finding | FeedItem> = []
+  let stories: PublicStory[] = []
   try {
     if (view === 'topics') {
       findings = await getFindings({ importance: 'high', limit: 80 })
     } else {
-      const feed = await getFeed({ limit: 40 })
-      findings = feed.items
+      const storyFeed = await getStories({ limit: 40 })
+      stories = storyFeed.items
+      if (!stories.length) {
+        const feed = await getFeed({ limit: 40 })
+        findings = feed.items
+      }
     }
   } catch {
     try {
@@ -45,6 +51,7 @@ export default async function WirePage({
     }
   }
 
+  const hasItems = view === 'topics' ? findings.length > 0 : stories.length > 0 || findings.length > 0
   const grouped: Record<string, Array<Finding | FeedItem>> = {}
   if (view === 'topics') {
     for (const f of findings) {
@@ -56,11 +63,11 @@ export default async function WirePage({
   return (
     <div className="h-full overflow-y-auto">
       <header className="mx-auto max-w-[1080px] px-8 pt-9 max-sm:px-[18px]">
-        <p className="flex items-center gap-2 font-mono text-[0.6875rem] font-semibold uppercase tracking-[0.16em] text-primary">
+        <p className="flex items-center gap-2 font-mono text-[0.6875rem] font-semibold uppercase text-primary">
           <span className="inline-block size-1.5 animate-pulse rounded-full bg-primary" aria-hidden />
           The Wire · Live
         </p>
-        <h1 className="mt-2 text-[1.875rem] font-extrabold tracking-[-0.03em] text-ink">
+        <h1 className="mt-2 text-[1.875rem] font-extrabold text-ink">
           {HEADING[view].h1}
         </h1>
         {stats && (
@@ -77,7 +84,7 @@ export default async function WirePage({
         {view === 'topics' ? (
           Object.entries(grouped).map(([section, items]) => (
             <section key={section} className="mb-5">
-              <h2 className="px-3 pb-1 pt-5 font-mono text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-primary">
+              <h2 className="px-3 pb-1 pt-5 font-mono text-[0.6875rem] font-semibold uppercase text-primary">
                 {section}
                 <span className="ml-2 text-ink-faint">{items.length}</span>
               </h2>
@@ -90,6 +97,14 @@ export default async function WirePage({
               </ol>
             </section>
           ))
+        ) : stories.length ? (
+          <ol>
+            {stories.map((story, i) => (
+              <li key={story.slug}>
+                <StoryWireRow story={story} rank={i + 1} />
+              </li>
+            ))}
+          </ol>
         ) : (
           <ol>
             {findings.map((f, i) => (
@@ -99,7 +114,7 @@ export default async function WirePage({
             ))}
           </ol>
         )}
-        {!findings.length && (
+        {!hasItems && (
           <p className="px-4 py-10 text-center font-mono text-[0.8125rem] text-ink-faint">
             The wire is quiet — couldn&rsquo;t reach the pipeline.
           </p>
