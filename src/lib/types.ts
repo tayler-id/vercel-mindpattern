@@ -156,3 +156,62 @@ export interface AudioBriefing {
   public_url: string
   transcript_url: string
 }
+
+export interface SourceRef {
+  url: string
+  domain: string
+  title: string
+}
+
+export interface EntityRef {
+  id: string
+  slug: string
+  name: string
+  kind: string
+}
+
+export interface IssueSection {
+  id: string
+  slug: string
+  title: string
+  order: number
+  summary: string
+  story_unit_ids: string[]
+}
+
+export interface IssueStoryUnit {
+  id: string
+  slug: string
+  issue_date: string
+  section_id: string
+  title: string
+  summary: string
+  body_excerpt: string
+  finding_ids: number[]
+  entity_ids: string[]
+  source_refs: SourceRef[]
+  arc_ids: string[]
+  order: number
+}
+
+export interface PublicIssue {
+  date: string
+  user: string
+  title: string
+  slug: string
+  sections: IssueSection[]
+  entities: EntityRef[]
+  story_units: IssueStoryUnit[]
+  source_trail: SourceRef[]
+  generated_at: string
+  provenance: {
+    generated_by: string
+    generated_at: string
+    input_artifacts: string[]
+    source_finding_ids: number[]
+    source_issue_dates: string[]
+    redaction_status: 'passed' | 'redacted' | 'failed' | string
+    ai_generated: boolean
+    human_approved: boolean
+  }
+}
