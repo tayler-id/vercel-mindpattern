@@ -16,6 +16,17 @@ function cleanSlug(raw: string): string | null {
   return ENTITY_SLUG_RE.test(slug) && !slug.includes('..') ? slug : null
 }
 
+function relationshipLabel(source: string, relationship: string): string {
+  const rel = relationship.replaceAll('_', ' ').trim()
+  const map: Record<string, string> = {
+    entity_graph_provenance: 'Graph evidence',
+    findings_text: 'Corpus mention',
+    reported_on: 'Reported in',
+    powers: 'Powers',
+  }
+  return map[relationship] || map[source] || rel || 'Graph evidence'
+}
+
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug: raw } = await params
   const slug = cleanSlug(raw)
@@ -38,6 +49,11 @@ export default async function EntityPage({ params }: Params) {
 
   const entity = await getEntity(slug)
   if (!entity) notFound()
+  const findings = entity.findings ?? []
+  const relationships = entity.relationships ?? []
+  const sourceTrail = entity.source_trail ?? []
+  const graphSources = entity.graph_sources ?? []
+  const briefingCount = entity.total ?? entity.issue_dates?.length ?? 0
 
   return (
     <div className="h-full overflow-y-auto">
@@ -57,41 +73,41 @@ export default async function EntityPage({ params }: Params) {
             '@type': 'Thing',
             name: entity.name,
           },
-          citation: entity.source_trail.slice(0, 12).map((source) => source.url),
+          citation: sourceTrail.slice(0, 12).map((source) => source.url),
         }}
       />
 
       <main className="mx-auto max-w-[760px] px-8 pb-24 pt-9 max-sm:px-5">
         <Link
           href="/"
-          className="font-mono text-[0.6875rem] font-semibold uppercase tracking-[0.08em] text-primary hover:underline"
+          className="font-mono text-[0.6875rem] font-semibold uppercase text-primary hover:underline"
         >
           The Wire
         </Link>
 
         <header className="mt-8 border-b border-line pb-6">
-          <div className="font-mono text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-primary">
+          <div className="font-mono text-[0.6875rem] font-semibold uppercase text-primary">
             Entity trail
           </div>
-          <h1 className="mt-3 font-serif text-[2.25rem] font-semibold leading-[1.08] tracking-[-0.02em] text-ink max-sm:text-[1.75rem]">
+          <h1 className="mt-3 font-serif text-[2.25rem] font-semibold leading-[1.08] text-ink max-sm:text-[1.75rem]">
             {entity.name}
           </h1>
           <p className="mt-3 max-w-[38rem] font-serif text-[1rem] leading-[1.72] text-[#30343b]">
-            Connected stories, citations, and issue history from the public MindPattern archive.
+            Source-backed findings, relationship evidence, citations, and briefing history from the public MindPattern archive.
           </p>
 
           <div className="mt-5 grid grid-cols-2 gap-3 font-mono text-[0.6875rem] text-ink-faint sm:grid-cols-4">
             <div>
-              <div className="text-ink">Stories</div>
-              <div>{entity.total}</div>
+              <div className="text-ink">Briefing refs</div>
+              <div>{briefingCount}</div>
             </div>
             <div>
-              <div className="text-ink">Issues</div>
-              <div>{entity.issue_dates.length}</div>
+              <div className="text-ink">Findings</div>
+              <div>{findings.length}</div>
             </div>
             <div>
-              <div className="text-ink">Sources</div>
-              <div>{entity.source_trail.length}</div>
+              <div className="text-ink">Edges</div>
+              <div>{relationships.length}</div>
             </div>
             <div>
               <div className="text-ink">Confidence</div>
@@ -100,52 +116,87 @@ export default async function EntityPage({ params }: Params) {
           </div>
         </header>
 
-        <section className="mt-7">
-          <h2 className="font-mono text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-ink">
-            Newsletter story trail
-          </h2>
-          <ol className="mt-3 divide-y divide-line">
-            {entity.story_units.map((story) => (
-              <li key={story.id}>
-                <Link
-                  href={story.target_url}
-                  className="block py-4 transition-colors hover:bg-accent-wash"
-                >
-                  <div className="font-mono text-[0.625rem] font-semibold uppercase tracking-[0.08em] text-primary">
-                    {story.issue_date} · {story.section_id.replaceAll('-', ' ')}
+        {findings.length > 0 && (
+          <section className="mt-7">
+            <h2 className="font-mono text-[0.6875rem] font-semibold uppercase text-ink">
+              Corpus findings
+            </h2>
+            <ol className="mt-3 divide-y divide-line">
+              {findings.slice(0, 12).map((finding) => (
+                <li key={finding.id}>
+                  <Link
+                    href={finding.target_url || `/f/${finding.id}`}
+                    className="block py-4 transition-colors hover:bg-accent-wash"
+                  >
+                    <div className="font-mono text-[0.625rem] font-semibold uppercase text-primary">
+                      {finding.run_date} / {finding.relationship || finding.agent}
+                    </div>
+                    <h3 className="mt-1.5 text-[1rem] font-semibold leading-snug text-ink">
+                      {finding.title}
+                    </h3>
+                    <p className="mt-2 line-clamp-2 font-serif text-[0.9375rem] leading-[1.58] text-[#30343b]">
+                      {finding.summary}
+                    </p>
+                  </Link>
+                </li>
+              ))}
+            </ol>
+          </section>
+        )}
+
+        {relationships.length > 0 && (
+          <section className="mt-8 border-t border-line pt-5">
+            <h2 className="font-mono text-[0.6875rem] font-semibold uppercase text-ink">
+              Graph relationships
+            </h2>
+            <ol className="mt-3 divide-y divide-line">
+              {relationships.slice(0, 12).map((relationship, index) => (
+                <li key={`${relationship.source}-${relationship.relationship}-${index}`} className="py-3">
+                  <div className="font-mono text-[0.625rem] font-semibold uppercase text-primary">
+                    {relationshipLabel(relationship.source, relationship.relationship)}
                   </div>
-                  <h3 className="mt-1.5 text-[1rem] font-semibold leading-snug text-ink">
-                    {story.title}
-                  </h3>
-                  <p className="mt-2 line-clamp-3 font-serif text-[0.9375rem] leading-[1.58] text-[#30343b]">
-                    {story.summary}
-                  </p>
-                </Link>
-                {story.source_refs.length > 0 && (
-                  <div className="-mt-1 mb-4 flex flex-wrap gap-x-3 gap-y-1 font-mono text-[0.625rem] text-ink-faint">
-                    {story.source_refs.slice(0, 4).map((source) => (
+                  <div className="mt-1.5 text-[0.9375rem] leading-snug text-ink">
+                    {relationship.related_entity && relationship.related_entity_slug !== 'unknown' ? (
                       <Link
-                        key={`${story.id}-${source.url}`}
-                        href={`/source/${encodeURIComponent(source.domain)}`}
+                        href={`/e/${encodeURIComponent(relationship.related_entity_slug || '')}`}
                         className="text-primary hover:underline"
                       >
-                        {source.title || source.domain}
+                        {relationship.related_entity}
                       </Link>
-                    ))}
+                    ) : relationship.related_entity ? (
+                      <span>{relationship.related_entity}</span>
+                    ) : (
+                      <span>
+                        {relationship.entity_a} {'->'} {relationship.entity_b}
+                      </span>
+                    )}
                   </div>
-                )}
-              </li>
-            ))}
-          </ol>
-        </section>
+                  {relationship.fact_text && (
+                    <p className="mt-2 font-serif text-[0.9375rem] leading-[1.58] text-[#30343b]">
+                      {relationship.fact_text}
+                    </p>
+                  )}
+                  {relationship.target_url && (
+                    <Link
+                      href={relationship.target_url}
+                      className="mt-2 inline-block font-mono text-[0.625rem] text-primary hover:underline"
+                    >
+                      Source finding
+                    </Link>
+                  )}
+                </li>
+              ))}
+            </ol>
+          </section>
+        )}
 
-        {entity.source_trail.length > 0 && (
+        {sourceTrail.length > 0 && (
           <section className="mt-8 border-t border-line pt-5">
-            <h2 className="font-mono text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-ink">
+            <h2 className="font-mono text-[0.6875rem] font-semibold uppercase text-ink">
               Source trail
             </h2>
             <div className="mt-3 flex flex-wrap gap-2">
-              {entity.source_trail.slice(0, 12).map((source) => (
+              {sourceTrail.slice(0, 12).map((source) => (
                 <Link
                   key={source.url}
                   href={`/source/${encodeURIComponent(source.domain)}`}
@@ -153,6 +204,24 @@ export default async function EntityPage({ params }: Params) {
                 >
                   {source.title || source.domain}
                 </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {graphSources.length > 0 && (
+          <section className="mt-8 border-t border-line pt-5">
+            <h2 className="font-mono text-[0.6875rem] font-semibold uppercase text-ink">
+              Graph sources
+            </h2>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {graphSources.map((source) => (
+                <span
+                  key={source}
+                  className="inline-block rounded-lg border border-line px-2.5 py-1.5 font-mono text-[0.71875rem] text-ink-faint"
+                >
+                  {source.replaceAll('_', ' ')}
+                </span>
               ))}
             </div>
           </section>

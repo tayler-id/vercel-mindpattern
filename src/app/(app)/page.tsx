@@ -1,6 +1,5 @@
-import { getFeed, getFindings, getStats, getStories } from '@/lib/api'
-import type { FeedItem, Finding, PublicStory, Stats } from '@/lib/types'
-import { StoryWireRow } from '@/components/wire/story-wire-row'
+import { getFeed, getFindings, getStats } from '@/lib/api'
+import type { FeedItem, Finding, Stats } from '@/lib/types'
 import { WireRow } from '@/components/wire/wire-row'
 import { WireTabs } from '@/components/wire/wire-tabs'
 import { SubscribeBand } from '@/components/subscribe/subscribe-band'
@@ -28,17 +27,12 @@ export default async function WirePage({
   const today = stats ? (Object.entries(stats.by_date).sort().at(-1)?.[1] ?? 0) : 0
 
   let findings: Array<Finding | FeedItem> = []
-  let stories: PublicStory[] = []
   try {
     if (view === 'topics') {
       findings = await getFindings({ importance: 'high', limit: 80 })
     } else {
-      const storyFeed = await getStories({ limit: 40 })
-      stories = storyFeed.items
-      if (!stories.length) {
-        const feed = await getFeed({ limit: 40 })
-        findings = feed.items
-      }
+      const feed = await getFeed({ limit: 40 })
+      findings = feed.items
     }
   } catch {
     try {
@@ -51,7 +45,7 @@ export default async function WirePage({
     }
   }
 
-  const hasItems = view === 'topics' ? findings.length > 0 : stories.length > 0 || findings.length > 0
+  const hasItems = findings.length > 0
   const grouped: Record<string, Array<Finding | FeedItem>> = {}
   if (view === 'topics') {
     for (const f of findings) {
@@ -97,14 +91,6 @@ export default async function WirePage({
               </ol>
             </section>
           ))
-        ) : stories.length ? (
-          <ol>
-            {stories.map((story, i) => (
-              <li key={story.slug}>
-                <StoryWireRow story={story} rank={i + 1} />
-              </li>
-            ))}
-          </ol>
         ) : (
           <ol>
             {findings.map((f, i) => (

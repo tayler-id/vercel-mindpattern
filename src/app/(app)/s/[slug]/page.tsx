@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { JsonLd } from '@/components/json-ld'
+import { ReportMarkdown } from '@/components/briefing/report-markdown'
 import { getStory } from '@/lib/api'
 import { absoluteUrl, SITE_NAME } from '@/lib/site'
 
@@ -38,6 +39,7 @@ export default async function StoryPage({ params }: Params) {
 
   const story = await getStory(slug)
   if (!story) notFound()
+  const bodyMarkdown = story.body_markdown || story.body_excerpt || story.summary
 
   return (
     <div className="h-full overflow-y-auto">
@@ -111,14 +113,14 @@ export default async function StoryPage({ params }: Params) {
           </div>
         </header>
 
-        {story.body_excerpt && story.body_excerpt !== story.summary && (
+        {bodyMarkdown && (
           <section className="mt-7">
             <h2 className="font-mono text-[0.6875rem] font-semibold uppercase text-ink">
-              Thread excerpt
+              Story
             </h2>
-            <p className="mt-3 font-serif text-[1rem] leading-[1.72] text-[#30343b]">
-              {story.body_excerpt}
-            </p>
+            <div className="mt-3">
+              <ReportMarkdown content={bodyMarkdown} />
+            </div>
           </section>
         )}
 
@@ -155,34 +157,6 @@ export default async function StoryPage({ params }: Params) {
                 </Link>
               ))}
             </div>
-          </section>
-        )}
-
-        {story.related_paths.length > 0 && (
-          <section className="mt-8 border-t border-line pt-5">
-            <h2 className="font-mono text-[0.6875rem] font-semibold uppercase text-ink">
-              Related paths
-            </h2>
-            <ol className="mt-3 divide-y divide-line">
-              {story.related_paths.map((related) => (
-                <li key={related.id}>
-                  <Link
-                    href={related.target_url}
-                    className="block py-4 transition-colors hover:bg-accent-wash"
-                  >
-                    <div className="font-mono text-[0.625rem] font-semibold uppercase text-primary">
-                      {related.relationship.replaceAll('_', ' ')}
-                    </div>
-                    <h3 className="mt-1.5 text-[1rem] font-semibold leading-snug text-ink">
-                      {related.title}
-                    </h3>
-                    <p className="mt-2 line-clamp-2 font-serif text-[0.9375rem] leading-[1.58] text-[#30343b]">
-                      {related.summary || related.reason}
-                    </p>
-                  </Link>
-                </li>
-              ))}
-            </ol>
           </section>
         )}
 

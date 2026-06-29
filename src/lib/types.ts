@@ -63,6 +63,7 @@ export interface PublicStory {
   title: string
   summary: string
   body_excerpt: string
+  body_markdown?: string
   source_refs: SourceRef[]
   entity_refs: EntityRef[]
   finding_ids: number[]
@@ -283,6 +284,35 @@ export interface EntityStoryUnit {
   target_url: string
 }
 
+export interface CorpusEntityRelationship {
+  source: string
+  relationship: string
+  related_entity?: string
+  related_entity_slug?: string
+  related_entity_type?: string
+  entity_a?: string
+  entity_a_type?: string
+  entity_b?: string
+  entity_b_type?: string
+  fact_text?: string
+  fact_type?: string
+  confidence?: number
+  finding_id?: number | null
+  target_url?: string
+  created_at?: string
+}
+
+export interface KgEntity {
+  id: number
+  name: string
+  kind: string
+  description: string
+  mention_count: number
+  importance: number
+  first_seen: string
+  last_seen: string
+}
+
 export interface PublicEntity {
   kind: 'entity'
   slug: string
@@ -290,13 +320,18 @@ export interface PublicEntity {
   user: string
   confidence: 'source-backed' | string
   story_units: EntityStoryUnit[]
+  findings: Finding[]
+  relationships: CorpusEntityRelationship[]
+  kg_entities: KgEntity[]
   source_trail: SourceRef[]
   issue_dates: string[]
+  graph_sources: string[]
   total: number
   limit: number
   provenance: {
     generated_by: string
     source_issue_dates: string[]
+    graph_sources: string[]
     redaction_status: 'passed' | 'redacted' | 'failed' | string
     ai_generated: boolean
   }
