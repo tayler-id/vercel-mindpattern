@@ -2,6 +2,7 @@ import type {
   AudioBriefing,
   FeedResponse,
   Finding,
+  PublicEntity,
   PublicIssue,
   RelatedResponse,
   Report,
@@ -90,6 +91,17 @@ export async function getAudioBriefing(date: string): Promise<AudioBriefing | nu
 export async function getStructuredIssue(date: string): Promise<PublicIssue | null> {
   try {
     return await backendFetch<PublicIssue>(`/api/issues/${date}/structured`, { user: 'ramsay' })
+  } catch {
+    return null
+  }
+}
+
+export async function getEntity(slug: string): Promise<PublicEntity | null> {
+  try {
+    return await backendFetch<PublicEntity>(`/api/entities/${encodeURIComponent(slug)}`, {
+      user: 'ramsay',
+      limit: '40',
+    })
   } catch {
     return null
   }

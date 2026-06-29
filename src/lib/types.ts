@@ -215,3 +215,36 @@ export interface PublicIssue {
     human_approved: boolean
   }
 }
+
+export interface EntityStoryUnit {
+  id: string
+  slug: string
+  issue_date: string
+  issue_title: string
+  section_id: string
+  title: string
+  summary: string
+  source_refs: SourceRef[]
+  arc_ids: string[]
+  finding_ids: number[]
+  target_url: string
+}
+
+export interface PublicEntity {
+  kind: 'entity'
+  slug: string
+  name: string
+  user: string
+  confidence: 'source-backed' | string
+  story_units: EntityStoryUnit[]
+  source_trail: SourceRef[]
+  issue_dates: string[]
+  total: number
+  limit: number
+  provenance: {
+    generated_by: string
+    source_issue_dates: string[]
+    redaction_status: 'passed' | 'redacted' | 'failed' | string
+    ai_generated: boolean
+  }
+}

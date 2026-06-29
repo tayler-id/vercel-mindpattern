@@ -54,7 +54,13 @@ export function IssueThreadSummary({ issue }: { issue: PublicIssue }) {
                           </Link>
                         ))}
                         {entities.slice(0, 4).map((entity) => (
-                          <span key={`${story.id}-${entity?.id}`}>{entity?.name}</span>
+                          <Link
+                            key={`${story.id}-${entity?.id}`}
+                            href={`/e/${encodeURIComponent(entity?.slug ?? '')}`}
+                            className="text-primary hover:underline"
+                          >
+                            {entity?.name}
+                          </Link>
                         ))}
                       </div>
                     </li>
