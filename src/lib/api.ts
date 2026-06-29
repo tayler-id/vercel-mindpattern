@@ -4,11 +4,13 @@ import type {
   Finding,
   PublicEntity,
   PublicIssue,
+  PublicStory,
   RelatedResponse,
   Report,
   ReportListItem,
   Source,
   Stats,
+  StoriesResponse,
 } from './types'
 
 const BACKEND_URL = process.env.BACKEND_API_URL || 'https://mindpattern.fly.dev'
@@ -66,6 +68,23 @@ export function getFeed(opts: {
   if (opts.date) params.date = opts.date
   if (opts.since) params.since = opts.since
   return backendFetch<FeedResponse>('/api/feed', params)
+}
+
+export function getStories(opts: { limit?: number; offset?: number } = {}) {
+  const params: Record<string, string> = { user: 'ramsay' }
+  if (opts.limit != null) params.limit = String(opts.limit)
+  if (opts.offset != null) params.offset = String(opts.offset)
+  return backendFetch<StoriesResponse>('/api/stories', params)
+}
+
+export async function getStory(slug: string): Promise<PublicStory | null> {
+  try {
+    return await backendFetch<PublicStory>(`/api/stories/${encodeURIComponent(slug)}`, {
+      user: 'ramsay',
+    })
+  } catch {
+    return null
+  }
 }
 
 export function getReports() {

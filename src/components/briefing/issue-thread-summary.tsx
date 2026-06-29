@@ -32,12 +32,24 @@ export function IssueThreadSummary({ issue }: { issue: PublicIssue }) {
                   const entities = story.entity_ids
                     .map((entityId) => entityById.get(entityId))
                     .filter(Boolean)
+                  const storyHref = story.source_refs.length
+                    ? `/s/${encodeURIComponent(story.id)}`
+                    : null
 
                   return (
                     <li key={story.id} className="py-3">
-                      <div className="text-[0.9375rem] font-semibold leading-snug text-ink">
-                        {story.title}
-                      </div>
+                      {storyHref ? (
+                        <Link
+                          href={storyHref}
+                          className="text-[0.9375rem] font-semibold leading-snug text-ink hover:text-primary"
+                        >
+                          {story.title}
+                        </Link>
+                      ) : (
+                        <div className="text-[0.9375rem] font-semibold leading-snug text-ink">
+                          {story.title}
+                        </div>
+                      )}
                       {story.summary && (
                         <p className="mt-1 line-clamp-2 font-serif text-[0.9375rem] leading-[1.55] text-[#30343b]">
                           {story.summary}

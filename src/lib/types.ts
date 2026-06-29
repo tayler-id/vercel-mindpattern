@@ -40,6 +40,59 @@ export interface FeedResponse {
   offset: number
 }
 
+export interface RelatedStoryPath {
+  kind: 'story'
+  id: string
+  slug: string
+  title: string
+  summary: string
+  target_url: string
+  relationship: string
+  reason: string
+}
+
+export interface PublicStory {
+  kind: 'story'
+  id: string
+  slug: string
+  story_unit_id: string
+  issue_date: string
+  issue_title: string
+  issue_url: string
+  section_id: string
+  title: string
+  summary: string
+  body_excerpt: string
+  source_refs: SourceRef[]
+  entity_refs: EntityRef[]
+  finding_ids: number[]
+  arc_ids: string[]
+  related_paths: RelatedStoryPath[]
+  target_url: string
+  confidence: 'source-backed' | string
+  labels: string[]
+  json_ld_ready: boolean
+  claim_evidence: unknown[]
+  provenance: {
+    generated_by: string
+    generated_at: string | null
+    input_artifacts: string[]
+    source_issue_dates: string[]
+    source_story_unit_id: string
+    redaction_status: 'passed' | 'redacted' | 'failed' | string
+    ai_generated: boolean
+    human_approved: boolean
+  }
+}
+
+export interface StoriesResponse {
+  kind: 'stories'
+  items: PublicStory[]
+  total: number
+  limit: number
+  offset: number
+}
+
 export interface Source {
   id?: number
   url_domain: string
