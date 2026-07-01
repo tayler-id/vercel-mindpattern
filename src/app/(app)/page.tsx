@@ -35,10 +35,8 @@ export default async function WirePage({
     } else {
       const storyResponse = await getStories({ limit: 20 })
       stories = storyResponse.items
-      if (stories.length === 0) {
-        const feed = await getFeed({ limit: 40 })
-        findings = feed.items
-      }
+      const feed = await getFeed({ limit: 40 })
+      findings = feed.items
     }
   } catch {
     try {
@@ -81,11 +79,16 @@ export default async function WirePage({
       </header>
 
       <div className="mx-auto max-w-[1080px] px-4 pb-[90px] pt-1.5 max-sm:px-1.5">
-        {stories.length > 0 && view !== 'topics' ? (
+        {view !== 'topics' ? (
           <ol>
             {stories.map((story, i) => (
               <li key={story.slug}>
                 <StoryWireRow story={story} rank={i + 1} />
+              </li>
+            ))}
+            {findings.map((f, i) => (
+              <li key={f.id}>
+                <WireRow finding={f} rank={stories.length + i + 1} />
               </li>
             ))}
           </ol>
