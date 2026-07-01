@@ -22,11 +22,33 @@ export function RabbitHole({
     [initial.id]: initialRelated,
   })
   const [loadingRelated, setLoadingRelated] = useState<Record<number, boolean>>({})
+  const [relatedError, setRelatedError] = useState<Record<number, boolean>>({})
   const [dir, setDir] = useState(1)
   const rootRef = useRef<HTMLDivElement>(null)
   const crumbsRef = useRef<HTMLDivElement>(null)
+  const mountedRef = useRef(true)
+  const relatedByIdRef = useRef(relatedById)
+  const loadingRelatedRef = useRef(loadingRelated)
+  const controllersRef = useRef<Set<AbortController>>(new Set())
   const reduce = useReducedMotion()
   const current = trail[trail.length - 1]
+
+  useEffect(() => {
+    relatedByIdRef.current = relatedById
+  }, [relatedById])
+
+  useEffect(() => {
+    loadingRelatedRef.current = loadingRelated
+  }, [loadingRelated])
+
+  useEffect(() => {
+    const controllers = controllersRef.current
+    return () => {
+      mountedRef.current = false
+      controllers.forEach((controller) => controller.abort())
+      controllers.clear()
+    }
+  }, [])
 
   useEffect(() => {
     const toTop = () => {
@@ -41,38 +63,44 @@ export function RabbitHole({
   }, [current.id])
 
   useEffect(() => {
-    if (relatedById[current.id] || loadingRelated[current.id]) return
+    const findingId = current.id
+    if (relatedByIdRef.current[findingId] || loadingRelatedRef.current[findingId]) return
 
-    let cancelled = false
-    setLoadingRelated((state) => ({ ...state, [current.id]: true }))
+    const controller = new AbortController()
+    controllersRef.current.add(controller)
+    const timeout = window.setTimeout(() => controller.abort(), 8000)
+
+    setRelatedError((state) => ({ ...state, [findingId]: false }))
+    setLoadingRelated((state) => ({ ...state, [findingId]: true }))
 
     async function loadRelated() {
       try {
-        const res = await fetch(`/api/proxy/related/${current.id}?user=ramsay&mode=blended&limit=8`, {
+        const res = await fetch(`/api/proxy/related/${findingId}?user=ramsay&mode=blended&limit=8`, {
           cache: 'no-store',
+          signal: controller.signal,
         })
         if (!res.ok) throw new Error(`Related ${res.status}`)
         const body = (await res.json()) as RelatedResponse
-        if (!cancelled) {
-          setRelatedById((state) => ({ ...state, [current.id]: body.items ?? [] }))
+        if (mountedRef.current) {
+          const items = Array.isArray(body.items) ? body.items : []
+          setRelatedById((state) => ({ ...state, [findingId]: items }))
         }
       } catch {
-        if (!cancelled) {
-          setRelatedById((state) => ({ ...state, [current.id]: [] }))
+        if (mountedRef.current) {
+          setRelatedError((state) => ({ ...state, [findingId]: true }))
+          setRelatedById((state) => ({ ...state, [findingId]: [] }))
         }
       } finally {
-        if (!cancelled) {
-          setLoadingRelated((state) => ({ ...state, [current.id]: false }))
+        window.clearTimeout(timeout)
+        controllersRef.current.delete(controller)
+        if (mountedRef.current) {
+          setLoadingRelated((state) => ({ ...state, [findingId]: false }))
         }
       }
     }
 
     void loadRelated()
-
-    return () => {
-      cancelled = true
-    }
-  }, [current.id, loadingRelated, relatedById])
+  }, [current.id])
 
   const open = (f: Finding) => {
     if (f.id === current.id) return
@@ -135,6 +163,7 @@ export function RabbitHole({
               finding={current}
               related={relatedById[current.id] ?? []}
               relatedLoading={!!loadingRelated[current.id]}
+              relatedError={!!relatedError[current.id]}
               onOpen={open}
             />
           </motion.div>
@@ -148,11 +177,13 @@ function ReadingColumn({
   finding,
   related,
   relatedLoading,
+  relatedError,
   onOpen,
 }: {
   finding: Finding
   related: Finding[]
   relatedLoading: boolean
+  relatedError: boolean
   onOpen: (f: Finding) => void
 }) {
   const isVideo = !!youtubeId(finding.source_url)
@@ -216,7 +247,12 @@ function ReadingColumn({
           {relatedLoading && (
             <p className="font-mono text-[0.71875rem] text-ink-faint">Loading related signals...</p>
           )}
-          {!relatedLoading && related.length === 0 && (
+          {!relatedLoading && relatedError && (
+            <p className="font-mono text-[0.71875rem] text-ink-faint">
+              Related signals are unavailable right now.
+            </p>
+          )}
+          {!relatedLoading && !relatedError && related.length === 0 && (
             <p className="font-mono text-[0.71875rem] text-ink-faint">No related signals yet.</p>
           )}
           {related.map((r) => (

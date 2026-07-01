@@ -1,10 +1,9 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { getAudioBriefing, getReport, getReports, getStructuredIssue } from '@/lib/api'
-import type { AudioBriefing, PublicIssue, Report, ReportListItem } from '@/lib/types'
+import { getAudioBriefing, getReport, getReports } from '@/lib/api'
+import type { AudioBriefing, Report, ReportListItem } from '@/lib/types'
 import { JsonLd } from '@/components/json-ld'
 import { AudioBriefingPlayer } from '@/components/briefing/audio-briefing-player'
-import { IssueThreadSummary } from '@/components/briefing/issue-thread-summary'
 import { ReportMarkdown } from '@/components/briefing/report-markdown'
 import { absoluteUrl, shortReportDescription, SITE_NAME } from '@/lib/site'
 import { shortDate } from '@/lib/format'
@@ -41,13 +40,11 @@ export default async function BriefingPage({ params }: Params) {
   let report: Report | null = null
   let list: ReportListItem[] = []
   let audio: AudioBriefing | null = null
-  let issue: PublicIssue | null = null
   try {
-    ;[report, list, audio, issue] = await Promise.all([
+    ;[report, list, audio] = await Promise.all([
       getReport(date),
       getReports(),
       getAudioBriefing(date),
-      getStructuredIssue(date),
     ])
   } catch {
     /* handled below */
@@ -110,8 +107,6 @@ export default async function BriefingPage({ params }: Params) {
         </header>
 
         {audio && <AudioBriefingPlayer audio={audio} />}
-
-        {issue && <IssueThreadSummary issue={issue} />}
 
         <ReportMarkdown content={report.content} />
 
