@@ -289,6 +289,10 @@ const ENTITY_DISPLAY_BLOCKLIST = new Set([
   'models',
   'never',
   'nobody',
+  'that',
+  'they',
+  'what',
+  'worth',
 ])
 
 function rankedIssueEntities(issue: PublicIssue) {
