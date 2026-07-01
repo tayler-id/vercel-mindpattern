@@ -1,5 +1,6 @@
-import { getFeed, getFindings, getStats } from '@/lib/api'
-import type { FeedItem, Finding, Stats } from '@/lib/types'
+import { getFeed, getFindings, getStats, getStories } from '@/lib/api'
+import type { FeedItem, Finding, PublicStory, Stats } from '@/lib/types'
+import { StoryWireRow } from '@/components/wire/story-wire-row'
 import { WireRow } from '@/components/wire/wire-row'
 import { WireTabs } from '@/components/wire/wire-tabs'
 import { SubscribeBand } from '@/components/subscribe/subscribe-band'
@@ -27,12 +28,17 @@ export default async function WirePage({
   const today = stats ? (Object.entries(stats.by_date).sort().at(-1)?.[1] ?? 0) : 0
 
   let findings: Array<Finding | FeedItem> = []
+  let stories: PublicStory[] = []
   try {
     if (view === 'topics') {
       findings = await getFindings({ importance: 'high', limit: 80 })
     } else {
-      const feed = await getFeed({ limit: 40 })
-      findings = feed.items
+      const storyResponse = await getStories({ limit: 20 })
+      stories = storyResponse.items
+      if (stories.length === 0) {
+        const feed = await getFeed({ limit: 40 })
+        findings = feed.items
+      }
     }
   } catch {
     try {
@@ -45,7 +51,7 @@ export default async function WirePage({
     }
   }
 
-  const hasItems = findings.length > 0
+  const hasItems = stories.length > 0 || findings.length > 0
   const grouped: Record<string, Array<Finding | FeedItem>> = {}
   if (view === 'topics') {
     for (const f of findings) {
@@ -75,7 +81,15 @@ export default async function WirePage({
       </header>
 
       <div className="mx-auto max-w-[1080px] px-4 pb-[90px] pt-1.5 max-sm:px-1.5">
-        {view === 'topics' ? (
+        {stories.length > 0 && view !== 'topics' ? (
+          <ol>
+            {stories.map((story, i) => (
+              <li key={story.slug}>
+                <StoryWireRow story={story} rank={i + 1} />
+              </li>
+            ))}
+          </ol>
+        ) : view === 'topics' ? (
           Object.entries(grouped).map(([section, items]) => (
             <section key={section} className="mb-5">
               <h2 className="px-3 pb-1 pt-5 font-mono text-[0.6875rem] font-semibold uppercase text-primary">

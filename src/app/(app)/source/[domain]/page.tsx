@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { JsonLd } from '@/components/json-ld'
 import { SourceFavicon } from '@/components/wire/source-favicon'
-import { getFindingsForSource, getSourceByDomain } from '@/lib/api'
+import { getSourceByDomain } from '@/lib/api'
 import { sectionLabel, sourceLabel } from '@/lib/sections'
 import { absoluteUrl, SITE_NAME } from '@/lib/site'
 
@@ -34,10 +34,9 @@ export default async function SourcePage({ params }: Params) {
   const domain = cleanDomain(raw)
   if (!domain) notFound()
 
-  const [source, findings] = await Promise.all([
-    getSourceByDomain(domain).catch(() => null),
-    getFindingsForSource(domain, { limit: 40 }).catch(() => []),
-  ])
+  const source = await getSourceByDomain(domain).catch(() => null)
+  const findings = source?.findings ?? []
+  const entities = source?.entities ?? []
 
   if (!source && findings.length === 0) notFound()
 
@@ -83,14 +82,13 @@ export default async function SourcePage({ params }: Params) {
             {displayName}
           </h1>
           <p className="mt-3 max-w-[36rem] font-serif text-[1rem] leading-[1.72] text-[#30343b]">
-            Public MindPattern findings that cite this source, ordered from the current research
-            archive.
+            Public MindPattern findings, entities, and graph evidence that cite this source.
           </p>
 
           <div className="mt-5 grid grid-cols-2 gap-3 font-mono text-[0.6875rem] text-ink-faint sm:grid-cols-4">
             <div>
               <div className="text-ink">Findings</div>
-              <div>{findings.length}</div>
+              <div>{source?.counts?.findings ?? findings.length}</div>
             </div>
             {source && (
               <>
@@ -111,6 +109,25 @@ export default async function SourcePage({ params }: Params) {
           </div>
         </header>
 
+        {entities.length > 0 && (
+          <section className="mt-7">
+            <h2 className="font-mono text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-ink">
+              Connected entities
+            </h2>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {entities.slice(0, 16).map((entity) => (
+                <Link
+                  key={entity.slug}
+                  href={`/e/${encodeURIComponent(entity.slug)}`}
+                  className="inline-block rounded-lg border border-line px-2.5 py-1.5 font-mono text-[0.71875rem] text-primary hover:border-primary hover:bg-accent-wash"
+                >
+                  {entity.name}
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
         <section className="mt-7">
           <h2 className="font-mono text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-ink">
             Related findings
@@ -123,7 +140,7 @@ export default async function SourcePage({ params }: Params) {
                   className="block py-4 transition-colors hover:bg-accent-wash"
                 >
                   <div className="font-mono text-[0.625rem] font-semibold uppercase tracking-[0.08em] text-primary">
-                    {sectionLabel(finding.agent)}
+                    {finding.run_date} / {sectionLabel(finding.agent)}
                   </div>
                   <h3 className="mt-1.5 text-[1rem] font-semibold leading-snug text-ink">
                     {finding.title}

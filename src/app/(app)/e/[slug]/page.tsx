@@ -53,7 +53,10 @@ export default async function EntityPage({ params }: Params) {
   const relationships = entity.relationships ?? []
   const sourceTrail = entity.source_trail ?? []
   const graphSources = entity.graph_sources ?? []
-  const briefingCount = entity.total ?? entity.issue_dates?.length ?? 0
+  const briefingCount = entity.counts?.story_units ?? entity.issue_dates?.length ?? 0
+  const findingCount = entity.counts?.findings ?? findings.length
+  const relationshipCount = entity.counts?.relationships ?? relationships.length
+  const sourceCount = entity.counts?.sources ?? sourceTrail.length
 
   return (
     <div className="h-full overflow-y-auto">
@@ -103,17 +106,22 @@ export default async function EntityPage({ params }: Params) {
             </div>
             <div>
               <div className="text-ink">Findings</div>
-              <div>{findings.length}</div>
+              <div>{findingCount}</div>
             </div>
             <div>
               <div className="text-ink">Edges</div>
-              <div>{relationships.length}</div>
+              <div>{relationshipCount}</div>
             </div>
             <div>
-              <div className="text-ink">Confidence</div>
-              <div>{entity.confidence}</div>
+              <div className="text-ink">Sources</div>
+              <div>{sourceCount}</div>
             </div>
           </div>
+          {entity.pagination?.has_more && (
+            <p className="mt-3 font-mono text-[0.6875rem] text-ink-faint">
+              Showing the first {entity.pagination.limit} findings. More graph evidence exists in the corpus.
+            </p>
+          )}
         </header>
 
         {findings.length > 0 && (

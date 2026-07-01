@@ -5,6 +5,7 @@ import type {
   PublicEntity,
   PublicIssue,
   PublicStory,
+  NarrativeArc,
   RelatedResponse,
   Report,
   ReportListItem,
@@ -133,36 +134,41 @@ export function getSources(opts: { limit?: number } = {}) {
 }
 
 export async function getSourceByDomain(domain: string): Promise<Source | null> {
-  const normalized = domain.toLowerCase().replace(/^www\./, '')
-  const sources = await getSources({ limit: 500 })
-  return (
-    sources.find((source) => source.url_domain.toLowerCase().replace(/^www\./, '') === normalized) ??
-    null
-  )
+  try {
+    const source = await backendFetch<Source>(`/api/sources/${encodeURIComponent(domain)}`, {
+      user: 'ramsay',
+      limit: '40',
+    })
+    return {
+      ...source,
+      url_domain: source.url_domain || source.domain || domain,
+      hit_count: source.hit_count ?? source.counts?.findings ?? 0,
+      high_value_count: source.high_value_count ?? 0,
+      last_seen: source.last_seen ?? '',
+      display_name: source.display_name || source.domain || domain,
+    }
+  } catch {
+    const normalized = domain.toLowerCase().replace(/^www\./, '')
+    const sources = await getSources({ limit: 500 })
+    return (
+      sources.find((source) => source.url_domain.toLowerCase().replace(/^www\./, '') === normalized) ??
+      null
+    )
+  }
 }
 
 export async function getFindingsForSource(domain: string, opts: { limit?: number } = {}) {
-  const normalized = domain.toLowerCase().replace(/^www\./, '')
-  const findings = await getFindings({ limit: 2000 })
-  return findings
-    .filter((finding) => {
-      if (!finding.source_url) return false
-      try {
-        return new URL(finding.source_url).hostname.replace(/^www\./, '').toLowerCase() === normalized
-      } catch {
-        return false
-      }
-    })
-    .slice(0, opts.limit ?? 40)
+  const source = await getSourceByDomain(domain)
+  if (source?.findings) return source.findings.slice(0, opts.limit ?? 40)
+  return []
 }
 
 export async function getFinding(id: number): Promise<Finding | null> {
   try {
-    return await backendFetch<Finding>(`/api/finding/${id}`, { user: 'ramsay' })
+    return await backendFetch<Finding>(`/api/findings/${id}`, { user: 'ramsay' })
   } catch {
     try {
-      const findings = await getFindings({ limit: 300 })
-      return findings.find((f) => f.id === id) ?? null
+      return await backendFetch<Finding>(`/api/finding/${id}`, { user: 'ramsay' })
     } catch {
       return null
     }
@@ -173,7 +179,7 @@ export async function getRelated(id: number, opts: { limit?: number } = {}): Pro
   try {
     return await backendFetch<RelatedResponse>(`/api/related/${id}`, {
       user: 'ramsay',
-      mode: 'semantic',
+      mode: 'blended',
       limit: String(opts.limit ?? 8),
     })
   } catch {
@@ -184,5 +190,17 @@ export async function getRelated(id: number, opts: { limit?: number } = {}): Pro
       items: [],
       total: 0,
     }
+  }
+}
+
+export async function getNarrativeArc(id: string, date?: string): Promise<NarrativeArc | null> {
+  if (!date) return null
+  try {
+    return await backendFetch<NarrativeArc>(`/api/narrative-arcs/${encodeURIComponent(id)}`, {
+      user: 'ramsay',
+      date,
+    })
+  } catch {
+    return null
   }
 }

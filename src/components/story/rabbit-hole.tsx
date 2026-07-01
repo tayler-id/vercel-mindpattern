@@ -48,7 +48,7 @@ export function RabbitHole({
 
     async function loadRelated() {
       try {
-        const res = await fetch(`/api/proxy/related/${current.id}?user=ramsay&mode=semantic&limit=8`, {
+        const res = await fetch(`/api/proxy/related/${current.id}?user=ramsay&mode=blended&limit=8`, {
           cache: 'no-store',
         })
         if (!res.ok) throw new Error(`Related ${res.status}`)
@@ -226,7 +226,7 @@ function ReadingColumn({
               className="group rounded-xl border border-line bg-surface px-4 py-3.5 text-left transition-colors hover:border-primary hover:bg-accent-wash active:scale-[0.99]"
             >
               <div className="font-mono text-[0.625rem] font-semibold uppercase tracking-[0.06em] text-primary">
-                {sectionLabel(r.agent)}
+                {r.connector_labels?.length ? r.connector_labels.join(' / ') : sectionLabel(r.agent)}
               </div>
               <div className="mt-1.5 text-[0.9375rem] font-semibold leading-snug tracking-[-0.01em] text-ink">
                 {r.title}

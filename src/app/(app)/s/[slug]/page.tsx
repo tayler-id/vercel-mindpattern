@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 
   return {
     title: story.title,
-    description: story.summary.slice(0, 160),
+    description: (story.summary || story.dek || story.take || '').slice(0, 160),
     alternates: { canonical: `/s/${story.slug}` },
   }
 }
@@ -40,6 +40,8 @@ export default async function StoryPage({ params }: Params) {
   const story = await getStory(slug)
   if (!story) notFound()
   const bodyMarkdown = story.body_markdown || story.body_excerpt || story.summary
+  const issueHref = story.issue_url || `/briefings/${story.issue_date}`
+  const summary = story.summary || story.dek || story.take || ''
 
   return (
     <div className="h-full overflow-y-auto">
@@ -49,7 +51,7 @@ export default async function StoryPage({ params }: Params) {
           '@type': 'Article',
           '@id': absoluteUrl(`/s/${story.slug}#story`),
           headline: story.title,
-          description: story.summary,
+          description: summary,
           url: absoluteUrl(`/s/${story.slug}`),
           datePublished: story.issue_date,
           dateModified: story.issue_date,
@@ -87,14 +89,26 @@ export default async function StoryPage({ params }: Params) {
           <h1 className="mt-3 font-serif text-[2.35rem] font-semibold leading-[1.08] text-ink max-sm:text-[1.8rem]">
             {story.title}
           </h1>
-          <p className="mt-4 font-serif text-[1.0625rem] leading-[1.72] text-[#30343b]">
-            {story.summary}
-          </p>
+          {(story.dek || summary) && (
+            <p className="mt-4 font-serif text-[1.0625rem] leading-[1.72] text-[#30343b]">
+              {story.dek || summary}
+            </p>
+          )}
+          {story.take && (
+            <p className="mt-3 border-l-2 border-primary pl-4 font-serif text-[1rem] leading-[1.68] text-ink">
+              {story.take}
+            </p>
+          )}
+          {story.why_now && (
+            <p className="mt-3 font-mono text-[0.75rem] leading-relaxed text-ink-faint">
+              Why now: {story.why_now}
+            </p>
+          )}
 
           <div className="mt-5 grid grid-cols-2 gap-3 font-mono text-[0.6875rem] text-ink-faint sm:grid-cols-4">
             <div>
               <div className="text-ink">Issue</div>
-              <Link href={story.issue_url} className="text-primary hover:underline">
+              <Link href={issueHref} className="text-primary hover:underline">
                 {story.issue_date}
               </Link>
             </div>
@@ -121,6 +135,62 @@ export default async function StoryPage({ params }: Params) {
             <div className="mt-3">
               <ReportMarkdown content={bodyMarkdown} />
             </div>
+          </section>
+        )}
+
+        {story.graph_edges && story.graph_edges.length > 0 && (
+          <section className="mt-8 border-t border-line pt-5">
+            <h2 className="font-mono text-[0.6875rem] font-semibold uppercase text-ink">
+              Graph trail
+            </h2>
+            <ol className="mt-3 divide-y divide-line">
+              {story.graph_edges.slice(0, 10).map((edge, index) => (
+                <li key={`${edge.kind}-${edge.id}-${index}`} className="py-3">
+                  <div className="font-mono text-[0.625rem] font-semibold uppercase text-primary">
+                    {edge.relationship.replaceAll('_', ' ')}
+                  </div>
+                  <div className="mt-1.5 text-[0.9375rem] leading-snug text-ink">
+                    {edge.target_url ? (
+                      <Link href={edge.target_url} className="text-primary hover:underline">
+                        {edge.label || edge.id}
+                      </Link>
+                    ) : (
+                      <span>{edge.label || edge.id}</span>
+                    )}
+                  </div>
+                  {edge.evidence && (
+                    <p className="mt-1 font-mono text-[0.6875rem] text-ink-faint">{edge.evidence}</p>
+                  )}
+                </li>
+              ))}
+            </ol>
+          </section>
+        )}
+
+        {story.related_paths.length > 0 && (
+          <section className="mt-8 border-t border-line pt-5">
+            <h2 className="font-mono text-[0.6875rem] font-semibold uppercase text-ink">
+              Related paths
+            </h2>
+            <ol className="mt-3 divide-y divide-line">
+              {story.related_paths.slice(0, 8).map((related, index) => (
+                <li key={`${related.id}-${index}`} className="py-3">
+                  <div className="font-mono text-[0.625rem] font-semibold uppercase text-primary">
+                    {(related.connector_labels || [related.relationship || 'connected']).join(' / ')}
+                  </div>
+                  {related.target_url ? (
+                    <Link href={related.target_url} className="mt-1.5 block text-[0.9375rem] font-semibold text-ink hover:text-primary">
+                      {related.title}
+                    </Link>
+                  ) : (
+                    <div className="mt-1.5 text-[0.9375rem] font-semibold text-ink">{related.title}</div>
+                  )}
+                  <p className="mt-1 font-serif text-[0.9375rem] leading-[1.58] text-[#30343b]">
+                    {related.reason || related.summary}
+                  </p>
+                </li>
+              ))}
+            </ol>
           </section>
         )}
 
@@ -160,6 +230,34 @@ export default async function StoryPage({ params }: Params) {
           </section>
         )}
 
+        {story.claim_evidence.length > 0 && (
+          <section className="mt-8 border-t border-line pt-5">
+            <h2 className="font-mono text-[0.6875rem] font-semibold uppercase text-ink">
+              Claim evidence
+            </h2>
+            <ol className="mt-3 divide-y divide-line">
+              {story.claim_evidence.slice(0, 8).map((item, index) => {
+                const evidence = item as { claim?: string; source_url?: string; finding_id?: number | null }
+                return (
+                  <li key={`${evidence.finding_id ?? index}-${evidence.claim ?? ''}`} className="py-3">
+                    <div className="font-serif text-[0.9375rem] leading-[1.58] text-[#30343b]">
+                      {evidence.claim}
+                    </div>
+                    <div className="mt-1 flex flex-wrap gap-3 font-mono text-[0.625rem] text-primary">
+                      {evidence.finding_id != null && <Link href={`/f/${evidence.finding_id}`}>Finding {evidence.finding_id}</Link>}
+                      {evidence.source_url && (
+                        <a href={evidence.source_url} target="_blank" rel="noopener noreferrer">
+                          Source
+                        </a>
+                      )}
+                    </div>
+                  </li>
+                )
+              })}
+            </ol>
+          </section>
+        )}
+
         <section className="mt-8 border-t border-line pt-5">
           <h2 className="font-mono text-[0.6875rem] font-semibold uppercase text-ink">
             Provenance
@@ -168,8 +266,8 @@ export default async function StoryPage({ params }: Params) {
             <div>
               <dt className="text-ink">Canonical issue</dt>
               <dd>
-                <Link href={story.issue_url} className="text-primary hover:underline">
-                  {story.issue_title}
+                <Link href={issueHref} className="text-primary hover:underline">
+                  {story.issue_title || story.issue_date}
                 </Link>
               </dd>
             </div>
@@ -179,11 +277,11 @@ export default async function StoryPage({ params }: Params) {
             </div>
             <div>
               <dt className="text-ink">Story unit</dt>
-              <dd>{story.provenance.source_story_unit_id}</dd>
+              <dd>{story.provenance.source_story_unit_id || story.provenance.source_finding_ids?.join(', ') || 'site artifact'}</dd>
             </div>
             <div>
               <dt className="text-ink">Labels</dt>
-              <dd>{story.labels.join(', ')}</dd>
+              <dd>{story.labels.length ? story.labels.join(', ') : 'source-backed'}</dd>
             </div>
           </dl>
         </section>

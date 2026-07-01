@@ -14,13 +14,41 @@ export interface Finding {
   relationship?: string
   reason?: string
   target_url?: string
+  source_refs?: SourceRef[]
+  entities?: EntityRef[]
+  related_paths?: RelatedFindingPath[]
+  connector_labels?: string[]
+  connectors?: RelatedConnector[]
+}
+
+export interface RelatedConnector {
+  kind: string
+  label: string
+  detail?: string
+  weight?: number
+  evidence: Array<{
+    kind: string
+    id?: string
+    url?: string
+    domain?: string
+    target_url?: string
+    similarity?: number
+    term?: string
+    signal?: string
+  }>
+}
+
+export interface RelatedFindingPath extends Finding {
+  mode?: string
+  connector_labels?: string[]
+  connectors?: RelatedConnector[]
 }
 
 export interface RelatedResponse {
   kind: 'related'
   finding_id: number
   mode: 'semantic' | string
-  items: Finding[]
+  items: RelatedFindingPath[]
   total: number
 }
 
@@ -41,33 +69,52 @@ export interface FeedResponse {
 }
 
 export interface RelatedStoryPath {
-  kind: 'story'
-  id: string
-  slug: string
+  kind: string
+  id: string | number
+  slug?: string
   title: string
-  summary: string
-  target_url: string
-  relationship: string
+  summary?: string
+  target_url?: string
+  relationship?: string
   reason: string
+  connector_labels?: string[]
+  connectors?: RelatedConnector[]
 }
 
 export interface PublicStory {
   kind: 'story'
   id: string
   slug: string
-  story_unit_id: string
+  story_unit_id?: string
   issue_date: string
-  issue_title: string
-  issue_url: string
-  section_id: string
+  date?: string
+  issue_title?: string
+  issue_url?: string
+  section_id?: string
   title: string
   summary: string
+  dek?: string
+  take?: string
+  why_now?: string
   body_excerpt: string
   body_markdown?: string
   source_refs: SourceRef[]
+  source_trail?: SourceRef[]
   entity_refs: EntityRef[]
   finding_ids: number[]
+  primary_finding_ids?: number[]
+  supporting_finding_ids?: number[]
   arc_ids: string[]
+  graph_edges?: GraphEdge[]
+  graph_connectors?: {
+    issue_date?: string
+    source_urls?: string[]
+    source_domains?: string[]
+    entity_ids?: string[]
+    topic_terms?: string[]
+    finding_ids?: number[]
+    arc_ids?: string[]
+  }
   related_paths: RelatedStoryPath[]
   target_url: string
   confidence: 'source-backed' | string
@@ -79,7 +126,8 @@ export interface PublicStory {
     generated_at: string | null
     input_artifacts: string[]
     source_issue_dates: string[]
-    source_story_unit_id: string
+    source_story_unit_id?: string
+    source_finding_ids?: number[]
     redaction_status: 'passed' | 'redacted' | 'failed' | string
     ai_generated: boolean
     human_approved: boolean
@@ -97,11 +145,29 @@ export interface StoriesResponse {
 export interface Source {
   id?: number
   url_domain: string
+  kind?: 'source'
+  domain?: string
+  status?: string
   display_name: string
   hit_count: number
   high_value_count: number
   last_seen: string
   created_at?: string
+  counts?: {
+    findings: number
+    entities: number
+  }
+  findings?: Finding[]
+  entities?: EntityRef[]
+  pagination?: {
+    limit: number
+    offset: number
+    has_more: boolean
+  }
+  provenance?: {
+    generated_by: string
+    redaction_status: string
+  }
 }
 
 export interface Pattern {
@@ -300,6 +366,7 @@ export interface CorpusEntityRelationship {
   finding_id?: number | null
   target_url?: string
   created_at?: string
+  evidence_edges?: GraphEdge[]
 }
 
 export interface KgEntity {
@@ -318,7 +385,19 @@ export interface PublicEntity {
   slug: string
   name: string
   user: string
+  status?: string
   confidence: 'source-backed' | string
+  counts?: {
+    story_units?: number
+    findings: number
+    relationships: number
+    sources: number
+  }
+  pagination?: {
+    limit: number
+    offset: number
+    has_more: boolean
+  }
   story_units: EntityStoryUnit[]
   findings: Finding[]
   relationships: CorpusEntityRelationship[]
@@ -335,4 +414,36 @@ export interface PublicEntity {
     redaction_status: 'passed' | 'redacted' | 'failed' | string
     ai_generated: boolean
   }
+}
+
+export interface GraphEdge {
+  kind: string
+  relationship: string
+  id: string
+  label?: string
+  target_url?: string
+  evidence?: string
+}
+
+export interface NarrativeArc {
+  id: string
+  title: string
+  summary: string
+  status: string
+  first_seen: string
+  last_seen: string
+  evidence_count: number
+  date_count: number
+  source_domain_count: number
+  agent_count: number
+  scores: Record<string, number>
+  evidence: Array<{
+    finding_id: number | null
+    run_date: string
+    agent: string
+    title: string
+    summary: string
+    source_url: string
+    source_name: string
+  }>
 }
