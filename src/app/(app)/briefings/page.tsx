@@ -6,6 +6,7 @@ import type { AudioBriefing, ReportListItem } from '@/lib/types'
 import { shortDate } from '@/lib/format'
 
 export const revalidate = 60
+export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: 'Briefings',
@@ -59,7 +60,7 @@ export default async function BriefingsPage() {
                   {r.title}
                 </div>
                 {r.subtitle && (
-                  <p className="mt-1 line-clamp-2 text-[0.875rem] text-ink-soft">
+                  <p className="mt-1 max-w-[42rem] text-[0.875rem] leading-[1.58] text-ink-soft">
                     {r.subtitle}
                   </p>
                 )}
