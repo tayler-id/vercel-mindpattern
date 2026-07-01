@@ -89,9 +89,9 @@ export default async function StoryPage({ params }: Params) {
           <h1 className="mt-3 font-serif text-[2.35rem] font-semibold leading-[1.08] text-ink max-sm:text-[1.8rem]">
             {story.title}
           </h1>
-          {(story.dek || summary) && (
+          {story.dek && (
             <p className="mt-4 font-serif text-[1.0625rem] leading-[1.72] text-[#30343b]">
-              {story.dek || summary}
+              {story.dek}
             </p>
           )}
           {story.take && (
