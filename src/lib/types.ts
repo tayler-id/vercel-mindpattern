@@ -312,6 +312,17 @@ export interface IssueStoryUnit {
   source_refs: SourceRef[]
   arc_ids: string[]
   order: number
+  published_story?: PublishedStoryRef
+}
+
+export interface PublishedStoryRef {
+  story_unit_id: string
+  slug: string
+  title: string
+  target_url: string
+  confidence: string
+  source_domains?: string[]
+  entity_ids?: string[]
 }
 
 export interface PublicIssue {
@@ -323,6 +334,7 @@ export interface PublicIssue {
   entities: EntityRef[]
   story_units: IssueStoryUnit[]
   source_trail: SourceRef[]
+  published_story_refs?: PublishedStoryRef[]
   generated_at: string
   provenance: {
     generated_by: string
