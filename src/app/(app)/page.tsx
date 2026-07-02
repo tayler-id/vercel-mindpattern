@@ -37,11 +37,14 @@ export default async function WirePage({
       const feed = await getFeed({ limit: 60 })
       findings = feed.items
     } else if (view === 'most-read') {
-      const popular = await getPopular({ window: 'all', limit: 50 })
-      stories = popular.items
-      if (stories.length === 0) {
-        stories = (await getStories({ limit: 50 })).items
-      }
+      // Real reads rank first; newest stories fill the rest while the
+      // event store is young so the tab is always a full page.
+      const [popular, latest] = await Promise.all([
+        getPopular({ window: 'all', limit: 50 }),
+        getStories({ limit: 50 }),
+      ])
+      const seen = new Set(popular.items.map((s) => s.slug))
+      stories = [...popular.items, ...latest.items.filter((s) => !seen.has(s.slug))].slice(0, 50)
     } else {
       // Trending: blended reader-signal + corpus score, newest pool of 400.
       const trending = await getTrending({ limit: 60 })
