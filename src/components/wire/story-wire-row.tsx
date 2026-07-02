@@ -8,13 +8,13 @@ export function StoryWireRow({
   story,
   rank,
 }: {
-  story: PublicStory & { trend?: string; views?: number }
+  story: PublicStory & { trend?: string; views?: number; source_count?: number; entity_count?: number }
   rank: number
 }) {
   const hot = rank <= 3
   const primarySource = story.source_refs[0] ?? null
-  const sourceCount = story.source_refs.length
-  const entityCount = story.entity_refs.length
+  const sourceCount = story.source_refs.length || story.source_count || 0
+  const entityCount = story.entity_refs.length || story.entity_count || 0
 
   return (
     <Link

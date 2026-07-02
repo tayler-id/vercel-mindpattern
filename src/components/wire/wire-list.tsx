@@ -15,12 +15,16 @@ interface ArchiveHit {
   target_url: string
   has_take: boolean
   section_id: string
+  source_count?: number
+  entity_count?: number
 }
 
 function hitToStory(hit: ArchiveHit): WireStory {
   return {
     ...hit,
     kind: 'story',
+    source_count: hit.source_count ?? 0,
+    entity_count: hit.entity_count ?? 0,
     id: hit.slug,
     take: hit.has_take ? 'yes' : '',
     body_excerpt: '',
@@ -61,6 +65,7 @@ export function WireList({
   const [section, setSection] = useState('')
   const [takeOnly, setTakeOnly] = useState(false)
   const [archiveHits, setArchiveHits] = useState<WireStory[] | null>(null)
+  const [archiveOffset, setArchiveOffset] = useState(0)
   const [archiveTotal, setArchiveTotal] = useState(0)
   const [corpusTotal, setCorpusTotal] = useState(0)
   const [searching, setSearching] = useState(false)
@@ -97,13 +102,15 @@ export function WireList({
           q: query,
           types: 'stories',
           limit: '100',
+          offset: String(archiveOffset),
           user: 'ramsay',
         })
         if (section) params.set('section', section)
         if (takeOnly) params.set('take', '1')
         const response = await fetch(`/api/proxy/search/site?${params}`)
         const payload = await response.json()
-        setArchiveHits((payload.groups?.stories ?? []).map(hitToStory))
+        const hits = (payload.groups?.stories ?? []).map(hitToStory)
+        setArchiveHits((prev) => (archiveOffset > 0 && prev ? [...prev, ...hits] : hits))
         setArchiveTotal(payload.totals?.stories ?? 0)
         setCorpusTotal(payload.totals?.stories_corpus ?? 0)
       } catch {
@@ -122,7 +129,7 @@ export function WireList({
     return () => {
       if (debounce.current) clearTimeout(debounce.current)
     }
-  }, [query, section, takeOnly])
+  }, [query, section, takeOnly, archiveOffset])
 
   const loadMore = async () => {
     if (loadingMore || exhausted) return
@@ -169,14 +176,20 @@ export function WireList({
       <div className="flex flex-wrap items-center gap-2 px-3 pt-3 sm:px-4">
         <input
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(e) => {
+            setArchiveOffset(0)
+            setQuery(e.target.value)
+          }}
           placeholder="Search all stories…"
           aria-label="Search all stories"
           className="w-52 rounded-full border border-line bg-surface px-3.5 py-1.5 font-mono text-[0.75rem] text-ink outline-none focus:border-primary"
         />
         <select
           value={section}
-          onChange={(e) => setSection(e.target.value)}
+          onChange={(e) => {
+            setArchiveOffset(0)
+            setSection(e.target.value)
+          }}
           aria-label="Filter by section"
           className="rounded-full border border-line bg-surface px-3 py-1.5 font-mono text-[0.75rem] text-ink outline-none focus:border-primary"
         >
@@ -186,7 +199,10 @@ export function WireList({
           ))}
         </select>
         <button
-          onClick={() => setTakeOnly(!takeOnly)}
+          onClick={() => {
+            setArchiveOffset(0)
+            setTakeOnly(!takeOnly)
+          }}
           aria-pressed={takeOnly}
           className={`rounded-full border px-3 py-1.5 font-mono text-[0.6875rem] uppercase tracking-wide ${
             takeOnly ? 'border-primary bg-primary/[0.06] text-primary' : 'border-line text-ink-faint hover:text-ink'
@@ -213,6 +229,17 @@ export function WireList({
         <p className="px-4 py-10 text-center font-mono text-[0.8125rem] text-ink-faint">
           {searchMode ? 'No stories match that search.' : 'Nothing matches those filters.'}
         </p>
+      )}
+      {searchMode && archiveHits && archiveHits.length < archiveTotal && (
+        <div className="px-4 py-5 text-center">
+          <button
+            onClick={() => setArchiveOffset(archiveHits.length)}
+            disabled={searching}
+            className="rounded-full border border-line px-5 py-2 font-mono text-[0.71875rem] uppercase tracking-wide text-ink transition-colors hover:border-primary hover:text-primary disabled:opacity-60"
+          >
+            {searching ? 'Loading…' : `Show more (${archiveHits.length.toLocaleString()} of ${archiveTotal.toLocaleString()})`}
+          </button>
+        </div>
       )}
       {!searchMode && canLoadMore && !exhausted && (
         <div className="px-4 py-5 text-center">
