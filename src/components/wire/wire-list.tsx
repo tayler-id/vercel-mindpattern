@@ -91,7 +91,7 @@ export function WireList({
     }
     if (debounce.current) clearTimeout(debounce.current)
     setSearching(true)
-    debounce.current = setTimeout(async () => {
+    const run = async () => {
       try {
         const params = new URLSearchParams({
           q: query,
@@ -112,7 +112,13 @@ export function WireList({
       } finally {
         setSearching(false)
       }
-    }, 250)
+    }
+    // A toggle click searches instantly; typing debounces.
+    if (query.trim()) {
+      debounce.current = setTimeout(run, 250)
+    } else {
+      void run()
+    }
     return () => {
       if (debounce.current) clearTimeout(debounce.current)
     }
@@ -139,14 +145,24 @@ export function WireList({
   }
 
   const searchMode = query.trim().length > 0 || takeOnly
-  const source = searchMode ? (archiveHits ?? []) : baseStories
-  const filtered = useMemo(() => {
-    if (searchMode) return source
-    return source.filter((story) => {
+  const localPreview = useMemo(() => {
+    const terms = query.toLowerCase().split(/\s+/).filter(Boolean)
+    return baseStories.filter((story) => {
       if (section && story.section_id !== section) return false
+      if (takeOnly && !story.take) return false
+      if (terms.length) {
+        const haystack = `${story.title} ${story.summary ?? ''}`.toLowerCase()
+        if (!terms.every((t) => haystack.includes(t))) return false
+      }
       return true
     })
-  }, [source, section, searchMode])
+  }, [baseStories, query, section, takeOnly])
+
+  const filtered = useMemo(() => {
+    if (!searchMode) return localPreview
+    // Archive answer when we have it; instant local preview while it loads.
+    return archiveHits ?? localPreview
+  }, [searchMode, archiveHits, localPreview])
 
   return (
     <div>
@@ -181,7 +197,7 @@ export function WireList({
         {searchMode && (
           <span className="font-mono text-[0.6875rem] text-ink-faint">
             {searching
-              ? 'searching the archive…'
+              ? `${filtered.length} on screen · searching all stories…`
               : `${archiveTotal.toLocaleString()}${takeOnly ? ' with takes' : ' matches'} in ${corpusTotal.toLocaleString()} stories${archiveTotal > filtered.length ? ` · top ${filtered.length}` : ''}`}
           </span>
         )}
