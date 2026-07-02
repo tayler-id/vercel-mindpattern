@@ -32,11 +32,16 @@ export default async function WirePage({
   try {
     if (view === 'topics') {
       findings = await getFindings({ importance: 'high', limit: 80 })
-    } else {
-      const storyResponse = await getStories({ limit: 20 })
-      stories = storyResponse.items
-      const feed = await getFeed({ limit: 40 })
+    } else if (view === 'latest') {
+      const feed = await getFeed({ limit: 60 })
       findings = feed.items
+    } else {
+      // Trending is story-first: one consistent row format, all with summaries.
+      const [first, second] = await Promise.all([
+        getStories({ limit: 50 }),
+        getStories({ limit: 50, offset: 50 }),
+      ])
+      stories = [...first.items, ...second.items]
     }
   } catch {
     try {

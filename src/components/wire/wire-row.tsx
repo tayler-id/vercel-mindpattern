@@ -28,6 +28,11 @@ export function WireRow({ finding, rank }: { finding: Finding; rank: number }) {
         <h3 className="mt-[5px] text-[1.03125rem] font-semibold leading-[1.32] tracking-[-0.01em] text-ink">
           {finding.title}
         </h3>
+        {finding.summary && (
+          <p className="mt-1.5 line-clamp-2 font-serif text-[0.9375rem] leading-[1.55] text-[#30343b]">
+            {finding.summary}
+          </p>
+        )}
         <div className="mt-[9px] flex flex-wrap items-center gap-x-3 gap-y-1.5 font-mono text-[0.65625rem] text-ink-faint">
           <span className="inline-flex min-w-0 items-center gap-1.5">
             <SourceFavicon url={finding.source_url} name={finding.source_name} />
