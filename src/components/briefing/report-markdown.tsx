@@ -1,6 +1,43 @@
 import Markdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 
+/**
+ * Some issues write Top 5 stories as plain prose blocks separated by ---
+ * with no headline line at all, which reads as one long wall. Bold the
+ * first paragraph of any story block that has no heading or bold lead so
+ * each story visibly starts. Presentation only; the canonical newsletter
+ * text is untouched.
+ */
+export function boldStoryLeads(content: string): string {
+  const lines = content.split('\n')
+  const out: string[] = []
+  let atBlockStart = false
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i]
+    const stripped = line.trim()
+    if (/^(---+|\*\*\*+)$/.test(stripped) || /^##\s/.test(stripped)) {
+      atBlockStart = true
+      out.push(line)
+      continue
+    }
+    if (atBlockStart && stripped) {
+      atBlockStart = false
+      const isPlainProse =
+        !stripped.startsWith('#') &&
+        !stripped.startsWith('**') &&
+        !stripped.startsWith('-') &&
+        !stripped.startsWith('>') &&
+        !/^\d+\./.test(stripped)
+      if (isPlainProse) {
+        out.push(`**${stripped}**`)
+        continue
+      }
+    }
+    out.push(line)
+  }
+  return out.join('\n')
+}
+
 /** Newsreader-serif briefing renderer, Signal-toned. No left-border callouts. */
 export function ReportMarkdown({ content }: { content: string }) {
   return (
@@ -53,7 +90,13 @@ export function ReportMarkdown({ content }: { content: string }) {
             {children}
           </blockquote>
         ),
-        hr: () => <hr className="my-7 border-0 border-t border-line" />,
+        hr: () => (
+          <div className="my-8 flex items-center gap-3" role="separator">
+            <span className="h-px flex-1 bg-line" />
+            <span className="font-mono text-[0.5625rem] tracking-[0.3em] text-ink-faint">///</span>
+            <span className="h-px flex-1 bg-line" />
+          </div>
+        ),
         code: ({ children }) => (
           <code className="rounded-[0.375rem] bg-accent-wash px-1.5 py-0.5 font-mono text-[0.8125rem] text-primary">
             {children}
@@ -74,7 +117,7 @@ export function ReportMarkdown({ content }: { content: string }) {
         ),
       }}
     >
-      {content}
+      {boldStoryLeads(content)}
     </Markdown>
   )
 }
