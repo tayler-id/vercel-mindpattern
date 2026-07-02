@@ -1,6 +1,7 @@
 'use client'
 
 import { useId, useState } from 'react'
+import { trackEvent } from '@/lib/analytics'
 
 type Status = 'idle' | 'loading' | 'ok' | 'error'
 
@@ -13,6 +14,7 @@ export function SubscribeBand() {
   async function submit(e: React.FormEvent) {
     e.preventDefault()
     setStatus('loading')
+    trackEvent('subscribe_submitted', { surface: 'subscribe_band' })
     try {
       const res = await fetch('/api/subscribe', {
         method: 'POST',
@@ -21,6 +23,7 @@ export function SubscribeBand() {
       })
       const data = await res.json().catch(() => ({}))
       if (res.ok) {
+        trackEvent('subscribe_success', { surface: 'subscribe_band' })
         setStatus('ok')
         setMsg(data.already ? "You're already on the list." : "You're in — check your inbox.")
       } else {

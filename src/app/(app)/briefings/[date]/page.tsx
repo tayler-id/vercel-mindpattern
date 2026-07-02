@@ -1,3 +1,4 @@
+import { ScrollDepthTracker } from '@/components/analytics/scroll-depth'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { getAudioBriefing, getReport, getReports, getStructuredIssue } from '@/lib/api'
@@ -75,6 +76,7 @@ export default async function BriefingPage({ params }: Params) {
   return (
     <div className="h-full overflow-y-auto">
       <article className="mx-auto max-w-[44rem] px-8 pb-24 pt-11 max-sm:px-5">
+        <ScrollDepthTracker kind="briefing" id={date} />
         <JsonLd
           data={{
             '@context': 'https://schema.org',

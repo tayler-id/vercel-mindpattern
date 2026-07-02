@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter, JetBrains_Mono, Newsreader } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
+import { WebVitalsTracker } from '@/components/analytics/web-vitals'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL } from '@/lib/site'
 import './globals.css'
@@ -65,6 +66,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body suppressHydrationWarning className="font-sans antialiased">
         <TooltipProvider>{children}</TooltipProvider>
         <Analytics />
+        <WebVitalsTracker />
       </body>
     </html>
   )
