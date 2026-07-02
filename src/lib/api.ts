@@ -88,6 +88,20 @@ export async function getStory(slug: string): Promise<PublicStory | null> {
   }
 }
 
+export function getTrending(opts: { limit?: number } = {}) {
+  return backendFetch<{ kind: 'trending'; items: import('./types').TrendingStory[]; total: number }>(
+    '/api/trending',
+    { user: 'ramsay', limit: String(opts.limit ?? 30) },
+  )
+}
+
+export function getPopular(opts: { window?: 'all' | '7d'; limit?: number } = {}) {
+  return backendFetch<{ kind: 'popular'; items: import('./types').TrendingStory[]; total: number }>(
+    '/api/popular',
+    { user: 'ramsay', window: opts.window ?? 'all', limit: String(opts.limit ?? 30) },
+  )
+}
+
 export function getReports() {
   return backendFetch<ReportListItem[]>('/api/reports', { user: 'ramsay' })
 }

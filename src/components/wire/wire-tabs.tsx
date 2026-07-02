@@ -2,6 +2,7 @@ import Link from 'next/link'
 
 const TABS = [
   { key: 'trending', label: 'Trending', href: '/' },
+  { key: 'most-read', label: 'Most Read', href: '/?view=most-read' },
   { key: 'latest', label: 'Latest', href: '/?view=latest' },
   { key: 'topics', label: 'Topics', href: '/?view=topics' },
 ]

@@ -134,6 +134,13 @@ export interface PublicStory {
   }
 }
 
+export interface TrendingStory extends PublicStory {
+  trending_score?: number
+  trend?: 'up' | 'down' | 'flat' | string
+  views?: number
+  unique_readers?: number
+}
+
 export interface StoriesResponse {
   kind: 'stories'
   items: PublicStory[]
