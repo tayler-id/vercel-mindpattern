@@ -26,8 +26,19 @@ Steps:
    first 3 WARNING lines if any failures, plus remaining target count from
    another --dry-run.
 
+Optional model override (default is Sonnet; Opus burns quota ~5x faster,
+use only if told to):
+   `MP_SITE_STORY_WRITER_MODEL=claude-opus-4-8` prepended to the run command.
+
 Hard rules:
 - Never raise --workers above 2 or --limit above 150.
+- You are an OPERATOR, not a developer: never edit, write, or delete any
+  file in mindpattern-v3 or mindpattern-rabbit-hole, never git commit,
+  never kill or restart processes you did not start. Another agent owns
+  code changes; your only writes are the artifacts the backfill itself
+  produces.
+- If a backfill process is already running (`pgrep -f site_backfill`),
+  do nothing and report that.
 - If the run prints ABORTED (usage limit or failure streak), stop for the
   day. Do NOT retry or restart. Report the abort reason.
 - Never run the newsletter pipeline (`run.py`), never deploy, never touch
