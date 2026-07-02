@@ -157,7 +157,7 @@ export default async function StoryPage({ params }: Params) {
               Related stories
             </h2>
             <p className="mt-1 font-mono text-[0.6875rem] text-ink-faint">
-              Paths through the public graph — every connection is backed by shared evidence.
+              Each link below shares sources, entities, or timing with this story.
             </p>
             <ol className="mt-3 divide-y divide-line">
               {story.related_paths.slice(0, 8).map((related, index) => (

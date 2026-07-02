@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: 'Briefings',
-  description: 'The daily MindPattern AI research briefing — top stories, long-form, with sources.',
+  description: 'The daily MindPattern AI research briefing. Top stories, long-form, with sources.',
 }
 
 export default async function BriefingsPage() {
@@ -40,7 +40,7 @@ export default async function BriefingsPage() {
           The daily dispatch
         </h1>
         <p className="mt-3 font-mono text-[0.71875rem] text-ink-faint">
-          One issue a day — the top stories, written long-form, with their sources.
+          One issue a day. The top stories, written long-form, with their sources.
         </p>
       </header>
 

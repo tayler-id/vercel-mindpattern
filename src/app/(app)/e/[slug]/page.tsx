@@ -131,7 +131,7 @@ export default async function EntityPage({ params }: Params) {
               Dossier
             </h2>
             <p className="mt-1 font-mono text-[0.6875rem] text-ink-faint">
-              Compiled by the content machine on {dossier.date} · {dossier.confidence}
+              Compiled {dossier.date} · {dossier.confidence}
             </p>
             {dossier.take && (
               <div className="mt-3 rounded border border-primary/25 bg-primary/[0.04] px-4 py-3">

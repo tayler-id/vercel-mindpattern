@@ -124,7 +124,7 @@ export default async function WirePage({
         )}
         {!hasItems && (
           <p className="px-4 py-10 text-center font-mono text-[0.8125rem] text-ink-faint">
-            The wire is quiet — couldn&rsquo;t reach the pipeline.
+            The wire is quiet. Nothing is loading right now.
           </p>
         )}
       </div>

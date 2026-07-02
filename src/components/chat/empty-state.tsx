@@ -35,12 +35,12 @@ export function EmptyState({ onSuggestion }: { onSuggestion: (text: string) => v
         <p className="text-muted-foreground text-xs leading-[1.8] max-w-lg mx-auto">
           MindPattern is an autonomous research pipeline that monitors the AI
           ecosystem every day. 13 specialized agents scan news, academic papers,
-          GitHub, Reddit, Hacker News, arXiv, RSS feeds, and expert commentary —
+          GitHub, Reddit, Hacker News, arXiv, RSS feeds, and expert commentary,
           then synthesize everything into a searchable intelligence database.
         </p>
         <p className="text-muted-foreground text-xs leading-[1.8] max-w-lg mx-auto mt-3">
           This is the conversational interface. Ask a question and get
-          data-grounded answers with interactive charts, cards, and tables —
+          data-grounded answers with interactive charts, cards, and tables,
           powered by real findings, not hallucinations.
         </p>
       </motion.section>
@@ -95,7 +95,7 @@ export function EmptyState({ onSuggestion }: { onSuggestion: (text: string) => v
             <Link href="/blog" className="text-navy underline underline-offset-2 hover:text-primary transition-colors">Briefings archive</Link>.
           </p>
           <p>
-            The pipeline self-improves — agents learn from their own outputs,
+            The pipeline self-improves. Agents learn from their own outputs,
             pattern recurrence is tracked with semantic dedup, and feedback
             adjusts what the system prioritizes next.
           </p>
@@ -121,27 +121,27 @@ export function EmptyState({ onSuggestion }: { onSuggestion: (text: string) => v
 
         <ul className="text-muted-foreground text-xs leading-[1.8] space-y-1.5 list-none">
           <li>
-            <strong className="text-foreground">Search findings</strong> — semantic
+            <strong className="text-foreground">Search findings</strong>: semantic
             vector search across thousands of research entries
           </li>
           <li>
-            <strong className="text-foreground">Track patterns</strong> — recurring
+            <strong className="text-foreground">Track patterns</strong>: recurring
             themes the system has identified across daily runs
           </li>
           <li>
-            <strong className="text-foreground">Read daily reports</strong> — full
+            <strong className="text-foreground">Read daily reports</strong>: full
             intelligence briefings, searchable and archived
           </li>
           <li>
-            <strong className="text-foreground">Discover skills</strong> — actionable
+            <strong className="text-foreground">Discover skills</strong>: actionable
             developer techniques extracted from the landscape
           </li>
           <li>
-            <strong className="text-foreground">Check system health</strong> — pipeline
+            <strong className="text-foreground">Check system health</strong>: pipeline
             quality scores, agent activity, error tracking
           </li>
           <li>
-            <strong className="text-foreground">Explore sources</strong> — see which
+            <strong className="text-foreground">Explore sources</strong>: see which
             newsletters, blogs, and feeds produce the highest-signal content
           </li>
         </ul>
@@ -166,17 +166,17 @@ export function EmptyState({ onSuggestion }: { onSuggestion: (text: string) => v
 
         <div className="space-y-4 text-xs leading-[1.8] text-muted-foreground">
           <div>
-            <strong className="text-foreground">This chat</strong> — the conversational
+            <strong className="text-foreground">This chat</strong>: the conversational
             interface. Ask anything in natural language and get data-grounded answers
             with inline charts, cards, and tables. The AI calls into the research
-            database on every query — it never guesses.
+            database on every query. It never guesses.
           </div>
 
           <div>
             <Link href="/blog" className="text-navy underline underline-offset-2 hover:text-primary transition-colors font-bold">
               Briefings
             </Link>{' '}
-            — the daily intelligence reports. Every pipeline run produces a 3,000–5,000
+            is the daily intelligence reports. Every pipeline run produces a 3,000–5,000
             word briefing covering top stories, breaking news, vibe coding updates,
             agent frameworks, security alerts, and thought leader takes. Fully
             searchable, delivered by email if you subscribe.
@@ -186,37 +186,37 @@ export function EmptyState({ onSuggestion }: { onSuggestion: (text: string) => v
             <Link href="/explore" className="text-navy underline underline-offset-2 hover:text-primary transition-colors font-bold">
               Archives
             </Link>{' '}
-            — the raw research database, browsable without chat. Seven views into the
+            is the raw research database, browsable without chat. Seven views into the
             data:
           </div>
 
           <ul className="list-none space-y-1 ml-4">
             <li>
-              <strong className="text-foreground">Search</strong> — semantic vector
+              <strong className="text-foreground">Search</strong>: semantic vector
               search across all findings
             </li>
             <li>
-              <strong className="text-foreground">All Findings</strong> — browse
+              <strong className="text-foreground">All Findings</strong>: browse
               every entry, filter by agent, importance, or date
             </li>
             <li>
-              <strong className="text-foreground">Sources</strong> — ranked table of
+              <strong className="text-foreground">Sources</strong>: ranked table of
               where the best intel comes from (domain, hit count, quality)
             </li>
             <li>
-              <strong className="text-foreground">Patterns</strong> — recurring
+              <strong className="text-foreground">Patterns</strong>: recurring
               themes tracked across pipeline runs
             </li>
             <li>
-              <strong className="text-foreground">Skills</strong> — actionable
+              <strong className="text-foreground">Skills</strong>: actionable
               developer techniques by domain and difficulty
             </li>
             <li>
-              <strong className="text-foreground">Health</strong> — pipeline quality
+              <strong className="text-foreground">Health</strong>: pipeline quality
               trend, per-agent activity, error log
             </li>
             <li>
-              <strong className="text-foreground">System</strong> — agent roster,
+              <strong className="text-foreground">System</strong>: agent roster,
               pipeline architecture, run schedule
             </li>
           </ul>
