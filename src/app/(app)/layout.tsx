@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react'
 import Link from 'next/link'
 import { HeaderNav, BottomTabBar } from '@/components/shell/site-nav'
-import { HeaderSearch } from '@/components/shell/header-search'
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   return (
@@ -20,10 +19,9 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           </Link>
           <HeaderNav />
         </div>
-        <HeaderSearch />
         <Link
           href="/#subscribe"
-          className="hidden rounded-full bg-primary px-4 py-2 text-[0.8125rem] font-semibold text-primary-foreground shadow-sm transition-transform hover:brightness-105 active:scale-95 sm:inline-block"
+          className="ml-auto hidden rounded-full bg-primary px-4 py-2 text-[0.8125rem] font-semibold text-primary-foreground shadow-sm transition-transform hover:brightness-105 active:scale-95 sm:inline-block"
         >
           Subscribe
         </Link>

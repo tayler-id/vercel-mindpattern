@@ -98,7 +98,7 @@ export default async function WirePage({
       <div className="mx-auto max-w-[1080px] px-4 pb-[90px] pt-1.5 max-sm:px-1.5">
         {view !== 'topics' ? (
           stories.length > 0 ? (
-            <WireList stories={stories} />
+            <WireList stories={stories} canLoadMore={view === 'latest'} />
           ) : (
             <ol>
               {findings.map((f, i) => (
