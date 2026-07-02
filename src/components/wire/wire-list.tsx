@@ -83,9 +83,9 @@ export function WireList({
     return [...seen.entries()].sort((a, b) => a[1].localeCompare(b[1]))
   }, [baseStories])
 
-  // Server-side archive search whenever a query is present.
+  // Server-side archive search whenever a query or the take filter is active.
   useEffect(() => {
-    if (!query.trim()) {
+    if (!query.trim() && !takeOnly) {
       setArchiveHits(null)
       return
     }
@@ -100,6 +100,7 @@ export function WireList({
           user: 'ramsay',
         })
         if (section) params.set('section', section)
+        if (takeOnly) params.set('take', '1')
         const response = await fetch(`/api/proxy/search/site?${params}`)
         const payload = await response.json()
         setArchiveHits((payload.groups?.stories ?? []).map(hitToStory))
@@ -115,7 +116,7 @@ export function WireList({
     return () => {
       if (debounce.current) clearTimeout(debounce.current)
     }
-  }, [query, section])
+  }, [query, section, takeOnly])
 
   const loadMore = async () => {
     if (loadingMore || exhausted) return
@@ -137,15 +138,15 @@ export function WireList({
     }
   }
 
-  const searchMode = query.trim().length > 0
+  const searchMode = query.trim().length > 0 || takeOnly
   const source = searchMode ? (archiveHits ?? []) : baseStories
   const filtered = useMemo(() => {
+    if (searchMode) return source
     return source.filter((story) => {
-      if (!searchMode && section && story.section_id !== section) return false
-      if (takeOnly && !story.take) return false
+      if (section && story.section_id !== section) return false
       return true
     })
-  }, [source, section, takeOnly, searchMode])
+  }, [source, section, searchMode])
 
   return (
     <div>
@@ -181,7 +182,7 @@ export function WireList({
           <span className="font-mono text-[0.6875rem] text-ink-faint">
             {searching
               ? 'searching the archive…'
-              : `${archiveTotal.toLocaleString()} matches in ${corpusTotal.toLocaleString()} stories${archiveTotal > filtered.length ? ` · top ${filtered.length}` : ''}`}
+              : `${archiveTotal.toLocaleString()}${takeOnly ? ' with takes' : ' matches'} in ${corpusTotal.toLocaleString()} stories${archiveTotal > filtered.length ? ` · top ${filtered.length}` : ''}`}
           </span>
         )}
       </div>
