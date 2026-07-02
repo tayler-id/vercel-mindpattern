@@ -95,9 +95,14 @@ export default async function StoryPage({ params }: Params) {
             </p>
           )}
           {story.take && (
-            <p className="mt-3 border-l-2 border-primary pl-4 font-serif text-[1rem] leading-[1.68] text-ink">
-              {story.take}
-            </p>
+            <div className="mt-3 rounded border border-primary/25 bg-primary/[0.04] px-4 py-3">
+              <div className="font-mono text-[0.625rem] font-semibold uppercase tracking-wider text-primary">
+                The take
+              </div>
+              <p className="mt-1.5 font-serif text-[1rem] leading-[1.68] text-ink">
+                {story.take}
+              </p>
+            </div>
           )}
           {story.why_now && (
             <p className="mt-3 font-mono text-[0.75rem] leading-relaxed text-ink-faint">
@@ -138,45 +143,19 @@ export default async function StoryPage({ params }: Params) {
           </section>
         )}
 
-        {story.graph_edges && story.graph_edges.length > 0 && (
-          <section className="mt-8 border-t border-line pt-5">
-            <h2 className="font-mono text-[0.6875rem] font-semibold uppercase text-ink">
-              Graph trail
-            </h2>
-            <ol className="mt-3 divide-y divide-line">
-              {story.graph_edges.slice(0, 10).map((edge, index) => (
-                <li key={`${edge.kind}-${edge.id}-${index}`} className="py-3">
-                  <div className="font-mono text-[0.625rem] font-semibold uppercase text-primary">
-                    {edge.relationship.replaceAll('_', ' ')}
-                  </div>
-                  <div className="mt-1.5 text-[0.9375rem] leading-snug text-ink">
-                    {edge.target_url ? (
-                      <Link href={edge.target_url} className="text-primary hover:underline">
-                        {edge.label || edge.id}
-                      </Link>
-                    ) : (
-                      <span>{edge.label || edge.id}</span>
-                    )}
-                  </div>
-                  {edge.evidence && (
-                    <p className="mt-1 font-mono text-[0.6875rem] text-ink-faint">{edge.evidence}</p>
-                  )}
-                </li>
-              ))}
-            </ol>
-          </section>
-        )}
-
         {story.related_paths.length > 0 && (
           <section className="mt-8 border-t border-line pt-5">
             <h2 className="font-mono text-[0.6875rem] font-semibold uppercase text-ink">
-              Related paths
+              Related stories
             </h2>
+            <p className="mt-1 font-mono text-[0.6875rem] text-ink-faint">
+              Paths through the public graph — every connection is backed by shared evidence.
+            </p>
             <ol className="mt-3 divide-y divide-line">
               {story.related_paths.slice(0, 8).map((related, index) => (
                 <li key={`${related.id}-${index}`} className="py-3">
                   <div className="font-mono text-[0.625rem] font-semibold uppercase text-primary">
-                    {(related.connector_labels || [related.relationship || 'connected']).join(' / ')}
+                    {(related.connector_labels || ['Connected']).join(' / ')}
                   </div>
                   {related.target_url ? (
                     <Link href={related.target_url} className="mt-1.5 block text-[0.9375rem] font-semibold text-ink hover:text-primary">
