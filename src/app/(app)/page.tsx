@@ -1,6 +1,6 @@
-import { getFeed, getFindings, getStats, getStories } from '@/lib/api'
+import { getFeed, getFindings, getPopular, getStats, getStories, getTrending } from '@/lib/api'
 import type { FeedItem, Finding, PublicStory, Stats } from '@/lib/types'
-import { StoryWireRow } from '@/components/wire/story-wire-row'
+import { WireList } from '@/components/wire/wire-list'
 import { WireRow } from '@/components/wire/wire-row'
 import { WireTabs } from '@/components/wire/wire-tabs'
 import { SubscribeBand } from '@/components/subscribe/subscribe-band'
@@ -8,10 +8,11 @@ import { sectionLabel } from '@/lib/sections'
 
 export const revalidate = 60
 
-const VIEWS = new Set(['trending', 'latest', 'topics'])
+const VIEWS = new Set(['trending', 'most-read', 'latest', 'topics'])
 
 const HEADING: Record<string, { h1: string; sub: string }> = {
-  trending: { h1: 'Trending now', sub: 'high-signal first' },
+  trending: { h1: 'Trending now', sub: 'reader signal + source recurrence' },
+  'most-read': { h1: 'Most read', sub: 'all-time reader favorites' },
   latest: { h1: 'Latest signals', sub: 'most recent first' },
   topics: { h1: 'By topic', sub: 'grouped by section' },
 }
@@ -35,13 +36,24 @@ export default async function WirePage({
     } else if (view === 'latest') {
       const feed = await getFeed({ limit: 60 })
       findings = feed.items
+    } else if (view === 'most-read') {
+      const popular = await getPopular({ window: 'all', limit: 50 })
+      stories = popular.items
+      if (stories.length === 0) {
+        stories = (await getStories({ limit: 50 })).items
+      }
     } else {
-      // Trending is story-first: one consistent row format, all with summaries.
-      const [first, second] = await Promise.all([
-        getStories({ limit: 50 }),
-        getStories({ limit: 50, offset: 50 }),
-      ])
-      stories = [...first.items, ...second.items]
+      // Trending: blended reader-signal + corpus score, newest pool of 400.
+      const trending = await getTrending({ limit: 60 })
+      stories = trending.items
+      if (stories.length < 20) {
+        // Cold start (no events yet): fall back to newest-first.
+        const [first, second] = await Promise.all([
+          getStories({ limit: 50 }),
+          getStories({ limit: 50, offset: 50 }),
+        ])
+        stories = [...first.items, ...second.items]
+      }
     }
   } catch {
     try {
@@ -85,18 +97,17 @@ export default async function WirePage({
 
       <div className="mx-auto max-w-[1080px] px-4 pb-[90px] pt-1.5 max-sm:px-1.5">
         {view !== 'topics' ? (
-          <ol>
-            {stories.map((story, i) => (
-              <li key={story.slug}>
-                <StoryWireRow story={story} rank={i + 1} />
-              </li>
-            ))}
-            {findings.map((f, i) => (
-              <li key={f.id}>
-                <WireRow finding={f} rank={stories.length + i + 1} />
-              </li>
-            ))}
-          </ol>
+          stories.length > 0 ? (
+            <WireList stories={stories} canLoadMore={view === 'latest'} />
+          ) : (
+            <ol>
+              {findings.map((f, i) => (
+                <li key={f.id}>
+                  <WireRow finding={f} rank={i + 1} />
+                </li>
+              ))}
+            </ol>
+          )
         ) : view === 'topics' ? (
           Object.entries(grouped).map(([section, items]) => (
             <section key={section} className="mb-5">

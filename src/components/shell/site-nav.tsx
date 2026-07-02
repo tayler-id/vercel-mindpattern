@@ -2,11 +2,12 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Radio, Newspaper, Mail } from 'lucide-react'
+import { Radio, Newspaper, Mail, Search as SearchIcon } from 'lucide-react'
 
 const HEADER_TABS = [
   { href: '/', label: 'Wire', match: (p: string) => p === '/' },
   { href: '/briefings', label: 'Briefings', match: (p: string) => p.startsWith('/briefings') },
+  { href: '/search', label: 'Search', match: (p: string) => p.startsWith('/search') },
 ]
 
 /** Header tabs (desktop). */
@@ -36,6 +37,7 @@ export function HeaderNav() {
 const TAB_ITEMS = [
   { href: '/', label: 'Wire', icon: Radio, match: (p: string) => p === '/' },
   { href: '/briefings', label: 'Briefings', icon: Newspaper, match: (p: string) => p.startsWith('/briefings') },
+  { href: '/search', label: 'Search', icon: SearchIcon, match: (p: string) => p.startsWith('/search') },
   { href: '/#subscribe', label: 'Subscribe', icon: Mail, match: () => false },
 ]
 

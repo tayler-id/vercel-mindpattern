@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { trackEvent } from '@/lib/analytics'
+import { trackEvent, trackView } from '@/lib/analytics'
 
 const THRESHOLDS = [25, 50, 75, 100] as const
 
@@ -11,6 +11,7 @@ export function ScrollDepthTracker({ kind, id }: { kind: string; id: string }) {
 
   useEffect(() => {
     fired.current = new Set()
+    trackView(kind, id)
     const onScroll = () => {
       const doc = document.documentElement
       const scrollable = doc.scrollHeight - window.innerHeight

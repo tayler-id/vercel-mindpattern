@@ -2,8 +2,15 @@ import Link from 'next/link'
 import type { PublicStory } from '@/lib/types'
 import { sourceLabel } from '@/lib/sections'
 import { SourceFavicon } from './source-favicon'
+import { TrendIndicator } from './trend-indicator'
 
-export function StoryWireRow({ story, rank }: { story: PublicStory; rank: number }) {
+export function StoryWireRow({
+  story,
+  rank,
+}: {
+  story: PublicStory & { trend?: string; views?: number }
+  rank: number
+}) {
   const hot = rank <= 3
   const primarySource = story.source_refs[0] ?? null
   const sourceCount = story.source_refs.length
@@ -23,8 +30,12 @@ export function StoryWireRow({ story, rank }: { story: PublicStory; rank: number
       </span>
 
       <div className="min-w-0">
-        <div className="font-mono text-[0.625rem] font-semibold uppercase text-primary">
-          {story.issue_date} / {story.confidence}
+        <div className="flex items-center gap-2 font-mono text-[0.625rem] font-semibold uppercase text-primary">
+          <span>{story.issue_date} / {story.confidence}</span>
+          <TrendIndicator trend={story.trend} />
+          {typeof story.views === 'number' && (
+            <span className="normal-case text-ink-faint">{story.views.toLocaleString()} reads</span>
+          )}
         </div>
         <h3 className="mt-[5px] text-[1.03125rem] font-semibold leading-[1.32] text-ink">
           {story.title}
