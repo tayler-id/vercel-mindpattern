@@ -42,10 +42,10 @@ export function SubscribeBand() {
         <div className="flex flex-wrap items-end gap-6">
           <div className="min-w-[240px] flex-1">
             <div className="font-mono text-[0.625rem] font-semibold uppercase tracking-[0.16em] text-primary">
-              The Briefing
+              The Ramsay Research Report
             </div>
             <h2 className="mt-2 font-serif text-[1.625rem] font-semibold leading-[1.15] tracking-[-0.01em] text-ink">
-              Get the signal, once a day.
+              The daily brief, in your inbox.
             </h2>
             <p className="mt-2 max-w-[52ch] text-[0.9375rem] leading-relaxed text-ink-soft">
               The day&rsquo;s top stories, long-form, with sources and a take. No noise,
