@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { trackEvent } from '@/lib/analytics'
+import { Streamdown } from 'streamdown'
 
 type Groups = {
   stories?: { slug: string; title: string; summary: string; issue_date: string; target_url: string; has_take: boolean }[]
@@ -25,6 +26,10 @@ export function SearchClient() {
   )
   const [groups, setGroups] = useState<Groups>({})
   const [busy, setBusy] = useState(false)
+  const [answer, setAnswer] = useState('')
+  const [asking, setAsking] = useState(false)
+  const [askError, setAskError] = useState('')
+  const [askedQ, setAskedQ] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
   const debounce = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -54,9 +59,55 @@ export function SearchClient() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  const askSources = () => [
+    ...(groups.stories ?? []).map((s) => ({
+      title: s.title, summary: s.summary, date: s.issue_date, url: s.target_url,
+    })),
+    ...(groups.findings ?? []).map((f) => ({
+      title: f.title, summary: f.summary, date: f.run_date, url: f.target_url,
+    })),
+  ].slice(0, 10)
+
+  const ask = async () => {
+    const sources = askSources()
+    if (!q.trim() || sources.length === 0 || asking) return
+    setAsking(true)
+    setAnswer('')
+    setAskError('')
+    setAskedQ(q)
+    trackEvent('search_query', { id: `ask:${q.slice(0, 50)}` })
+    try {
+      const response = await fetch('/api/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ q, sources }),
+      })
+      if (!response.ok) {
+        const payload = await response.json().catch(() => null)
+        setAskError(payload?.error ?? 'Ask failed. Try again.')
+        return
+      }
+      const reader = response.body!.getReader()
+      const decoder = new TextDecoder()
+      let text = ''
+      for (;;) {
+        const { done, value } = await reader.read()
+        if (done) break
+        text += decoder.decode(value, { stream: true })
+        setAnswer(text)
+      }
+    } catch {
+      setAskError('Ask failed. Try again.')
+    } finally {
+      setAsking(false)
+    }
+  }
+
   const onChange = (value: string) => {
     setQ(value)
     if (debounce.current) clearTimeout(debounce.current)
+    setAnswer('')
+    setAskError('')
     debounce.current = setTimeout(() => {
       router.replace(`/search?q=${encodeURIComponent(value)}&types=${types.join(',')}`, { scroll: false })
       run(value, types)
@@ -100,6 +151,51 @@ export function SearchClient() {
           </button>
         ))}
       </div>
+
+      {q.trim() && total > 0 && (
+        <button
+          onClick={ask}
+          disabled={asking}
+          className="mt-5 flex w-full items-center gap-2.5 rounded-xl border border-line bg-surface px-4 py-3 text-left transition-colors hover:border-primary disabled:opacity-60"
+        >
+          <span className="font-mono text-[0.875rem] text-primary" aria-hidden>✦</span>
+          <span className="min-w-0 flex-1 truncate text-[0.875rem] font-semibold text-ink">
+            {asking ? 'Consulting the corpus…' : `Ask MindPattern: "${q}"`}
+          </span>
+          <span className="font-mono text-[0.625rem] uppercase tracking-wide text-ink-faint">
+            AI answer, cited
+          </span>
+        </button>
+      )}
+
+      {askError && (
+        <p className="mt-3 font-mono text-[0.75rem] text-primary">{askError}</p>
+      )}
+
+      {answer && (
+        <section className="mt-4 rounded-xl border border-line bg-surface p-5">
+          <div className="font-mono text-[0.625rem] font-semibold uppercase tracking-wide text-primary">
+            Analyst answer · {askedQ}
+          </div>
+          <div className="prose-sm mt-3 max-w-none text-[0.875rem] leading-relaxed text-ink [&_p]:mt-2">
+            <Streamdown>{answer}</Streamdown>
+          </div>
+          <ol className="mt-4 space-y-1 border-t border-line pt-3">
+            {askSources().map((s, i) => (
+              <li key={`${s.url}-${i}`} className="font-mono text-[0.6875rem] text-ink-faint">
+                [{i + 1}]{' '}
+                <Link href={s.url ?? '#'} className="text-navy hover:underline">
+                  {s.title}
+                </Link>{' '}
+                · {s.date}
+              </li>
+            ))}
+          </ol>
+          <p className="mt-3 font-mono text-[0.625rem] text-ink-faint">
+            Grounded in the corpus excerpts above. Verify against the cited stories.
+          </p>
+        </section>
+      )}
 
       {busy && <p className="mt-6 font-mono text-[0.75rem] text-ink-faint">Searching…</p>}
       {!busy && q.trim() && total === 0 && (
