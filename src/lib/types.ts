@@ -228,6 +228,14 @@ export interface HealthData {
   }
 }
 
+export interface SiteSitemap {
+  kind: 'site_sitemap'
+  stories: { slug: string; issue_date: string }[]
+  entities: string[]
+  sources: string[]
+  briefings: string[]
+}
+
 export interface ReportListItem {
   date: string
   title: string

@@ -10,8 +10,12 @@ type Params = { params: Promise<{ id: string }> }
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { id } = await params
   const f = await getFinding(Number(id))
-  if (!f) return { title: 'Finding not found' }
-  return { title: f.title, description: f.summary.slice(0, 160) }
+  if (!f) return { title: 'Finding not found', robots: { index: false } }
+  return {
+    title: f.title,
+    description: f.summary.slice(0, 160),
+    alternates: { canonical: `/f/${f.id}` },
+  }
 }
 
 export default async function FindingPage({ params }: Params) {
