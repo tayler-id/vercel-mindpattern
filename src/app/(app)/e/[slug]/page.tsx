@@ -49,6 +49,7 @@ export default async function EntityPage({ params }: Params) {
 
   const entity = await getEntity(slug)
   if (!entity) notFound()
+  const dossier = entity.dossier ?? null
   const findings = entity.findings ?? []
   const relationships = entity.relationships ?? []
   const sourceTrail = entity.source_trail ?? []
@@ -123,6 +124,63 @@ export default async function EntityPage({ params }: Params) {
             </p>
           )}
         </header>
+
+        {dossier && (
+          <section className="mt-7">
+            <h2 className="font-mono text-[0.6875rem] font-semibold uppercase text-ink">
+              Dossier
+            </h2>
+            <p className="mt-1 font-mono text-[0.6875rem] text-ink-faint">
+              Compiled {dossier.date} · {dossier.confidence}
+            </p>
+            {dossier.take && (
+              <div className="mt-3 rounded border border-primary/25 bg-primary/[0.04] px-4 py-3">
+                <div className="font-mono text-[0.625rem] font-semibold uppercase tracking-wider text-primary">
+                  The take
+                </div>
+                <p className="mt-1.5 font-serif text-[1rem] leading-[1.68] text-ink">
+                  {dossier.take}
+                </p>
+              </div>
+            )}
+            {dossier.timeline.length > 0 && (
+              <ol className="mt-3 divide-y divide-line">
+                {dossier.timeline.slice(0, 10).map((entry) => (
+                  <li key={entry.date} className="py-3">
+                    <div className="font-mono text-[0.625rem] font-semibold uppercase text-primary">
+                      {entry.date}
+                    </div>
+                    <ul className="mt-1.5 space-y-1">
+                      {entry.items.slice(0, 3).map((item) => (
+                        <li key={item.finding_id}>
+                          <Link
+                            href={item.target_url}
+                            className="text-[0.9375rem] leading-snug text-ink hover:text-primary"
+                          >
+                            {item.title}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </li>
+                ))}
+              </ol>
+            )}
+            {dossier.top_sources.length > 0 && (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {dossier.top_sources.slice(0, 8).map((source) => (
+                  <Link
+                    key={source.domain}
+                    href={source.target_url}
+                    className="rounded border border-line px-2 py-1 font-mono text-[0.6875rem] text-ink-faint hover:border-primary hover:text-primary"
+                  >
+                    {source.domain} · {source.finding_count}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </section>
+        )}
 
         {findings.length > 0 && (
           <section className="mt-7">

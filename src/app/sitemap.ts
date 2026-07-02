@@ -1,12 +1,13 @@
 import type { MetadataRoute } from 'next'
 import { backendFetch } from '@/lib/api'
 import { absoluteUrl } from '@/lib/site'
-import type { ReportListItem } from '@/lib/types'
+import type { ReportListItem, SiteSitemap } from '@/lib/types'
 
 export const revalidate = 3600
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let reports: ReportListItem[] = []
+  let graph: SiteSitemap | null = null
 
   try {
     reports = await backendFetch<ReportListItem[]>('/api/reports', {
@@ -16,12 +17,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     reports = []
   }
 
+  try {
+    graph = await backendFetch<SiteSitemap>('/api/site/sitemap', {
+      user: 'ramsay',
+    })
+  } catch {
+    graph = null
+  }
+
   const staticRoutes: MetadataRoute.Sitemap = [
     {
       url: absoluteUrl('/'),
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 1,
+    },
+    {
+      url: absoluteUrl('/briefings'),
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.9,
     },
     {
       url: absoluteUrl('/blog'),
@@ -50,5 +65,38 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.75,
   }))
 
-  return [...staticRoutes, ...reportRoutes]
+  const storyRoutes: MetadataRoute.Sitemap = (graph?.stories ?? []).map((story) => ({
+    url: absoluteUrl(`/s/${story.slug}`),
+    lastModified: story.issue_date ? new Date(story.issue_date) : undefined,
+    changeFrequency: 'weekly',
+    priority: 0.8,
+  }))
+
+  const briefingRoutes: MetadataRoute.Sitemap = (graph?.briefings ?? []).map((date) => ({
+    url: absoluteUrl(`/briefings/${date}`),
+    lastModified: new Date(date),
+    changeFrequency: 'monthly',
+    priority: 0.7,
+  }))
+
+  const entityRoutes: MetadataRoute.Sitemap = (graph?.entities ?? []).map((slug) => ({
+    url: absoluteUrl(`/e/${slug}`),
+    changeFrequency: 'weekly',
+    priority: 0.6,
+  }))
+
+  const sourceRoutes: MetadataRoute.Sitemap = (graph?.sources ?? []).map((domain) => ({
+    url: absoluteUrl(`/source/${domain}`),
+    changeFrequency: 'weekly',
+    priority: 0.5,
+  }))
+
+  return [
+    ...staticRoutes,
+    ...reportRoutes,
+    ...storyRoutes,
+    ...briefingRoutes,
+    ...entityRoutes,
+    ...sourceRoutes,
+  ]
 }

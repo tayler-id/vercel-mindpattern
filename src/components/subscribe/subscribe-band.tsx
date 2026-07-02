@@ -1,6 +1,7 @@
 'use client'
 
 import { useId, useState } from 'react'
+import { trackEvent } from '@/lib/analytics'
 
 type Status = 'idle' | 'loading' | 'ok' | 'error'
 
@@ -13,6 +14,7 @@ export function SubscribeBand() {
   async function submit(e: React.FormEvent) {
     e.preventDefault()
     setStatus('loading')
+    trackEvent('subscribe_submitted', { surface: 'subscribe_band' })
     try {
       const res = await fetch('/api/subscribe', {
         method: 'POST',
@@ -21,8 +23,9 @@ export function SubscribeBand() {
       })
       const data = await res.json().catch(() => ({}))
       if (res.ok) {
+        trackEvent('subscribe_success', { surface: 'subscribe_band' })
         setStatus('ok')
-        setMsg(data.already ? "You're already on the list." : "You're in — check your inbox.")
+        setMsg(data.already ? "You're already on the list." : "You're in. Check your inbox.")
       } else {
         setStatus('error')
         setMsg(data.error || 'Something went wrong. Try again.')
@@ -45,7 +48,7 @@ export function SubscribeBand() {
               Get the signal, once a day.
             </h2>
             <p className="mt-2 max-w-[52ch] text-[0.9375rem] leading-relaxed text-ink-soft">
-              The day&rsquo;s top stories — long-form, with sources and a take. No noise,
+              The day&rsquo;s top stories, long-form, with sources and a take. No noise,
               unsubscribe anytime.
             </p>
           </div>

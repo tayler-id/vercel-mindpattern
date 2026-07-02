@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { TrackedLink } from '@/components/analytics/tracked-link'
+import { ScrollDepthTracker } from '@/components/analytics/scroll-depth'
 import { notFound } from 'next/navigation'
 import { JsonLd } from '@/components/json-ld'
 import { ReportMarkdown } from '@/components/briefing/report-markdown'
@@ -75,6 +77,7 @@ export default async function StoryPage({ params }: Params) {
       />
 
       <main className="mx-auto max-w-[760px] px-8 pb-24 pt-9 max-sm:px-5">
+        <ScrollDepthTracker kind="story" id={story.slug} />
         <Link
           href="/"
           className="font-mono text-[0.6875rem] font-semibold uppercase text-primary hover:underline"
@@ -95,9 +98,14 @@ export default async function StoryPage({ params }: Params) {
             </p>
           )}
           {story.take && (
-            <p className="mt-3 border-l-2 border-primary pl-4 font-serif text-[1rem] leading-[1.68] text-ink">
-              {story.take}
-            </p>
+            <div className="mt-3 rounded border border-primary/25 bg-primary/[0.04] px-4 py-3">
+              <div className="font-mono text-[0.625rem] font-semibold uppercase tracking-wider text-primary">
+                The take
+              </div>
+              <p className="mt-1.5 font-serif text-[1rem] leading-[1.68] text-ink">
+                {story.take}
+              </p>
+            </div>
           )}
           {story.why_now && (
             <p className="mt-3 font-mono text-[0.75rem] leading-relaxed text-ink-faint">
@@ -108,9 +116,14 @@ export default async function StoryPage({ params }: Params) {
           <div className="mt-5 grid grid-cols-2 gap-3 font-mono text-[0.6875rem] text-ink-faint sm:grid-cols-4">
             <div>
               <div className="text-ink">Issue</div>
-              <Link href={issueHref} className="text-primary hover:underline">
+              <TrackedLink
+                href={issueHref}
+                event="briefing_click"
+                eventProps={{ from: story.slug, date: story.issue_date }}
+                className="text-primary hover:underline"
+              >
                 {story.issue_date}
-              </Link>
+              </TrackedLink>
             </div>
             <div>
               <div className="text-ink">Sources</div>
@@ -138,50 +151,33 @@ export default async function StoryPage({ params }: Params) {
           </section>
         )}
 
-        {story.graph_edges && story.graph_edges.length > 0 && (
-          <section className="mt-8 border-t border-line pt-5">
-            <h2 className="font-mono text-[0.6875rem] font-semibold uppercase text-ink">
-              Graph trail
-            </h2>
-            <ol className="mt-3 divide-y divide-line">
-              {story.graph_edges.slice(0, 10).map((edge, index) => (
-                <li key={`${edge.kind}-${edge.id}-${index}`} className="py-3">
-                  <div className="font-mono text-[0.625rem] font-semibold uppercase text-primary">
-                    {edge.relationship.replaceAll('_', ' ')}
-                  </div>
-                  <div className="mt-1.5 text-[0.9375rem] leading-snug text-ink">
-                    {edge.target_url ? (
-                      <Link href={edge.target_url} className="text-primary hover:underline">
-                        {edge.label || edge.id}
-                      </Link>
-                    ) : (
-                      <span>{edge.label || edge.id}</span>
-                    )}
-                  </div>
-                  {edge.evidence && (
-                    <p className="mt-1 font-mono text-[0.6875rem] text-ink-faint">{edge.evidence}</p>
-                  )}
-                </li>
-              ))}
-            </ol>
-          </section>
-        )}
-
         {story.related_paths.length > 0 && (
           <section className="mt-8 border-t border-line pt-5">
             <h2 className="font-mono text-[0.6875rem] font-semibold uppercase text-ink">
-              Related paths
+              Related stories
             </h2>
+            <p className="mt-1 font-mono text-[0.6875rem] text-ink-faint">
+              Each link below shares sources, entities, or timing with this story.
+            </p>
             <ol className="mt-3 divide-y divide-line">
               {story.related_paths.slice(0, 8).map((related, index) => (
                 <li key={`${related.id}-${index}`} className="py-3">
                   <div className="font-mono text-[0.625rem] font-semibold uppercase text-primary">
-                    {(related.connector_labels || [related.relationship || 'connected']).join(' / ')}
+                    {(related.connector_labels || ['Connected']).join(' / ')}
                   </div>
                   {related.target_url ? (
-                    <Link href={related.target_url} className="mt-1.5 block text-[0.9375rem] font-semibold text-ink hover:text-primary">
+                    <TrackedLink
+                      href={related.target_url}
+                      event="related_click"
+                      eventProps={{
+                        from: story.slug,
+                        to: String(related.slug || related.target_url),
+                        connectors: (related.connector_labels || []).join(' / '),
+                      }}
+                      className="mt-1.5 block text-[0.9375rem] font-semibold text-ink hover:text-primary"
+                    >
                       {related.title}
-                    </Link>
+                    </TrackedLink>
                   ) : (
                     <div className="mt-1.5 text-[0.9375rem] font-semibold text-ink">{related.title}</div>
                   )}
@@ -200,13 +196,15 @@ export default async function StoryPage({ params }: Params) {
           </h2>
           <div className="mt-3 flex flex-wrap gap-2">
             {story.source_refs.map((source) => (
-              <Link
+              <TrackedLink
                 key={source.url}
                 href={`/source/${encodeURIComponent(source.domain)}`}
+                event="source_click"
+                eventProps={{ from: story.slug, domain: source.domain }}
                 className="inline-block rounded-lg border border-line px-2.5 py-1.5 font-mono text-[0.71875rem] text-primary hover:border-primary hover:bg-accent-wash"
               >
                 {source.title || source.domain}
-              </Link>
+              </TrackedLink>
             ))}
           </div>
         </section>
@@ -218,13 +216,15 @@ export default async function StoryPage({ params }: Params) {
             </h2>
             <div className="mt-3 flex flex-wrap gap-2">
               {story.entity_refs.slice(0, 16).map((entity) => (
-                <Link
+                <TrackedLink
                   key={entity.id}
                   href={`/e/${encodeURIComponent(entity.slug)}`}
+                  event="entity_click"
+                  eventProps={{ from: story.slug, entity: entity.slug }}
                   className="inline-block rounded-lg border border-line px-2.5 py-1.5 font-mono text-[0.71875rem] text-primary hover:border-primary hover:bg-accent-wash"
                 >
                   {entity.name}
-                </Link>
+                </TrackedLink>
               ))}
             </div>
           </section>
@@ -246,9 +246,14 @@ export default async function StoryPage({ params }: Params) {
                     <div className="mt-1 flex flex-wrap gap-3 font-mono text-[0.625rem] text-primary">
                       {evidence.finding_id != null && <Link href={`/f/${evidence.finding_id}`}>Finding {evidence.finding_id}</Link>}
                       {evidence.source_url && (
-                        <a href={evidence.source_url} target="_blank" rel="noopener noreferrer">
+                        <TrackedLink
+                          href={evidence.source_url}
+                          external
+                          event="outbound_source_click"
+                          eventProps={{ from: story.slug }}
+                        >
                           Source
-                        </a>
+                        </TrackedLink>
                       )}
                     </div>
                   </li>

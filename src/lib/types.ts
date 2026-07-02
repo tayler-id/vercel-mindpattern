@@ -228,6 +228,14 @@ export interface HealthData {
   }
 }
 
+export interface SiteSitemap {
+  kind: 'site_sitemap'
+  stories: { slug: string; issue_date: string }[]
+  entities: string[]
+  sources: string[]
+  briefings: string[]
+}
+
 export interface ReportListItem {
   date: string
   title: string
@@ -393,11 +401,43 @@ export interface KgEntity {
   last_seen: string
 }
 
+export interface EntityDossierTimelineEntry {
+  date: string
+  items: {
+    finding_id: number
+    title: string
+    source_url?: string
+    source_name?: string
+    target_url: string
+  }[]
+}
+
+export interface EntityDossier {
+  kind: 'entity_dossier'
+  slug: string
+  name: string
+  entity_kind?: string
+  date: string
+  status: string
+  confidence: string
+  summary?: string
+  take?: string
+  counts?: {
+    findings?: number
+    relationships?: number
+    sources?: number
+  }
+  timeline: EntityDossierTimelineEntry[]
+  top_sources: { domain: string; finding_count: number; target_url: string }[]
+  target_url: string
+}
+
 export interface PublicEntity {
   kind: 'entity'
   slug: string
   name: string
   user: string
+  dossier?: EntityDossier | null
   status?: string
   confidence: 'source-backed' | string
   counts?: {

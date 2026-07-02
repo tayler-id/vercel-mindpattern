@@ -68,7 +68,7 @@ export default async function BlogPage() {
           Get the briefing delivered
         </p>
         <p className="text-[10px] text-muted-foreground mb-3">
-          Daily AI research intelligence — 13 agents, 8 sources, one briefing.
+          Daily AI research intelligence. 13 agents, 8 sources, one briefing.
         </p>
         <NewsletterSignup />
       </div>

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Send } from 'lucide-react'
+import { trackEvent } from '@/lib/analytics'
 
 export function NewsletterSignup({ className }: { className?: string }) {
   const [email, setEmail] = useState('')
@@ -13,6 +14,7 @@ export function NewsletterSignup({ className }: { className?: string }) {
     if (!email) return
 
     setStatus('loading')
+    trackEvent('subscribe_submitted', { surface: 'newsletter_signup' })
     try {
       const res = await fetch('/api/subscribe', {
         method: 'POST',
@@ -22,6 +24,7 @@ export function NewsletterSignup({ className }: { className?: string }) {
       const data = await res.json()
 
       if (res.ok) {
+        trackEvent('subscribe_success', { surface: 'newsletter_signup' })
         setStatus('ok')
         setMessage(data.already ? 'ALREADY ON FILE' : 'SUBSCRIBED')
         setEmail('')
