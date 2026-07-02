@@ -1,6 +1,6 @@
 import { getFeed, getFindings, getPopular, getStats, getStories, getTrending } from '@/lib/api'
 import type { FeedItem, Finding, PublicStory, Stats } from '@/lib/types'
-import { StoryWireRow } from '@/components/wire/story-wire-row'
+import { WireList } from '@/components/wire/wire-list'
 import { WireRow } from '@/components/wire/wire-row'
 import { WireTabs } from '@/components/wire/wire-tabs'
 import { SubscribeBand } from '@/components/subscribe/subscribe-band'
@@ -97,18 +97,17 @@ export default async function WirePage({
 
       <div className="mx-auto max-w-[1080px] px-4 pb-[90px] pt-1.5 max-sm:px-1.5">
         {view !== 'topics' ? (
-          <ol>
-            {stories.map((story, i) => (
-              <li key={story.slug}>
-                <StoryWireRow story={story} rank={i + 1} />
-              </li>
-            ))}
-            {findings.map((f, i) => (
-              <li key={f.id}>
-                <WireRow finding={f} rank={stories.length + i + 1} />
-              </li>
-            ))}
-          </ol>
+          stories.length > 0 ? (
+            <WireList stories={stories} />
+          ) : (
+            <ol>
+              {findings.map((f, i) => (
+                <li key={f.id}>
+                  <WireRow finding={f} rank={i + 1} />
+                </li>
+              ))}
+            </ol>
+          )
         ) : view === 'topics' ? (
           Object.entries(grouped).map(([section, items]) => (
             <section key={section} className="mb-5">
