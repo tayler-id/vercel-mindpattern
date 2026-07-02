@@ -3,6 +3,22 @@ import { track } from '@vercel/analytics'
 export type AnalyticsProps = Record<string, string | number | boolean>
 
 const ANON_KEY = 'mp_anon'
+const OPTOUT_KEY = 'mp_optout'
+
+/**
+ * Owner exclusion: visit any page with ?mp_optout=1 and this browser stops
+ * sending analytics entirely (?mp_optout=0 turns it back on).
+ */
+function optedOut(): boolean {
+  try {
+    const flag = new URLSearchParams(window.location.search).get(OPTOUT_KEY)
+    if (flag === '1') localStorage.setItem(OPTOUT_KEY, '1')
+    if (flag === '0') localStorage.removeItem(OPTOUT_KEY)
+    return localStorage.getItem(OPTOUT_KEY) === '1'
+  } catch {
+    return false
+  }
+}
 
 /** Random first-party reader id: resettable, never tied to identity. */
 function anonId(): string {
@@ -43,6 +59,7 @@ function beacon(name: string, props?: AnalyticsProps) {
  * Fails silently — analytics must never break the page.
  */
 export function trackEvent(name: string, props?: AnalyticsProps) {
+  if (optedOut()) return
   try {
     track(name, props)
   } catch {
@@ -53,5 +70,6 @@ export function trackEvent(name: string, props?: AnalyticsProps) {
 
 /** Story views: fired by pages, not clicks. */
 export function trackView(kind: string, id: string) {
+  if (optedOut()) return
   if (kind === 'story') beacon('story_view', { id })
 }
