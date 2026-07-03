@@ -41,11 +41,11 @@ export function NewsletterSignup({ className }: { className?: string }) {
   if (status === 'ok') {
     return (
       <div className={className}>
-        <div className="border border-secondary/40 bg-secondary/5 p-3">
-          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-secondary">
+        <div className="border border-line bg-surface p-3">
+          <p className="type-kicker text-ok">
             {message}
           </p>
-          <p className="text-[10px] text-muted-foreground mt-1">
+          <p className="font-mono text-[11px] tracking-[0.08em] text-ink-faint mt-1">
             Daily briefings inbound.
           </p>
         </div>
@@ -55,7 +55,7 @@ export function NewsletterSignup({ className }: { className?: string }) {
 
   return (
     <div className={className}>
-      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-2">
+      <p className="type-kicker text-ink-faint mb-2">
         Daily Intel Briefing
       </p>
       <form onSubmit={handleSubmit} className="flex gap-1.5">
@@ -68,18 +68,18 @@ export function NewsletterSignup({ className }: { className?: string }) {
           }}
           placeholder="agent@email.com"
           required
-          className="h-7 flex-1 min-w-0 border border-input bg-transparent px-2 text-xs placeholder:text-muted-foreground/50 focus:outline-none focus:border-ring"
+          className="h-7 flex-1 min-w-0 rounded-sm border border-line bg-surface px-2 font-mono text-xs placeholder:text-ink-faint focus:outline-none focus:border-ring"
         />
         <button
           type="submit"
           disabled={status === 'loading'}
-          className="h-7 px-2 border border-primary bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider hover:bg-primary/20 disabled:opacity-50 flex items-center gap-1"
+          className="h-7 px-2 rounded-sm bg-primary text-primary-foreground font-mono text-[10px] font-semibold uppercase tracking-wider hover:bg-primary/90 disabled:opacity-50 flex items-center gap-1"
         >
           <Send className="size-3" />
         </button>
       </form>
       {status === 'error' && (
-        <p className="text-[10px] text-destructive mt-1 uppercase tracking-wider">
+        <p className="type-kicker text-destructive mt-1">
           {message}
         </p>
       )}

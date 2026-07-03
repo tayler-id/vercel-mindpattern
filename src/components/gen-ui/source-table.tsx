@@ -14,7 +14,7 @@ export function SourceTable({ data }: { data: unknown }) {
   const sources = data as Source[]
   if (!sources?.length) {
     return (
-      <p className="text-xs text-muted-foreground uppercase tracking-wider font-bold">
+      <p className="type-kicker text-ink-soft">
         [NO SOURCES ON FILE]
       </p>
     )
@@ -33,16 +33,16 @@ export function SourceTable({ data }: { data: unknown }) {
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-card border border-border dossier-card p-4 grid-paper"
+          className="border border-line bg-surface p-4"
         >
-          <p className="text-[10px] text-muted-foreground mb-3 uppercase tracking-wider font-bold">
+          <p className="type-kicker text-ink mb-3">
             Top sources by high-value findings
           </p>
           <ResponsiveContainer width="100%" height={120}>
             <BarChart data={chartData}>
               <XAxis
                 dataKey="name"
-                tick={{ fill: 'var(--muted-foreground)', fontSize: 9 }}
+                tick={{ fill: 'var(--ink-faint)', fontSize: 10, fontFamily: 'var(--font-mono)' }}
                 axisLine={false}
                 tickLine={false}
                 interval={0}
@@ -55,15 +55,15 @@ export function SourceTable({ data }: { data: unknown }) {
                   if (!active || !payload?.length) return null
                   const d = payload[0]?.payload
                   return (
-                    <div className="bg-popover border border-border px-3 py-2 text-xs shadow-lg">
-                      <p className="text-foreground font-bold">{d.name}</p>
-                      <p className="text-olive">{d.highValue} high-value</p>
-                      <p className="text-muted-foreground">{d.total} total hits</p>
+                    <div className="bg-surface border border-line px-3 py-2 font-mono text-xs">
+                      <p className="text-ink font-semibold">{d.name}</p>
+                      <p className="text-chart-2">{d.highValue} high-value</p>
+                      <p className="text-ink-soft">{d.total} total hits</p>
                     </div>
                   )
                 }}
               />
-              <Bar dataKey="highValue" radius={[2, 2, 0, 0]} barSize={24} fill="var(--olive)" fillOpacity={0.7} />
+              <Bar dataKey="highValue" barSize={24} fill="var(--chart-2)" fillOpacity={0.8} />
             </BarChart>
           </ResponsiveContainer>
         </motion.div>
@@ -73,16 +73,16 @@ export function SourceTable({ data }: { data: unknown }) {
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="bg-card border border-border dossier-card overflow-hidden"
+        className="overflow-x-auto"
       >
         <table className="w-full text-xs">
           <thead>
-            <tr className="border-b border-border">
-              <th className="text-left text-[10px] text-muted-foreground font-bold uppercase tracking-wider px-4 py-2">Source</th>
-              <th className="text-right text-[10px] text-muted-foreground font-bold uppercase tracking-wider px-4 py-2">High-value</th>
-              <th className="text-right text-[10px] text-muted-foreground font-bold uppercase tracking-wider px-4 py-2">Total</th>
-              <th className="text-right text-[10px] text-muted-foreground font-bold uppercase tracking-wider px-4 py-2 hidden sm:table-cell">Quality</th>
-              <th className="text-right text-[10px] text-muted-foreground font-bold uppercase tracking-wider px-4 py-2">Last seen</th>
+            <tr>
+              <th className="text-left font-mono font-semibold text-[10px] text-ink uppercase tracking-[0.14em] px-4 py-2 border-b-2 border-ink">Source</th>
+              <th className="text-right font-mono font-semibold text-[10px] text-ink uppercase tracking-[0.14em] px-4 py-2 border-b-2 border-ink">High-value</th>
+              <th className="text-right font-mono font-semibold text-[10px] text-ink uppercase tracking-[0.14em] px-4 py-2 border-b-2 border-ink">Total</th>
+              <th className="text-right font-mono font-semibold text-[10px] text-ink uppercase tracking-[0.14em] px-4 py-2 border-b-2 border-ink hidden sm:table-cell">Quality</th>
+              <th className="text-right font-mono font-semibold text-[10px] text-ink uppercase tracking-[0.14em] px-4 py-2 border-b-2 border-ink">Last seen</th>
             </tr>
           </thead>
           <tbody>
@@ -94,32 +94,32 @@ export function SourceTable({ data }: { data: unknown }) {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: Math.min(i * 0.02, 0.5) }}
-                  className="border-b border-border/50 last:border-0 hover:bg-muted/20 transition-colors"
+                  className="border-b border-line last:border-0 hover:bg-spine transition-colors"
                 >
-                  <td className="px-4 py-2.5 font-bold">
-                    <a href={`https://${s.url_domain}`} target="_blank" rel="noopener noreferrer" className="text-navy hover:underline">
+                  <td className="px-4 py-2.5 font-semibold">
+                    <a href={`https://${s.url_domain}`} target="_blank" rel="noopener noreferrer" className="text-ink hover:text-primary hover:underline">
                       {s.display_name || s.url_domain}
                     </a>
                   </td>
                   <td className="px-4 py-2.5 text-right">
-                    <span className="text-olive font-bold">{s.high_value_count}</span>
+                    <span className="font-mono text-ok font-semibold">{s.high_value_count}</span>
                   </td>
-                  <td className="px-4 py-2.5 text-right text-muted-foreground">{s.hit_count}</td>
+                  <td className="px-4 py-2.5 text-right font-mono text-ink-soft">{s.hit_count}</td>
                   <td className="px-4 py-2.5 text-right hidden sm:table-cell">
                     <div className="flex items-center justify-end gap-1.5">
-                      <div className="w-12 h-1 bg-muted overflow-hidden">
+                      <div className="w-12 h-1 bg-panel overflow-hidden">
                         <div
                           className="h-full"
                           style={{
                             width: `${qualityRatio}%`,
-                            backgroundColor: qualityRatio > 50 ? 'var(--olive)' : qualityRatio > 25 ? 'var(--chart-4)' : 'var(--primary)',
+                            backgroundColor: qualityRatio > 50 ? 'var(--chart-2)' : qualityRatio > 25 ? 'var(--chart-3)' : 'var(--chart-1)',
                           }}
                         />
                       </div>
-                      <span className="text-[10px] text-muted-foreground w-7 text-right">{qualityRatio}%</span>
+                      <span className="font-mono text-[11px] text-ink-faint w-8 text-right">{qualityRatio}%</span>
                     </div>
                   </td>
-                  <td className="px-4 py-2.5 text-right text-muted-foreground text-[11px]">{s.last_seen}</td>
+                  <td className="px-4 py-2.5 text-right font-mono text-ink-soft text-[11px]">{s.last_seen}</td>
                 </motion.tr>
               )
             })}

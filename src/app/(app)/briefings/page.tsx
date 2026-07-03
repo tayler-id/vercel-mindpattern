@@ -33,13 +33,13 @@ export default async function BriefingsPage() {
   return (
     <div className="h-full overflow-y-auto">
       <header className="mx-auto max-w-[44rem] px-8 pt-11 max-sm:px-5">
-        <p className="font-mono text-[0.6875rem] font-semibold uppercase tracking-[0.16em] text-primary">
+        <p className="type-kicker text-primary">
           Briefings
         </p>
-        <h1 className="mt-2 font-serif text-[2.25rem] font-semibold leading-[1.1] tracking-[-0.02em] text-ink">
+        <h1 className="type-display mt-3 text-[2.75rem] font-[620] text-ink max-sm:text-[2rem]">
           The daily dispatch
         </h1>
-        <p className="mt-3 font-mono text-[0.71875rem] text-ink-faint">
+        <p className="mt-3 font-serif text-[1.0625rem] italic leading-[1.6] text-ink-soft">
           One issue a day. The top stories, written long-form, with their sources.
         </p>
       </header>
@@ -48,19 +48,19 @@ export default async function BriefingsPage() {
         {reports.map((r) => {
           const audio = audioByDate.get(r.date)
           return (
-            <li key={r.date} className="border-b border-line-soft py-4">
+            <li key={r.date} className="rule-row py-5">
               <Link
                 href={`/briefings/${r.date}`}
-                className="block transition-colors hover:bg-card"
+                className="group block"
               >
-                <div className="font-mono text-[0.71875rem] font-semibold text-primary">
+                <div className="type-kicker text-primary">
                   {shortDate(r.date)}
                 </div>
-                <div className="mt-1 font-serif text-[1.25rem] font-semibold leading-snug tracking-[-0.01em] text-ink">
+                <div className="type-display mt-1.5 text-[1.375rem] font-[560] text-ink group-hover:underline">
                   {r.title}
                 </div>
                 {r.subtitle && (
-                  <p className="mt-1 max-w-[42rem] text-[0.875rem] leading-[1.58] text-ink-soft">
+                  <p className="mt-1.5 max-w-[42rem] font-serif text-[0.9375rem] leading-[1.6] text-ink-soft">
                     {r.subtitle}
                   </p>
                 )}

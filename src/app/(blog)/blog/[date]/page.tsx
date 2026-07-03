@@ -77,16 +77,16 @@ export default async function BlogPostPage({
       <div className="max-w-3xl mx-auto px-4 py-8">
         <Link
           href="/blog"
-          className="inline-flex items-center gap-1.5 text-[10px] text-muted-foreground hover:text-foreground transition-colors mb-8 uppercase tracking-wider font-bold"
+          className="type-kicker inline-flex items-center gap-1.5 text-ink-faint hover:text-primary transition-colors mb-8"
         >
-          <ChevronLeft data-icon="inline-start" />
+          <ChevronLeft data-icon="inline-start" className="size-3.5" />
           Back to archive
         </Link>
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          <p className="text-xs text-muted-foreground uppercase tracking-[0.15em] font-bold">
+        <div className="rule-row flex flex-col items-center justify-center py-16 text-center">
+          <p className="type-kicker text-ink-soft">
             [REPORT NOT FOUND]
           </p>
-          <p className="text-[10px] text-muted-foreground/60 mt-1 uppercase tracking-wider">
+          <p className="type-kicker text-ink-faint mt-1">
             The briefing for {date} may not exist or the backend is unavailable.
           </p>
         </div>
@@ -139,31 +139,31 @@ export default async function BlogPostPage({
       />
       <Link
         href="/blog"
-        className="inline-flex items-center gap-1.5 text-[10px] text-muted-foreground hover:text-foreground transition-colors uppercase tracking-wider font-bold"
+        className="type-kicker inline-flex items-center gap-1.5 text-ink-faint hover:text-primary transition-colors"
       >
-        <ChevronLeft data-icon="inline-start" />
+        <ChevronLeft data-icon="inline-start" className="size-3.5" />
         Back to archive
       </Link>
 
-      <header className="mt-6 mb-8">
-        <h1 className="text-sm font-bold uppercase tracking-[0.15em]">{report.title}</h1>
-        <p className="text-[10px] text-muted-foreground mt-2 uppercase tracking-wider">
+      <header className="rule-scotch mt-6 mb-8 pt-3">
+        <h1 className="type-display text-[30px] font-[560] text-ink sm:text-[38px]">{report.title}</h1>
+        <p className="type-kicker text-ink-faint mt-3">
           [{date}] -- {wordCount.toLocaleString()} words -- {readTime} min read
         </p>
       </header>
 
-      <article className="bg-card border border-border dossier-card px-6 py-8 report-article">
+      <article>
         <ReportMarkdown content={report.content} />
       </article>
 
       {(prevDate || nextDate) && (
-        <nav className="mt-8 flex items-center justify-between gap-4">
+        <nav className="rule-row mt-8 flex items-center justify-between gap-4 pt-4">
           {prevDate ? (
             <Link
               href={`/blog/${prevDate}`}
-              className="inline-flex items-center gap-1.5 text-[10px] text-muted-foreground hover:text-foreground transition-colors uppercase tracking-wider font-bold"
+              className="type-kicker inline-flex items-center gap-1.5 text-ink-faint hover:text-primary transition-colors"
             >
-              <ChevronLeft data-icon="inline-start" />
+              <ChevronLeft data-icon="inline-start" className="size-3.5" />
               [{prevDate}]
             </Link>
           ) : (
@@ -172,10 +172,10 @@ export default async function BlogPostPage({
           {nextDate ? (
             <Link
               href={`/blog/${nextDate}`}
-              className="inline-flex items-center gap-1.5 text-[10px] text-muted-foreground hover:text-foreground transition-colors uppercase tracking-wider font-bold"
+              className="type-kicker inline-flex items-center gap-1.5 text-ink-faint hover:text-primary transition-colors"
             >
               [{nextDate}]
-              <ChevronRight data-icon="inline-end" />
+              <ChevronRight data-icon="inline-end" className="size-3.5" />
             </Link>
           ) : (
             <span />
@@ -199,40 +199,40 @@ function ReportMarkdown({ content }: { content: string }) {
       remarkPlugins={[remarkGfm]}
       components={{
         h1: ({ children }) => (
-          <h2 className="text-base font-bold uppercase tracking-[0.15em] text-foreground border-b-2 border-primary/30 pb-3 mb-6">{children}</h2>
+          <h2 className="rule-scotch type-display text-[26px] font-[560] text-ink pt-3 mb-6">{children}</h2>
         ),
         h2: ({ children }) => (
-          <h3 className="text-sm font-bold uppercase tracking-[0.15em] text-foreground mt-10 mb-4 border-l-3 border-primary pl-3">{children}</h3>
+          <h3 className="type-display text-[21px] font-[560] text-ink mt-10 mb-4 border-t border-ink pt-3">{children}</h3>
         ),
         h3: ({ children }) => (
-          <h4 className="text-xs font-bold uppercase tracking-[0.12em] text-foreground mt-8 mb-3">{children}</h4>
+          <h4 className="type-display text-[17px] font-[560] text-ink mt-8 mb-3">{children}</h4>
         ),
         p: ({ children }) => (
-          <p className="text-[13px] leading-[1.8] text-muted-foreground mb-5">{children}</p>
+          <p className="font-serif text-[17px] leading-[1.72] text-ink-prose mb-5">{children}</p>
         ),
         strong: ({ children }) => (
-          <strong className="text-foreground font-bold">{children}</strong>
+          <strong className="text-ink font-semibold">{children}</strong>
         ),
         a: ({ href, children }) => (
-          <a href={href} target="_blank" rel="noopener noreferrer" className="text-navy underline underline-offset-2 hover:text-primary transition-colors">{children}</a>
+          <a href={href} target="_blank" rel="noopener noreferrer" className="text-primary underline underline-offset-2 hover:text-ink transition-colors">{children}</a>
         ),
         ul: ({ children }) => (
-          <ul className="flex flex-col gap-2 mb-5 ml-4 list-disc marker:text-primary/40">{children}</ul>
+          <ul className="flex flex-col gap-2 mb-5 ml-4 list-disc marker:text-ink-faint">{children}</ul>
         ),
         ol: ({ children }) => (
-          <ol className="flex flex-col gap-2 mb-5 ml-4 list-decimal marker:text-primary/40">{children}</ol>
+          <ol className="flex flex-col gap-2 mb-5 ml-4 list-decimal marker:text-ink-faint">{children}</ol>
         ),
         li: ({ children }) => (
-          <li className="text-[13px] leading-[1.8] text-muted-foreground">{children}</li>
+          <li className="font-serif text-[17px] leading-[1.72] text-ink-prose">{children}</li>
         ),
         hr: () => (
-          <hr className="my-8 border-t border-border" />
+          <hr className="my-8 mx-auto w-32 border-t border-ink" />
         ),
         blockquote: ({ children }) => (
-          <blockquote className="border-l-3 border-olive pl-4 my-6 italic text-muted-foreground/80">{children}</blockquote>
+          <blockquote className="border-t border-b border-ink px-6 py-4 my-6 text-center font-serif italic text-[19px] text-ink-prose [&_p]:mb-0 [&_p]:text-[19px]">{children}</blockquote>
         ),
         code: ({ children }) => (
-          <code className="text-primary bg-primary/5 px-1.5 py-0.5 text-xs">{children}</code>
+          <code className="font-mono text-primary bg-accent-wash px-1.5 py-0.5 text-[13px]">{children}</code>
         ),
         table: ({ children }) => (
           <div className="overflow-x-auto my-6">
@@ -240,10 +240,10 @@ function ReportMarkdown({ content }: { content: string }) {
           </div>
         ),
         th: ({ children }) => (
-          <th className="text-left px-3 py-2 border-b-2 border-border font-bold text-foreground text-[10px] uppercase tracking-wider bg-muted/30">{children}</th>
+          <th className="text-left px-3 py-2 border-b-2 border-ink font-mono font-semibold text-ink text-[10px] uppercase tracking-[0.14em]">{children}</th>
         ),
         td: ({ children }) => (
-          <td className="px-3 py-2 border-b border-border/50 text-[13px]">{children}</td>
+          <td className="px-3 py-2 border-b border-line text-[13px] text-ink-prose">{children}</td>
         ),
       }}
     >

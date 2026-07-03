@@ -19,24 +19,24 @@ export function BlogSearch({ reports }: { reports: ReportListItem[] }) {
   return (
     <div className="flex flex-col gap-6">
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-ink-faint" />
         <Input
           type="text"
           placeholder="SEARCH BRIEFINGS..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="pl-10 h-10 bg-card border-border uppercase tracking-wider text-xs placeholder:text-muted-foreground/50"
+          className="pl-10 h-10 font-mono uppercase tracking-[0.08em] text-xs placeholder:text-ink-faint"
         />
       </div>
 
       {filtered.length === 0 ? (
-        <div className="bg-card border border-border dossier-card p-10 text-center">
-          <p className="text-xs text-muted-foreground uppercase tracking-[0.15em] font-bold">
+        <div className="rule-row p-10 text-center">
+          <p className="type-kicker text-ink-soft">
             [NO MATCHING BRIEFINGS]
           </p>
         </div>
       ) : (
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col">
           {filtered.map((report, i) => (
             <motion.div
               key={report.date}
@@ -46,17 +46,17 @@ export function BlogSearch({ reports }: { reports: ReportListItem[] }) {
             >
               <Link
                 href={`/blog/${report.date}`}
-                className="flex items-center justify-between bg-card border border-border dossier-card px-5 py-4 hover:border-primary/30 transition-colors group"
+                className="rule-row group flex items-center justify-between gap-4 py-4 transition-colors hover:bg-spine"
               >
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs font-bold group-hover:text-navy transition-colors truncate">
+                  <p className="type-display text-[19px] font-[560] text-ink truncate group-hover:underline">
                     {report.title}
                   </p>
-                  <p className="text-[10px] text-muted-foreground mt-1 uppercase tracking-wider">
+                  <p className="type-kicker text-ink-faint mt-1">
                     [{report.date}] -- ~{estimateReadTime(report.size)} min read
                   </p>
                 </div>
-                <ChevronRight className="text-muted-foreground group-hover:text-navy shrink-0 ml-4" />
+                <ChevronRight className="size-4 text-ink-faint group-hover:text-primary shrink-0" />
               </Link>
             </motion.div>
           ))}

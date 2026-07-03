@@ -80,29 +80,29 @@ export default async function StoryPage({ params }: Params) {
         <ScrollDepthTracker kind="story" id={story.slug} />
         <Link
           href="/"
-          className="font-mono text-[0.6875rem] font-semibold uppercase text-primary hover:underline"
+          className="type-kicker text-primary hover:underline"
         >
           The Wire
         </Link>
 
-        <header className="mt-8 border-b border-line pb-6">
-          <div className="font-mono text-[0.6875rem] font-semibold uppercase text-primary">
+        <header className="mt-8">
+          <div className="type-kicker text-primary">
             Public story
           </div>
-          <h1 className="mt-3 font-serif text-[2.35rem] font-semibold leading-[1.08] text-ink max-sm:text-[1.8rem]">
+          <h1 className="type-display mt-3 text-[2.75rem] font-[620] text-ink max-sm:text-[2rem]">
             {story.title}
           </h1>
           {story.dek && (
-            <p className="mt-4 font-serif text-[1.0625rem] leading-[1.72] text-[#30343b]">
+            <p className="mt-4 font-serif text-[1.25rem] italic leading-[1.55] text-ink-soft">
               {story.dek}
             </p>
           )}
           {story.take && (
-            <div className="mt-3 rounded border border-primary/25 bg-primary/[0.04] px-4 py-3">
-              <div className="font-mono text-[0.625rem] font-semibold uppercase tracking-wider text-primary">
+            <div className="mt-5 border border-ink bg-accent-wash px-5 py-4">
+              <div className="type-kicker text-primary">
                 The take
               </div>
-              <p className="mt-1.5 font-serif text-[1rem] leading-[1.68] text-ink">
+              <p className="mt-2 font-serif text-[1.0625rem] leading-[1.62] text-ink-prose">
                 {story.take}
               </p>
             </div>
@@ -113,36 +113,36 @@ export default async function StoryPage({ params }: Params) {
             </p>
           )}
 
-          <div className="mt-5 grid grid-cols-2 gap-3 font-mono text-[0.6875rem] text-ink-faint sm:grid-cols-4">
+          <div className="mt-6 grid grid-cols-2 gap-x-4 gap-y-3 border-y border-line py-3 sm:grid-cols-4">
             <div>
-              <div className="text-ink">Issue</div>
+              <div className="type-kicker text-ink-faint">Issue</div>
               <TrackedLink
                 href={issueHref}
                 event="briefing_click"
                 eventProps={{ from: story.slug, date: story.issue_date }}
-                className="text-primary hover:underline"
+                className="mt-0.5 block font-mono text-[0.75rem] text-primary hover:underline"
               >
                 {story.issue_date}
               </TrackedLink>
             </div>
             <div>
-              <div className="text-ink">Sources</div>
-              <div>{story.source_refs.length}</div>
+              <div className="type-kicker text-ink-faint">Sources</div>
+              <div className="mt-0.5 font-mono text-[0.75rem] text-ink">{story.source_refs.length}</div>
             </div>
             <div>
-              <div className="text-ink">Confidence</div>
-              <div>{story.confidence}</div>
+              <div className="type-kicker text-ink-faint">Confidence</div>
+              <div className="mt-0.5 font-mono text-[0.75rem] text-ink">{story.confidence}</div>
             </div>
             <div>
-              <div className="text-ink">Redaction</div>
-              <div>{story.provenance.redaction_status}</div>
+              <div className="type-kicker text-ink-faint">Redaction</div>
+              <div className="mt-0.5 font-mono text-[0.75rem] text-ink">{story.provenance.redaction_status}</div>
             </div>
           </div>
         </header>
 
         {bodyMarkdown && (
           <section className="mt-7">
-            <h2 className="font-mono text-[0.6875rem] font-semibold uppercase text-ink">
+            <h2 className="type-kicker text-ink">
               Story
             </h2>
             <div className="mt-3">
@@ -153,7 +153,7 @@ export default async function StoryPage({ params }: Params) {
 
         {story.related_paths.length > 0 && (
           <section className="mt-8 border-t border-line pt-5">
-            <h2 className="font-mono text-[0.6875rem] font-semibold uppercase text-ink">
+            <h2 className="type-kicker text-ink">
               Related stories
             </h2>
             <p className="mt-1 font-mono text-[0.6875rem] text-ink-faint">
@@ -162,7 +162,7 @@ export default async function StoryPage({ params }: Params) {
             <ol className="mt-3 divide-y divide-line">
               {story.related_paths.slice(0, 8).map((related, index) => (
                 <li key={`${related.id}-${index}`} className="py-3">
-                  <div className="font-mono text-[0.625rem] font-semibold uppercase text-primary">
+                  <div className="type-kicker text-primary">
                     {(related.connector_labels || ['Connected']).join(' / ')}
                   </div>
                   {related.target_url ? (
@@ -174,14 +174,14 @@ export default async function StoryPage({ params }: Params) {
                         to: String(related.slug || related.target_url),
                         connectors: (related.connector_labels || []).join(' / '),
                       }}
-                      className="mt-1.5 block text-[0.9375rem] font-semibold text-ink hover:text-primary"
+                      className="type-display mt-1.5 block text-[1.125rem] font-[560] leading-snug text-ink hover:underline"
                     >
                       {related.title}
                     </TrackedLink>
                   ) : (
-                    <div className="mt-1.5 text-[0.9375rem] font-semibold text-ink">{related.title}</div>
+                    <div className="type-display mt-1.5 text-[1.125rem] font-[560] leading-snug text-ink">{related.title}</div>
                   )}
-                  <p className="mt-1 font-serif text-[0.9375rem] leading-[1.58] text-[#30343b]">
+                  <p className="mt-1 font-serif text-[0.9375rem] leading-[1.58] text-ink-prose">
                     {related.reason || related.summary}
                   </p>
                 </li>
@@ -191,7 +191,7 @@ export default async function StoryPage({ params }: Params) {
         )}
 
         <section className="mt-8 border-t border-line pt-5">
-          <h2 className="font-mono text-[0.6875rem] font-semibold uppercase text-ink">
+          <h2 className="type-kicker text-ink">
             Source trail
           </h2>
           <div className="mt-3 flex flex-wrap gap-2">
@@ -201,7 +201,7 @@ export default async function StoryPage({ params }: Params) {
                 href={`/source/${encodeURIComponent(source.domain)}`}
                 event="source_click"
                 eventProps={{ from: story.slug, domain: source.domain }}
-                className="inline-block rounded-lg border border-line px-2.5 py-1.5 font-mono text-[0.71875rem] text-primary hover:border-primary hover:bg-accent-wash"
+                className="inline-block rounded-sm border border-line bg-surface px-2.5 py-1.5 font-mono text-[0.6875rem] uppercase tracking-[0.08em] text-ink transition-colors hover:bg-panel hover:text-primary"
               >
                 {source.title || source.domain}
               </TrackedLink>
@@ -211,7 +211,7 @@ export default async function StoryPage({ params }: Params) {
 
         {story.entity_refs.length > 0 && (
           <section className="mt-8 border-t border-line pt-5">
-            <h2 className="font-mono text-[0.6875rem] font-semibold uppercase text-ink">
+            <h2 className="type-kicker text-ink">
               Entities
             </h2>
             <div className="mt-3 flex flex-wrap gap-2">
@@ -221,7 +221,7 @@ export default async function StoryPage({ params }: Params) {
                   href={`/e/${encodeURIComponent(entity.slug)}`}
                   event="entity_click"
                   eventProps={{ from: story.slug, entity: entity.slug }}
-                  className="inline-block rounded-lg border border-line px-2.5 py-1.5 font-mono text-[0.71875rem] text-primary hover:border-primary hover:bg-accent-wash"
+                  className="inline-block rounded-sm border border-line bg-surface px-2.5 py-1.5 font-mono text-[0.6875rem] uppercase tracking-[0.08em] text-ink transition-colors hover:bg-panel hover:text-primary"
                 >
                   {entity.name}
                 </TrackedLink>
@@ -232,7 +232,7 @@ export default async function StoryPage({ params }: Params) {
 
         {story.claim_evidence.length > 0 && (
           <section className="mt-8 border-t border-line pt-5">
-            <h2 className="font-mono text-[0.6875rem] font-semibold uppercase text-ink">
+            <h2 className="type-kicker text-ink">
               Claim evidence
             </h2>
             <ol className="mt-3 divide-y divide-line">
@@ -240,10 +240,10 @@ export default async function StoryPage({ params }: Params) {
                 const evidence = item as { claim?: string; source_url?: string; finding_id?: number | null }
                 return (
                   <li key={`${evidence.finding_id ?? index}-${evidence.claim ?? ''}`} className="py-3">
-                    <div className="font-serif text-[0.9375rem] leading-[1.58] text-[#30343b]">
+                    <div className="font-serif text-[0.9375rem] leading-[1.58] text-ink-prose">
                       {evidence.claim}
                     </div>
-                    <div className="mt-1 flex flex-wrap gap-3 font-mono text-[0.625rem] text-primary">
+                    <div className="type-kicker mt-1.5 flex flex-wrap gap-3 text-primary">
                       {evidence.finding_id != null && <Link href={`/f/${evidence.finding_id}`}>Finding {evidence.finding_id}</Link>}
                       {evidence.source_url && (
                         <TrackedLink
@@ -264,29 +264,29 @@ export default async function StoryPage({ params }: Params) {
         )}
 
         <section className="mt-8 border-t border-line pt-5">
-          <h2 className="font-mono text-[0.6875rem] font-semibold uppercase text-ink">
+          <h2 className="type-kicker text-ink">
             Provenance
           </h2>
-          <dl className="mt-3 grid grid-cols-1 gap-3 font-mono text-[0.6875rem] text-ink-faint sm:grid-cols-2">
-            <div>
-              <dt className="text-ink">Canonical issue</dt>
-              <dd>
+          <dl className="mt-4 grid grid-cols-1 gap-x-6 gap-y-2.5 sm:grid-cols-2">
+            <div className="rule-row pt-2.5">
+              <dt className="type-kicker text-ink-faint">Canonical issue</dt>
+              <dd className="mt-0.5 font-mono text-[0.75rem] text-ink">
                 <Link href={issueHref} className="text-primary hover:underline">
                   {story.issue_title || story.issue_date}
                 </Link>
               </dd>
             </div>
-            <div>
-              <dt className="text-ink">AI generated</dt>
-              <dd>{story.provenance.ai_generated ? 'yes' : 'no'}</dd>
+            <div className="rule-row pt-2.5">
+              <dt className="type-kicker text-ink-faint">AI generated</dt>
+              <dd className="mt-0.5 font-mono text-[0.75rem] text-ink">{story.provenance.ai_generated ? 'yes' : 'no'}</dd>
             </div>
-            <div>
-              <dt className="text-ink">Story unit</dt>
-              <dd>{story.provenance.source_story_unit_id || story.provenance.source_finding_ids?.join(', ') || 'site artifact'}</dd>
+            <div className="rule-row pt-2.5">
+              <dt className="type-kicker text-ink-faint">Story unit</dt>
+              <dd className="mt-0.5 font-mono text-[0.75rem] text-ink">{story.provenance.source_story_unit_id || story.provenance.source_finding_ids?.join(', ') || 'site artifact'}</dd>
             </div>
-            <div>
-              <dt className="text-ink">Labels</dt>
-              <dd>{story.labels.length ? story.labels.join(', ') : 'source-backed'}</dd>
+            <div className="rule-row pt-2.5">
+              <dt className="type-kicker text-ink-faint">Labels</dt>
+              <dd className="mt-0.5 font-mono text-[0.75rem] text-ink">{story.labels.length ? story.labels.join(', ') : 'source-backed'}</dd>
             </div>
           </dl>
         </section>

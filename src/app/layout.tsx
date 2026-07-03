@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter, JetBrains_Mono, Newsreader } from 'next/font/google'
+import { Archivo, Fraunces, IBM_Plex_Mono, Newsreader } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { WebVitalsTracker } from '@/components/analytics/web-vitals'
 import { SearchHotkey } from '@/components/search/search-hotkey'
@@ -7,8 +7,20 @@ import { TooltipProvider } from '@/components/ui/tooltip'
 import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL } from '@/lib/site'
 import './globals.css'
 
-const inter = Inter({ variable: '--font-inter', subsets: ['latin'], display: 'swap' })
-const jetbrainsMono = JetBrains_Mono({ variable: '--font-jetbrains', subsets: ['latin'], display: 'swap' })
+const archivo = Archivo({ variable: '--font-archivo', subsets: ['latin'], display: 'swap' })
+const fraunces = Fraunces({
+  variable: '--font-fraunces',
+  subsets: ['latin'],
+  style: ['normal', 'italic'],
+  axes: ['opsz', 'SOFT', 'WONK'],
+  display: 'swap',
+})
+const plexMono = IBM_Plex_Mono({
+  variable: '--font-plex-mono',
+  subsets: ['latin'],
+  weight: ['400', '500', '600'],
+  display: 'swap',
+})
 const newsreader = Newsreader({
   variable: '--font-newsreader',
   subsets: ['latin'],
@@ -53,7 +65,7 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: '#fbfcfd',
+  themeColor: '#f7f3ea',
   viewportFit: 'cover',
 }
 
@@ -62,7 +74,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${inter.variable} ${jetbrainsMono.variable} ${newsreader.variable}`}
+      className={`${archivo.variable} ${fraunces.variable} ${plexMono.variable} ${newsreader.variable}`}
     >
       <body suppressHydrationWarning className="font-sans antialiased">
         <TooltipProvider>{children}</TooltipProvider>

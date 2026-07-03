@@ -8,27 +8,33 @@
 @custom-variant dark (&:is(.dark *));
 
 /* ───────────────────────────────────────────────────────────
-   SIGNAL design system (light only).
-   Inter (UI) · JetBrains Mono (numerals/labels) · Newsreader (serif, briefings).
-   One cobalt accent. No left-border callouts. App-feel mobile.
+   BROADSHEET design system (light only).
+   Fraunces (display) · Newsreader (body serif) · Archivo (UI sans)
+   · IBM Plex Mono (data voice).
+   Warm newsprint paper, ink, hairline rules instead of cards,
+   one oxblood accent. Signature primitive: the ruled row.
+   No left-border callouts. App-feel mobile.
    ─────────────────────────────────────────────────────────── */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
 
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-mono: var(--font-jetbrains), ui-monospace, "SF Mono", Menlo, monospace;
+  --font-sans: var(--font-archivo), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, "SF Mono", Menlo, monospace;
   --font-serif: var(--font-newsreader), Georgia, "Times New Roman", serif;
+  --font-display: var(--font-fraunces), var(--font-newsreader), Georgia, serif;
 
-  /* Signal surface + ink scale (utilities: bg-paper, text-ink-soft, border-line, …) */
+  /* Broadsheet surface + ink scale (utilities: bg-paper, text-ink-soft, border-line, …) */
   --color-paper: var(--paper);
   --color-surface: var(--surface);
   --color-panel: var(--panel);
   --color-ink: var(--ink);
+  --color-ink-prose: var(--ink-prose);
   --color-ink-soft: var(--ink-soft);
   --color-ink-faint: var(--ink-faint);
   --color-line: var(--line);
   --color-line-soft: var(--line-soft);
+  --color-line-strong: var(--line-strong);
   --color-accent-wash: var(--accent-wash);
   --color-spine: var(--spine);
   --color-ok: var(--ok);
@@ -62,7 +68,7 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  /* legacy aliases retained so existing components keep resolving (now Signal-toned) */
+  /* legacy aliases retained so existing components keep resolving (now Broadsheet-toned) */
   --color-navy: var(--navy);
   --color-olive: var(--olive);
 
@@ -73,24 +79,29 @@
   --radius-2xl: calc(var(--radius) * 1.6);
   --radius-3xl: calc(var(--radius) * 2);
   --radius-4xl: calc(var(--radius) * 2.4);
+
+  /* Rules do the lifting; shadows are near-invisible paper lift only. */
+  --shadow-lift: 0 1px 0 var(--line);
 }
 
 :root {
-  /* Signal palette (prototype source of truth) */
-  --paper: #fbfcfd;
-  --surface: #ffffff;
-  --panel: #f4f6f9;
-  --ink: #0b0d12;
-  --ink-soft: #545a64;
-  --ink-faint: #929aa5;
-  --line: #ebedf1;
-  --line-soft: #f3f4f7;
-  --accent: #2f6bff;       /* cobalt */
-  --accent-wash: #eef3ff;
-  --spine: #f5f7fa;
-  --ok: #0a7d4f;
+  /* Broadsheet palette — warm newsprint, ink, oxblood */
+  --paper: #f7f3ea;
+  --surface: #fdfbf5;
+  --panel: #efe9db;
+  --ink: #171310;
+  --ink-prose: #2b251d;
+  --ink-soft: #5c5443;
+  --ink-faint: #8d8371;
+  --line: #ddd4c2;
+  --line-soft: #e9e2d2;
+  --line-strong: var(--ink);
+  --accent: #8a2318;       /* oxblood */
+  --accent-wash: #f0e2d8;
+  --spine: #f1ecdf;
+  --ok: #3d5a37;
 
-  /* shadcn token contract → Signal values */
+  /* shadcn token contract → Broadsheet values */
   --background: var(--paper);
   --foreground: var(--ink);
   --card: var(--surface);
@@ -98,42 +109,42 @@
   --popover: var(--surface);
   --popover-foreground: var(--ink);
   --primary: var(--accent);
-  --primary-foreground: #ffffff;
+  --primary-foreground: #fdfbf5;
   --secondary: var(--panel);
   --secondary-foreground: var(--ink);
   --muted: var(--spine);
   --muted-foreground: var(--ink-soft);
   --accent-foreground: var(--accent);
-  /* shadcn "accent" = subtle interactive bg → Signal accent-wash */
+  /* shadcn "accent" = subtle interactive bg → Broadsheet accent-wash */
   --color-accent-bg: var(--accent-wash);
-  --destructive: #d92d20;
-  --destructive-foreground: #ffffff;
+  --destructive: #9f2d20;
+  --destructive-foreground: #fdfbf5;
   --border: var(--line);
   --input: var(--line);
   --ring: var(--accent);
-  --radius: 0.75rem;       /* 12px */
+  --radius: 0.125rem;      /* 2px — sharp, printed */
 
-  /* legacy aliases mapped onto Signal so old utilities don't break */
-  --navy: var(--accent);
+  /* legacy aliases mapped onto Broadsheet so old utilities don't break */
+  --navy: #3e4c63;
   --olive: var(--ok);
 
   --sidebar: var(--panel);
   --sidebar-foreground: var(--ink-soft);
   --sidebar-primary: var(--accent);
-  --sidebar-primary-foreground: #ffffff;
+  --sidebar-primary-foreground: #fdfbf5;
   --sidebar-accent: var(--accent-wash);
   --sidebar-accent-foreground: var(--accent);
   --sidebar-border: var(--line);
   --sidebar-ring: var(--accent);
 
-  --chart-1: var(--accent);
-  --chart-2: var(--ok);
-  --chart-3: #7c5cff;
-  --chart-4: #e8833a;
-  --chart-5: #545a64;
+  --chart-1: #8a2318;
+  --chart-2: #3d5a37;
+  --chart-3: #a8781f;
+  --chart-4: #3e4c63;
+  --chart-5: #6e6552;
 }
 
-/* shadcn "accent" surface token resolves to the wash, not the cobalt text color */
+/* shadcn "accent" surface token resolves to the wash, not the oxblood text color */
 @theme inline {
   --color-accent: var(--accent-wash);
 }
@@ -152,9 +163,80 @@
     -webkit-tap-highlight-color: transparent;
     overscroll-behavior-y: none;
   }
+  /* Print grain — the whole page reads as paper, not a screen. */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    pointer-events: none;
+    opacity: 0.032;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
   h1, h2, h3, h4 {
     text-wrap: balance;
-    letter-spacing: -0.01em;
+  }
+}
+
+/* ── Broadsheet primitives ────────────────────────────────────
+   Layered as components so Tailwind utilities (leading-*, text-*,
+   tracking-*, …) can override any single property at call sites. */
+@layer components {
+  /* Scotch rule — the classic thick-over-thin newspaper section rule. */
+  .rule-scotch {
+    border-top: 3px solid var(--ink);
+    position: relative;
+  }
+  .rule-scotch::before {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 0;
+    right: 0;
+    border-top: 1px solid var(--ink);
+  }
+
+  /* Hairline row rule — the repeated feed primitive. */
+  .rule-row {
+    border-top: 1px solid var(--line);
+  }
+
+  /* Ghost numeral — oversized Fraunces ranking figures. */
+  .numeral-ghost {
+    font-family: var(--font-fraunces), Georgia, serif;
+    font-weight: 320;
+    font-variant-numeric: lining-nums;
+    line-height: 0.8;
+    letter-spacing: -0.04em;
+    color: color-mix(in oklab, var(--ink) 22%, transparent);
+  }
+
+  /* Display headline voice — Fraunces at high optical size. */
+  .type-display {
+    font-family: var(--font-fraunces), Georgia, serif;
+    font-variation-settings: "opsz" 90, "SOFT" 0, "WONK" 0;
+    letter-spacing: -0.015em;
+    line-height: 1.04;
+    text-wrap: balance;
+  }
+
+  /* Kicker / folio line — letterspaced Plex Mono caps, no dots, no bars. */
+  .type-kicker {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+  }
+
+  /* Duotone plate — thumbnails print in ink until inspected. */
+  .plate-duotone {
+    filter: grayscale(1) sepia(0.22) contrast(1.05) brightness(0.98);
+    transition: filter 0.25s ease;
+  }
+  a:hover .plate-duotone,
+  .plate-duotone:hover {
+    filter: none;
   }
 }
 
@@ -175,7 +257,7 @@
   background: var(--surface); color: var(--ink);
   font-family: var(--font-mono); font-size: 0.6875rem; font-weight: 600;
   text-transform: uppercase; letter-spacing: 0.12em;
-  border-radius: 0.5rem;
+  border-radius: var(--radius);
   outline: 2px solid var(--ring); outline-offset: 2px;
 }
 
@@ -215,28 +297,45 @@ input:autofill {
 }
 
 /* ───────────────────────────────────────────────────────────
-   Briefing reading style — Newsreader serif, Signal-toned.
-   (Selector name retained for the existing report viewer; the
-   dedicated briefing component is rebuilt in T5. No left borders.)
+   Briefing reading style — Newsreader serif body, Fraunces
+   display headings, scotch-rule section breaks.
+   (Selector name retained for the existing report viewer.)
    ─────────────────────────────────────────────────────────── */
 .streamdown-wire-room {
   font-family: var(--font-serif);
   font-size: 1.0625rem;
   line-height: 1.72;
-  color: #23262c;
+  color: var(--ink-prose);
 }
 .streamdown-wire-room [data-streamdown="heading-1"],
 .streamdown-wire-room [data-streamdown="heading-2"],
 .streamdown-wire-room [data-streamdown="heading-3"] {
-  font-family: var(--font-mono);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--accent);
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-variation-settings: "opsz" 60, "SOFT" 0, "WONK" 0;
+  font-weight: 560;
+  letter-spacing: -0.01em;
+  color: var(--ink);
 }
-.streamdown-wire-room [data-streamdown="heading-1"] { font-size: 0.75rem; margin: 0 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--line); }
-.streamdown-wire-room [data-streamdown="heading-2"] { font-size: 0.6875rem; margin: 2.25rem 0 0; padding-bottom: 0.5rem; border-bottom: 1px solid var(--line); }
-.streamdown-wire-room [data-streamdown="heading-3"] { font-size: 0.6875rem; margin: 1.5rem 0 0.5rem; }
+.streamdown-wire-room [data-streamdown="heading-1"] {
+  font-size: 1.75rem; line-height: 1.15;
+  margin: 0 0 1.25rem; padding-top: 0.75rem;
+  border-top: 3px solid var(--ink);
+  position: relative;
+}
+.streamdown-wire-room [data-streamdown="heading-1"]::before {
+  content: "";
+  position: absolute; top: 2px; left: 0; right: 0;
+  border-top: 1px solid var(--ink);
+}
+.streamdown-wire-room [data-streamdown="heading-2"] {
+  font-size: 1.375rem; line-height: 1.2;
+  margin: 2.5rem 0 0.75rem; padding-top: 0.625rem;
+  border-top: 1px solid var(--ink);
+}
+.streamdown-wire-room [data-streamdown="heading-3"] {
+  font-size: 1.125rem; line-height: 1.25;
+  margin: 1.75rem 0 0.5rem;
+}
 .streamdown-wire-room p { margin: 0 0 1.125rem; }
 .streamdown-wire-room strong { color: var(--ink); font-weight: 600; }
 .streamdown-wire-room [data-streamdown="link"] {
@@ -252,12 +351,13 @@ input:autofill {
 .streamdown-wire-room [data-streamdown="blockquote"] {
   font-family: var(--font-serif);
   font-style: italic;
-  color: var(--ink-soft);
-  border: 1px solid var(--line);
-  background: var(--panel);
-  border-radius: var(--radius);
-  padding: 0.75rem 1rem;
-  margin: 1.25rem 0;
+  font-size: 1.1875rem;
+  color: var(--ink-prose);
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+  padding: 1rem 1.5rem;
+  margin: 1.5rem 0;
+  text-align: center;
 }
 .streamdown-wire-room [data-streamdown="code-block"] {
   font-family: var(--font-mono);
@@ -270,7 +370,7 @@ input:autofill {
   font-family: var(--font-mono);
   color: var(--accent);
   background: var(--accent-wash);
-  border-radius: 0.375rem;
+  border-radius: var(--radius);
   padding: 0.125rem 0.375rem;
   font-size: 0.8125rem;
 }
@@ -280,13 +380,16 @@ input:autofill {
 }
 .streamdown-wire-room th {
   text-align: left; padding: 0.5rem 0.75rem;
-  border-bottom: 2px solid var(--line);
-  font-family: var(--font-mono); font-weight: 700; font-size: 0.625rem;
-  text-transform: uppercase; letter-spacing: 0.12em;
-  background: var(--panel);
+  border-bottom: 2px solid var(--ink);
+  font-family: var(--font-mono); font-weight: 600; font-size: 0.625rem;
+  text-transform: uppercase; letter-spacing: 0.14em;
+  color: var(--ink);
 }
 .streamdown-wire-room td {
   padding: 0.5rem 0.75rem;
-  border-bottom: 1px solid var(--line-soft);
+  border-bottom: 1px solid var(--line);
 }
-.streamdown-wire-room hr { margin: 1.75rem 0; border: 0; border-top: 1px solid var(--line); }
+.streamdown-wire-room hr {
+  margin: 1.75rem auto; border: 0; width: 8rem;
+  border-top: 1px solid var(--ink);
+}

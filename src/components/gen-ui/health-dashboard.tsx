@@ -21,11 +21,11 @@ function MetricCard({ label, value, sub, color }: { label: string; value: string
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`bg-card border border-border dossier-card px-4 py-3 flex-1 min-w-[100px] border-l-2 ${color}`}
+      className="border border-line bg-surface px-4 py-3 flex-1 min-w-[100px]"
     >
-      <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">{label}</p>
-      <p className="text-lg font-bold text-foreground">{value}</p>
-      {sub && <p className="text-[10px] text-muted-foreground mt-0.5">{sub}</p>}
+      <p className="type-kicker text-ink-faint">{label}</p>
+      <p className={`type-display text-[22px] font-[560] ${color}`}>{value}</p>
+      {sub && <p className="type-kicker text-ink-faint mt-0.5">{sub}</p>}
     </motion.div>
   )
 }
@@ -79,11 +79,11 @@ export function HealthDashboard({ data }: { data: unknown }) {
           label="Quality Score"
           value={`${latestScore}%`}
           sub={trend > 0 ? `+${trend}% from prev` : trend < 0 ? `${trend}% from prev` : 'stable'}
-          color="border-l-olive"
+          color="text-ok"
         />
-        <MetricCard label="Avg Score" value={`${avgScore}%`} color="border-l-navy" />
-        <MetricCard label="Pending" value={health.approval_summary?.pending ?? 0} color="border-l-chart-4" />
-        <MetricCard label="Decided" value={health.approval_summary?.decided ?? 0} color="border-l-olive" />
+        <MetricCard label="Avg Score" value={`${avgScore}%`} color="text-ink" />
+        <MetricCard label="Pending" value={health.approval_summary?.pending ?? 0} color="text-chart-3" />
+        <MetricCard label="Decided" value={health.approval_summary?.decided ?? 0} color="text-ink" />
       </div>
 
       {qualityData.length > 1 && (
@@ -91,39 +91,39 @@ export function HealthDashboard({ data }: { data: unknown }) {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-card border border-border dossier-card p-4 grid-paper"
+          className="border border-line bg-surface p-4"
         >
-          <p className="text-[10px] text-muted-foreground mb-3 uppercase tracking-wider font-bold">
+          <p className="type-kicker text-ink mb-3">
             Pipeline quality trend
           </p>
           <ResponsiveContainer width="100%" height={160}>
             <LineChart data={qualityData}>
               <XAxis
                 dataKey="date"
-                tick={{ fill: 'var(--muted-foreground)', fontSize: 10 }}
+                tick={{ fill: 'var(--ink-faint)', fontSize: 10, fontFamily: 'var(--font-mono)' }}
                 axisLine={false}
                 tickLine={false}
                 interval="preserveStartEnd"
               />
               <YAxis
                 domain={[0, 100]}
-                tick={{ fill: 'var(--muted-foreground)', fontSize: 10 }}
+                tick={{ fill: 'var(--ink-faint)', fontSize: 10, fontFamily: 'var(--font-mono)' }}
                 axisLine={false}
                 tickLine={false}
                 width={30}
                 tickFormatter={(v) => `${v}%`}
               />
-              <ReferenceLine y={70} stroke="var(--olive)" strokeDasharray="3 3" strokeOpacity={0.4} />
-              <ReferenceLine y={40} stroke="var(--chart-4)" strokeDasharray="3 3" strokeOpacity={0.4} />
+              <ReferenceLine y={70} stroke="var(--chart-2)" strokeDasharray="3 3" strokeOpacity={0.4} />
+              <ReferenceLine y={40} stroke="var(--chart-3)" strokeDasharray="3 3" strokeOpacity={0.4} />
               <Tooltip
                 content={({ active, payload, label }) => {
                   if (!active || !payload?.length) return null
                   const d = payload[0].payload
                   return (
-                    <div className="bg-popover border border-border px-3 py-2 text-xs shadow-lg">
-                      <p className="text-muted-foreground">{label}</p>
-                      <p className="text-olive font-bold">{d.score}% quality</p>
-                      <p className="text-muted-foreground">{d.findings} findings / {d.sources} sources</p>
+                    <div className="bg-surface border border-line px-3 py-2 font-mono text-xs">
+                      <p className="text-ink-soft">{label}</p>
+                      <p className="text-chart-2 font-semibold">{d.score}% quality</p>
+                      <p className="text-ink-soft">{d.findings} findings / {d.sources} sources</p>
                     </div>
                   )
                 }}
@@ -131,10 +131,10 @@ export function HealthDashboard({ data }: { data: unknown }) {
               <Line
                 type="monotone"
                 dataKey="score"
-                stroke="var(--olive)"
+                stroke="var(--chart-2)"
                 strokeWidth={2}
-                dot={{ r: 3, fill: 'var(--olive)', stroke: 'var(--background)', strokeWidth: 2 }}
-                activeDot={{ r: 5, fill: 'var(--olive)', stroke: 'var(--background)', strokeWidth: 2 }}
+                dot={{ r: 3, fill: 'var(--chart-2)', stroke: 'var(--background)', strokeWidth: 2 }}
+                activeDot={{ r: 5, fill: 'var(--chart-2)', stroke: 'var(--background)', strokeWidth: 2 }}
               />
             </LineChart>
           </ResponsiveContainer>
@@ -146,26 +146,16 @@ export function HealthDashboard({ data }: { data: unknown }) {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
-          className="bg-card border border-border dossier-card p-4 grid-paper"
+          className="border border-line bg-surface p-4"
         >
-          <p className="text-[10px] text-muted-foreground mb-3 uppercase tracking-wider font-bold">
+          <p className="type-kicker text-ink mb-3">
             Daily findings volume
           </p>
           <ResponsiveContainer width="100%" height={120}>
             <AreaChart data={findingsData}>
-              <defs>
-                <linearGradient id="totalGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="var(--navy)" stopOpacity={0.2} />
-                  <stop offset="95%" stopColor="var(--navy)" stopOpacity={0} />
-                </linearGradient>
-                <linearGradient id="hvGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="var(--chart-4)" stopOpacity={0.2} />
-                  <stop offset="95%" stopColor="var(--chart-4)" stopOpacity={0} />
-                </linearGradient>
-              </defs>
               <XAxis
                 dataKey="date"
-                tick={{ fill: 'var(--muted-foreground)', fontSize: 10 }}
+                tick={{ fill: 'var(--ink-faint)', fontSize: 10, fontFamily: 'var(--font-mono)' }}
                 axisLine={false}
                 tickLine={false}
                 interval="preserveStartEnd"
@@ -175,21 +165,21 @@ export function HealthDashboard({ data }: { data: unknown }) {
                 content={({ active, payload, label }) => {
                   if (!active || !payload?.length) return null
                   return (
-                    <div className="bg-popover border border-border px-3 py-2 text-xs shadow-lg">
-                      <p className="text-muted-foreground">{label}</p>
-                      <p className="text-navy font-bold">{payload[0]?.value} total</p>
-                      <p className="text-chart-4">{payload[1]?.value} high-value</p>
+                    <div className="bg-surface border border-line px-3 py-2 font-mono text-xs">
+                      <p className="text-ink-soft">{label}</p>
+                      <p className="text-chart-4 font-semibold">{payload[0]?.value} total</p>
+                      <p className="text-chart-3">{payload[1]?.value} high-value</p>
                     </div>
                   )
                 }}
               />
-              <Area type="monotone" dataKey="findings" stroke="var(--navy)" strokeWidth={1.5} fill="url(#totalGrad)" dot={false} />
-              <Area type="monotone" dataKey="highValue" stroke="var(--chart-4)" strokeWidth={1.5} fill="url(#hvGrad)" dot={false} />
+              <Area type="monotone" dataKey="findings" stroke="var(--chart-4)" strokeWidth={1.5} fill="var(--chart-4)" fillOpacity={0.12} dot={false} />
+              <Area type="monotone" dataKey="highValue" stroke="var(--chart-3)" strokeWidth={1.5} fill="var(--chart-3)" fillOpacity={0.12} dot={false} />
             </AreaChart>
           </ResponsiveContainer>
-          <div className="flex gap-4 mt-2 text-[10px] text-muted-foreground uppercase tracking-wider">
-            <span className="flex items-center gap-1"><span className="inline-block size-2 bg-navy" /> Total</span>
-            <span className="flex items-center gap-1"><span className="inline-block size-2 bg-chart-4" /> High-value</span>
+          <div className="type-kicker flex gap-4 mt-2 text-ink-faint">
+            <span className="flex items-center gap-1"><span className="inline-block size-2 bg-chart-4" /> Total</span>
+            <span className="flex items-center gap-1"><span className="inline-block size-2 bg-chart-3" /> High-value</span>
           </div>
         </motion.div>
       )}
@@ -199,9 +189,9 @@ export function HealthDashboard({ data }: { data: unknown }) {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="bg-card border border-border dossier-card p-4 grid-paper"
+          className="border border-line bg-surface p-4"
         >
-          <p className="text-[10px] text-muted-foreground mb-3 uppercase tracking-wider font-bold">
+          <p className="type-kicker text-ink mb-3">
             Agent activity
           </p>
           <ResponsiveContainer width="100%" height={agentData.length * 26 + 8}>
@@ -210,7 +200,7 @@ export function HealthDashboard({ data }: { data: unknown }) {
               <YAxis
                 dataKey="agent"
                 type="category"
-                tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }}
+                tick={{ fill: 'var(--ink-faint)', fontSize: 11, fontFamily: 'var(--font-mono)' }}
                 axisLine={false}
                 tickLine={false}
                 width={65}
@@ -220,23 +210,23 @@ export function HealthDashboard({ data }: { data: unknown }) {
                   if (!active || !payload?.length) return null
                   const d = payload[0]?.payload
                   return (
-                    <div className="bg-popover border border-border px-3 py-2 text-xs shadow-lg">
-                      <p className="text-olive">{d.success} success</p>
-                      {d.warning > 0 && <p className="text-chart-4">{d.warning} warnings</p>}
-                      {d.error > 0 && <p className="text-primary">{d.error} errors</p>}
+                    <div className="bg-surface border border-line px-3 py-2 font-mono text-xs">
+                      <p className="text-chart-2">{d.success} success</p>
+                      {d.warning > 0 && <p className="text-chart-3">{d.warning} warnings</p>}
+                      {d.error > 0 && <p className="text-chart-1">{d.error} errors</p>}
                     </div>
                   )
                 }}
               />
-              <Bar dataKey="success" stackId="a" fill="var(--olive)" fillOpacity={0.6} barSize={14} />
-              <Bar dataKey="warning" stackId="a" fill="var(--chart-4)" fillOpacity={0.6} barSize={14} />
-              <Bar dataKey="error" stackId="a" fill="var(--primary)" fillOpacity={0.6} radius={[0, 2, 2, 0]} barSize={14} />
+              <Bar dataKey="success" stackId="a" fill="var(--chart-2)" fillOpacity={0.7} barSize={14} />
+              <Bar dataKey="warning" stackId="a" fill="var(--chart-3)" fillOpacity={0.7} barSize={14} />
+              <Bar dataKey="error" stackId="a" fill="var(--chart-1)" fillOpacity={0.7} barSize={14} />
             </BarChart>
           </ResponsiveContainer>
-          <div className="flex gap-4 mt-2 text-[10px] text-muted-foreground uppercase tracking-wider">
-            <span className="flex items-center gap-1"><span className="inline-block size-2 bg-olive" /> Success</span>
-            <span className="flex items-center gap-1"><span className="inline-block size-2 bg-chart-4" /> Warning</span>
-            <span className="flex items-center gap-1"><span className="inline-block size-2 bg-primary" /> Error</span>
+          <div className="type-kicker flex gap-4 mt-2 text-ink-faint">
+            <span className="flex items-center gap-1"><span className="inline-block size-2 bg-chart-2" /> Success</span>
+            <span className="flex items-center gap-1"><span className="inline-block size-2 bg-chart-3" /> Warning</span>
+            <span className="flex items-center gap-1"><span className="inline-block size-2 bg-chart-1" /> Error</span>
           </div>
         </motion.div>
       )}
@@ -246,29 +236,28 @@ export function HealthDashboard({ data }: { data: unknown }) {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.25 }}
-          className="bg-card border border-border dossier-card p-4"
+          className="border border-line bg-surface p-4"
         >
-          <p className="text-[10px] text-muted-foreground mb-3 uppercase tracking-wider font-bold">
+          <p className="type-kicker text-ink mb-3">
             Recent errors &amp; warnings
           </p>
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col">
             {health.recent_errors.slice(0, 5).map((e, i) => (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, x: -8 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.3 + i * 0.05 }}
-                className="text-xs border-l-2 pl-3 py-1"
-                style={{ borderColor: e.note_type === 'error' ? 'var(--primary)' : e.note_type === 'warning' ? 'var(--chart-4)' : 'var(--navy)' }}
+                className="rule-row text-xs py-2"
               >
-                <div className="flex items-center gap-2 text-muted-foreground mb-0.5 text-[10px] uppercase tracking-wider">
-                  <span className="font-bold" style={{ color: e.note_type === 'error' ? 'var(--primary)' : e.note_type === 'warning' ? 'var(--chart-4)' : 'var(--navy)' }}>
+                <div className="type-kicker flex items-center gap-2 text-ink-faint mb-0.5">
+                  <span className="font-semibold" style={{ color: e.note_type === 'error' ? 'var(--chart-1)' : e.note_type === 'warning' ? 'var(--chart-3)' : 'var(--chart-4)' }}>
                     [{e.note_type}]
                   </span>
                   <span>{e.agent?.replace('-researcher', '')}</span>
                   <span>{e.run_date}</span>
                 </div>
-                <p className="text-muted-foreground text-[11px]">{e.content?.substring(0, 150)}</p>
+                <p className="text-ink-soft text-[11px]">{e.content?.substring(0, 150)}</p>
               </motion.div>
             ))}
           </div>

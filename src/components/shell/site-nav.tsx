@@ -22,8 +22,8 @@ export function HeaderNav() {
             key={t.href}
             href={t.href}
             aria-current={on ? 'page' : undefined}
-            className={`rounded-lg px-3 py-1.5 font-mono text-[0.6875rem] font-semibold uppercase tracking-[0.06em] transition-colors ${
-              on ? 'bg-accent-wash text-primary' : 'text-ink-faint hover:bg-spine hover:text-ink'
+            className={`type-kicker px-3 py-1.5 transition-colors ${
+              on ? 'text-primary' : 'text-ink-soft hover:text-ink'
             }`}
           >
             {t.label}
@@ -58,11 +58,11 @@ export function BottomTabBar() {
             href={t.href}
             aria-current={on ? 'page' : undefined}
             className={`flex flex-1 flex-col items-center justify-center gap-1 pb-1.5 pt-2.5 transition-transform active:scale-90 ${
-              on ? 'text-primary' : 'text-ink-faint'
+              on ? 'text-primary' : 'text-ink-soft'
             }`}
           >
             <Icon size={24} strokeWidth={on ? 2.4 : 1.9} aria-hidden />
-            <span className="text-[0.625rem] font-semibold tracking-[0.01em]">{t.label}</span>
+            <span className="font-mono text-[0.625rem] font-semibold uppercase tracking-[0.08em]">{t.label}</span>
           </Link>
         )
       })}

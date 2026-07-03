@@ -68,41 +68,41 @@ export default async function SourcePage({ params }: Params) {
       <main className="mx-auto max-w-[760px] px-8 pb-24 pt-9 max-sm:px-5">
         <Link
           href="/"
-          className="font-mono text-[0.6875rem] font-semibold uppercase tracking-[0.08em] text-primary hover:underline"
+          className="type-kicker text-primary hover:underline"
         >
           The Wire
         </Link>
 
-        <header className="mt-8 border-b border-line pb-6">
-          <div className="flex items-center gap-2 font-mono text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-primary">
+        <header className="mt-8">
+          <div className="type-kicker flex items-center gap-2 text-primary">
             <SourceFavicon url={`https://${domain}`} name={displayName} />
             Source trail
           </div>
-          <h1 className="mt-3 font-serif text-[2.25rem] font-semibold leading-[1.08] tracking-[-0.02em] text-ink max-sm:text-[1.75rem]">
+          <h1 className="type-display mt-3 text-[2.75rem] font-[620] text-ink max-sm:text-[2rem]">
             {displayName}
           </h1>
-          <p className="mt-3 max-w-[36rem] font-serif text-[1rem] leading-[1.72] text-[#30343b]">
+          <p className="mt-4 max-w-[36rem] font-serif text-[1.125rem] italic leading-[1.6] text-ink-soft">
             Public MindPattern findings, entities, and graph evidence that cite this source.
           </p>
 
-          <div className="mt-5 grid grid-cols-2 gap-3 font-mono text-[0.6875rem] text-ink-faint sm:grid-cols-4">
+          <div className="mt-6 grid grid-cols-2 gap-x-4 gap-y-3 border-y border-line py-3 sm:grid-cols-4">
             <div>
-              <div className="text-ink">Findings</div>
-              <div>{source?.counts?.findings ?? findings.length}</div>
+              <div className="type-kicker text-ink-faint">Findings</div>
+              <div className="mt-0.5 font-mono text-[0.75rem] text-ink">{source?.counts?.findings ?? findings.length}</div>
             </div>
             {source && (
               <>
                 <div>
-                  <div className="text-ink">All-time hits</div>
-                  <div>{source.hit_count.toLocaleString()}</div>
+                  <div className="type-kicker text-ink-faint">All-time hits</div>
+                  <div className="mt-0.5 font-mono text-[0.75rem] text-ink">{source.hit_count.toLocaleString()}</div>
                 </div>
                 <div>
-                  <div className="text-ink">High value</div>
-                  <div>{source.high_value_count.toLocaleString()}</div>
+                  <div className="type-kicker text-ink-faint">High value</div>
+                  <div className="mt-0.5 font-mono text-[0.75rem] text-ink">{source.high_value_count.toLocaleString()}</div>
                 </div>
                 <div>
-                  <div className="text-ink">Last seen</div>
-                  <div>{source.last_seen}</div>
+                  <div className="type-kicker text-ink-faint">Last seen</div>
+                  <div className="mt-0.5 font-mono text-[0.75rem] text-ink">{source.last_seen}</div>
                 </div>
               </>
             )}
@@ -111,7 +111,7 @@ export default async function SourcePage({ params }: Params) {
 
         {entities.length > 0 && (
           <section className="mt-7">
-            <h2 className="font-mono text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-ink">
+            <h2 className="type-kicker text-ink">
               Connected entities
             </h2>
             <div className="mt-3 flex flex-wrap gap-2">
@@ -119,7 +119,7 @@ export default async function SourcePage({ params }: Params) {
                 <Link
                   key={entity.slug}
                   href={`/e/${encodeURIComponent(entity.slug)}`}
-                  className="inline-block rounded-lg border border-line px-2.5 py-1.5 font-mono text-[0.71875rem] text-primary hover:border-primary hover:bg-accent-wash"
+                  className="inline-block rounded-sm border border-line bg-surface px-2.5 py-1.5 font-mono text-[0.6875rem] uppercase tracking-[0.08em] text-ink transition-colors hover:bg-panel hover:text-primary"
                 >
                   {entity.name}
                 </Link>
@@ -129,7 +129,7 @@ export default async function SourcePage({ params }: Params) {
         )}
 
         <section className="mt-7">
-          <h2 className="font-mono text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-ink">
+          <h2 className="type-kicker text-ink">
             Related findings
           </h2>
           <ol className="mt-3 divide-y divide-line">
@@ -137,15 +137,15 @@ export default async function SourcePage({ params }: Params) {
               <li key={finding.id}>
                 <Link
                   href={`/f/${finding.id}`}
-                  className="block py-4 transition-colors hover:bg-accent-wash"
+                  className="block py-4 transition-colors hover:bg-spine"
                 >
-                  <div className="font-mono text-[0.625rem] font-semibold uppercase tracking-[0.08em] text-primary">
+                  <div className="type-kicker text-primary">
                     {finding.run_date} / {sectionLabel(finding.agent)}
                   </div>
-                  <h3 className="mt-1.5 text-[1rem] font-semibold leading-snug text-ink">
+                  <h3 className="type-display mt-1.5 text-[1.125rem] font-[560] leading-snug text-ink">
                     {finding.title}
                   </h3>
-                  <p className="mt-2 line-clamp-3 font-serif text-[0.9375rem] leading-[1.58] text-[#30343b]">
+                  <p className="mt-2 line-clamp-3 font-serif text-[0.9375rem] leading-[1.58] text-ink-prose">
                     {finding.summary}
                   </p>
                 </Link>
@@ -159,7 +159,7 @@ export default async function SourcePage({ params }: Params) {
             href={firstFinding.source_url}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-8 inline-block rounded-lg border border-line px-3 py-2 font-mono text-[0.71875rem] text-primary hover:border-primary hover:bg-accent-wash"
+            className="mt-8 inline-block rounded-sm border border-ink px-3.5 py-2 font-mono text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-ink transition-colors hover:bg-panel"
           >
             Open latest cited source
           </a>

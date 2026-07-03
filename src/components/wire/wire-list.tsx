@@ -182,7 +182,7 @@ export function WireList({
           }}
           placeholder="Search all stories…"
           aria-label="Search all stories"
-          className="w-52 rounded-full border border-line bg-surface px-3.5 py-1.5 font-mono text-[0.75rem] text-ink outline-none focus:border-primary"
+          className="w-52 rounded-sm border border-line bg-surface px-3.5 py-1.5 font-mono text-[0.75rem] text-ink outline-none focus:border-primary"
         />
         <select
           value={section}
@@ -191,7 +191,7 @@ export function WireList({
             setSection(e.target.value)
           }}
           aria-label="Filter by section"
-          className="rounded-full border border-line bg-surface px-3 py-1.5 font-mono text-[0.75rem] text-ink outline-none focus:border-primary"
+          className="rounded-sm border border-line bg-surface px-3 py-1.5 font-mono text-[0.75rem] text-ink outline-none focus:border-primary"
         >
           <option value="">All sections</option>
           {sections.map(([id, label]) => (
@@ -204,8 +204,8 @@ export function WireList({
             setTakeOnly(!takeOnly)
           }}
           aria-pressed={takeOnly}
-          className={`rounded-full border px-3 py-1.5 font-mono text-[0.6875rem] uppercase tracking-wide ${
-            takeOnly ? 'border-primary bg-primary/[0.06] text-primary' : 'border-line text-ink-faint hover:text-ink'
+          className={`type-kicker rounded-sm border px-3 py-1.5 transition-colors ${
+            takeOnly ? 'border-primary bg-accent-wash text-primary' : 'border-line text-ink-soft hover:bg-panel hover:text-ink'
           }`}
         >
           With take
@@ -235,7 +235,7 @@ export function WireList({
           <button
             onClick={() => setArchiveOffset(archiveHits.length)}
             disabled={searching}
-            className="rounded-full border border-line px-5 py-2 font-mono text-[0.71875rem] uppercase tracking-wide text-ink transition-colors hover:border-primary hover:text-primary disabled:opacity-60"
+            className="type-kicker rounded-sm border border-line px-5 py-2 text-ink transition-colors hover:border-ink hover:bg-panel disabled:opacity-60"
           >
             {searching ? 'Loading…' : `Show more (${archiveHits.length.toLocaleString()} of ${archiveTotal.toLocaleString()})`}
           </button>
@@ -246,7 +246,7 @@ export function WireList({
           <button
             onClick={loadMore}
             disabled={loadingMore}
-            className="rounded-full border border-line px-5 py-2 font-mono text-[0.71875rem] uppercase tracking-wide text-ink transition-colors hover:border-primary hover:text-primary disabled:opacity-60"
+            className="type-kicker rounded-sm border border-line px-5 py-2 text-ink transition-colors hover:border-ink hover:bg-panel disabled:opacity-60"
           >
             {loadingMore
               ? 'Loading…'

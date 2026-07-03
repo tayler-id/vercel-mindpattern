@@ -22,31 +22,31 @@ function SkillCard({ skill, index }: { skill: Skill; index: number }) {
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: Math.min(index * 0.03, 0.5) }}
-      className="bg-card border border-border dossier-card overflow-hidden hover:border-primary/30 transition-colors"
+      className="border border-line bg-surface overflow-hidden transition-colors"
     >
       <div className="p-4">
         <div className="flex items-start justify-between gap-3 mb-2">
-          <h4 className="text-xs font-bold leading-snug">
+          <h4 className="type-display text-[17px] font-[560] text-ink leading-snug">
             {skill.source_url ? (
-              <a href={skill.source_url} target="_blank" rel="noopener noreferrer" className="text-navy hover:underline">
+              <a href={skill.source_url} target="_blank" rel="noopener noreferrer" className="hover:underline">
                 {skill.title}
               </a>
             ) : skill.title}
           </h4>
           <div className="flex gap-1.5 shrink-0">
-            <Badge variant="outline" className={`text-[10px] uppercase tracking-wider stamp ${DIFFICULTY_COLORS[skill.difficulty] || ''}`}>
+            <Badge variant="outline" className={`text-[10px] uppercase tracking-wider ${DIFFICULTY_COLORS[skill.difficulty] || ''}`}>
               {DIFFICULTY_ICON[skill.difficulty] || ''} {skill.difficulty}
             </Badge>
-            <Badge variant="outline" className="text-[10px] uppercase tracking-wider text-olive bg-olive/10 border-olive/20">
+            <Badge variant="outline" className="text-[10px] uppercase tracking-wider text-ok bg-ok/10 border-ok/20">
               {skill.domain}
             </Badge>
           </div>
         </div>
-        <p className="text-[11px] text-muted-foreground leading-relaxed">{skill.description}</p>
-        <div className="flex items-center gap-3 mt-3 text-[10px] text-muted-foreground uppercase tracking-wider">
+        <p className="font-serif text-[14px] text-ink-soft leading-relaxed">{skill.description}</p>
+        <div className="type-kicker flex items-center gap-3 mt-3 text-ink-faint">
           <span>[{skill.run_date}]</span>
           {skill.source_name && skill.source_url ? (
-            <a href={skill.source_url} target="_blank" rel="noopener noreferrer" className="hover:text-navy transition-colors">
+            <a href={skill.source_url} target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">
               {skill.source_name}
             </a>
           ) : skill.source_name ? (
@@ -62,12 +62,12 @@ function SkillCard({ skill, index }: { skill: Skill; index: number }) {
 
       {skill.steps && (
         <>
-          <div className="border-t border-border">
+          <div className="border-t border-line">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setExpanded(!expanded)}
-              className="w-full text-[10px] h-8 rounded-none text-muted-foreground hover:text-foreground uppercase tracking-wider font-bold"
+              className="w-full text-[10px] h-8 rounded-none text-ink-soft hover:text-ink tracking-[0.12em]"
             >
               {expanded ? 'Hide steps' : 'Show steps'}
               <ChevronDown data-icon="inline-end" className={`transition-transform ${expanded ? 'rotate-180' : ''}`} />
@@ -82,8 +82,8 @@ function SkillCard({ skill, index }: { skill: Skill; index: number }) {
                 transition={{ duration: 0.2 }}
                 className="overflow-hidden"
               >
-                <div className="px-4 py-3 bg-muted/20 border-t border-border">
-                  <pre className="text-[11px] text-muted-foreground whitespace-pre-wrap leading-relaxed">
+                <div className="px-4 py-3 bg-panel border-t border-line">
+                  <pre className="text-[11px] text-ink-soft whitespace-pre-wrap leading-relaxed">
                     {skill.steps}
                   </pre>
                 </div>
@@ -100,7 +100,7 @@ export function SkillCards({ data, limit }: { data: unknown; limit?: number }) {
   const skills = data as Skill[]
   if (!skills?.length) {
     return (
-      <p className="text-xs text-muted-foreground uppercase tracking-wider font-bold">
+      <p className="type-kicker text-ink-soft">
         [NO SKILLS ON FILE]
       </p>
     )

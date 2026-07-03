@@ -82,7 +82,7 @@ export function SearchClient() {
         onChange={(e) => onChange(e.target.value)}
         placeholder="Search the public graph…"
         aria-label="Search"
-        className="w-full rounded-xl border border-line bg-surface px-4 py-3 font-mono text-[0.9375rem] text-ink outline-none focus:border-primary"
+        className="w-full rounded-sm border border-line bg-surface px-4 py-3 font-mono text-[0.9375rem] text-ink outline-none placeholder:text-ink-faint focus:border-ink focus:shadow-[0_0_0_3px_var(--accent-wash)]"
       />
       <div className="mt-3 flex flex-wrap gap-2">
         {TYPE_CHIPS.map((type) => (
@@ -90,10 +90,10 @@ export function SearchClient() {
             key={type}
             onClick={() => toggleType(type)}
             aria-pressed={types.includes(type)}
-            className={`rounded-full border px-3 py-1 font-mono text-[0.6875rem] uppercase tracking-wide transition-colors ${
+            className={`rounded-sm border px-3 py-1 font-mono text-[0.6875rem] uppercase tracking-[0.08em] transition-colors ${
               types.includes(type)
-                ? 'border-primary bg-primary/[0.06] text-primary'
-                : 'border-line text-ink-faint hover:text-ink'
+                ? 'border-ink bg-panel text-ink'
+                : 'border-line bg-surface text-ink-faint hover:bg-panel hover:text-ink'
             }`}
           >
             {type}
@@ -108,14 +108,14 @@ export function SearchClient() {
 
       {(groups.stories?.length ?? 0) > 0 && (
         <section className="mt-8">
-          <h2 className="font-mono text-[0.6875rem] font-semibold uppercase text-primary">Stories</h2>
+          <h2 className="type-kicker text-primary">Stories</h2>
           <ol className="mt-2 divide-y divide-line">
             {groups.stories!.map((s) => (
               <li key={s.slug}>
-                <Link href={s.target_url} className="block py-3 hover:bg-accent-wash">
-                  <div className="font-mono text-[0.625rem] text-ink-faint">{s.issue_date}{s.has_take ? ' · with take' : ''}</div>
-                  <div className="text-[0.9375rem] font-semibold text-ink">{s.title}</div>
-                  <p className="mt-0.5 line-clamp-2 font-serif text-[0.875rem] text-[#30343b]">{s.summary}</p>
+                <Link href={s.target_url} className="block py-3 transition-colors hover:bg-spine">
+                  <div className="type-kicker text-ink-faint">{s.issue_date}{s.has_take ? ' · with take' : ''}</div>
+                  <div className="type-display mt-1 text-[1.0625rem] font-[560] leading-snug text-ink">{s.title}</div>
+                  <p className="mt-0.5 line-clamp-2 font-serif text-[0.875rem] text-ink-prose">{s.summary}</p>
                 </Link>
               </li>
             ))}
@@ -125,13 +125,13 @@ export function SearchClient() {
 
       {(groups.findings?.length ?? 0) > 0 && (
         <section className="mt-8">
-          <h2 className="font-mono text-[0.6875rem] font-semibold uppercase text-primary">Findings</h2>
+          <h2 className="type-kicker text-primary">Findings</h2>
           <ol className="mt-2 divide-y divide-line">
             {groups.findings!.map((f) => (
               <li key={f.id}>
-                <Link href={f.target_url} className="block py-3 hover:bg-accent-wash">
-                  <div className="font-mono text-[0.625rem] text-ink-faint">{f.run_date}</div>
-                  <div className="text-[0.9375rem] font-semibold text-ink">{f.title}</div>
+                <Link href={f.target_url} className="block py-3 transition-colors hover:bg-spine">
+                  <div className="type-kicker text-ink-faint">{f.run_date}</div>
+                  <div className="type-display mt-1 text-[1.0625rem] font-[560] leading-snug text-ink">{f.title}</div>
                 </Link>
               </li>
             ))}
@@ -141,11 +141,11 @@ export function SearchClient() {
 
       {(groups.entities?.length ?? 0) > 0 && (
         <section className="mt-8">
-          <h2 className="font-mono text-[0.6875rem] font-semibold uppercase text-primary">Entities</h2>
+          <h2 className="type-kicker text-primary">Entities</h2>
           <div className="mt-2 flex flex-wrap gap-2">
             {groups.entities!.map((e) => (
               <Link key={e.slug} href={e.target_url}
-                className="rounded-lg border border-line px-2.5 py-1.5 font-mono text-[0.71875rem] text-primary hover:border-primary">
+                className="rounded-sm border border-line bg-surface px-2.5 py-1.5 font-mono text-[0.6875rem] uppercase tracking-[0.08em] text-ink transition-colors hover:bg-panel hover:text-primary">
                 {e.name}
               </Link>
             ))}
@@ -155,11 +155,11 @@ export function SearchClient() {
 
       {(groups.sources?.length ?? 0) > 0 && (
         <section className="mt-8">
-          <h2 className="font-mono text-[0.6875rem] font-semibold uppercase text-primary">Sources</h2>
+          <h2 className="type-kicker text-primary">Sources</h2>
           <div className="mt-2 flex flex-wrap gap-2">
             {groups.sources!.map((s) => (
               <Link key={s.domain} href={s.target_url}
-                className="rounded-lg border border-line px-2.5 py-1.5 font-mono text-[0.71875rem] text-primary hover:border-primary">
+                className="rounded-sm border border-line bg-surface px-2.5 py-1.5 font-mono text-[0.6875rem] uppercase tracking-[0.08em] text-ink transition-colors hover:bg-panel hover:text-primary">
                 {s.domain} · {s.hit_count}
               </Link>
             ))}

@@ -43,11 +43,11 @@ export default function ExplorePage() {
           ],
         }}
       />
-      <div className="mb-6">
-        <h1 className="text-sm font-bold uppercase tracking-[0.2em]">AI Research Archive</h1>
-        <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-1">
+      <div className="rule-scotch mb-6 pt-3">
+        <p className="type-kicker text-primary">
           Browse the research database
         </p>
+        <h1 className="type-display text-[32px] font-[560] text-ink mt-1 sm:text-[40px]">AI Research Archive</h1>
       </div>
       <ExploreTabs />
     </div>

@@ -41,10 +41,10 @@ function SidebarNav() {
     <Sidebar>
       <SidebarHeader className="px-3 py-4">
         <Link href="/" onClick={handleNewCase} className="flex items-center gap-2.5">
-          <div className="flex items-center justify-center size-7 border border-primary bg-primary/10">
-            <span className="text-primary text-xs font-bold">MP</span>
+          <div className="flex items-center justify-center size-7 border border-primary bg-accent-wash">
+            <span className="type-display text-primary text-sm font-[640]">MP</span>
           </div>
-          <span className="text-xs font-bold uppercase tracking-[0.15em] text-foreground">
+          <span className="type-display text-[17px] font-[600] text-ink">
             MindPattern
           </span>
         </Link>
@@ -54,7 +54,7 @@ function SidebarNav() {
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-bold">
+          <SidebarGroupLabel className="type-kicker text-ink-faint">
             Operations
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -62,7 +62,7 @@ function SidebarNav() {
               <SidebarMenuItem>
                 <SidebarMenuButton onClick={handleNewCase} isActive={isActive('/') && !isActive('/blog') && !isActive('/explore')}>
                     <Plus data-icon="inline-start" />
-                    <span className="text-xs uppercase tracking-wider">New Case</span>
+                    <span className="font-mono text-xs uppercase tracking-[0.12em]">New Case</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
@@ -72,7 +72,7 @@ function SidebarNav() {
         <SidebarSeparator />
 
         <SidebarGroup>
-          <SidebarGroupLabel className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-bold">
+          <SidebarGroupLabel className="type-kicker text-ink-faint">
             File Index
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -81,7 +81,7 @@ function SidebarNav() {
                 <SidebarMenuItem key={href}>
                   <SidebarMenuButton render={<Link href={href} />} isActive={isActive(href)}>
                       <Icon data-icon="inline-start" />
-                      <span className="text-xs uppercase tracking-wider">{label}</span>
+                      <span className="font-mono text-xs uppercase tracking-[0.12em]">{label}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -93,7 +93,7 @@ function SidebarNav() {
       <SidebarFooter className="px-3 py-3">
         <NewsletterSignup className="mb-3" />
         <SidebarSeparator />
-        <SidebarTrigger className="w-full justify-start gap-2 text-xs uppercase tracking-wider text-muted-foreground mt-2" />
+        <SidebarTrigger className="w-full justify-start gap-2 text-ink-soft mt-2" />
       </SidebarFooter>
     </Sidebar>
   )

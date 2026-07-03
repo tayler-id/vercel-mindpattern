@@ -7,10 +7,10 @@ export default function ExploreLayout({ children }: { children: React.ReactNode 
     <SidebarProvider>
       <SidebarNav />
       <SidebarInset>
-        <header className="flex items-center gap-2 px-3 py-2 md:hidden border-b border-border">
+        <header className="flex items-center gap-2 px-3 py-2 md:hidden border-b border-line bg-paper">
           <SidebarTrigger />
           <Separator orientation="vertical" className="h-4" />
-          <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">MindPattern</span>
+          <span className="type-display text-[15px] font-[600] text-ink">MindPattern</span>
         </header>
         {children}
       </SidebarInset>

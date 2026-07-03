@@ -123,7 +123,7 @@ export function RabbitHole({
       >
         <Link
           href="/"
-          className="shrink-0 font-mono text-[0.65625rem] font-semibold uppercase tracking-[0.06em] text-primary"
+          className="shrink-0 font-mono text-[0.6875rem] font-semibold uppercase tracking-[0.08em] text-primary"
         >
           The Wire
         </Link>
@@ -138,7 +138,7 @@ export function RabbitHole({
                 onClick={() => jumpTo(i)}
                 disabled={last}
                 aria-current={last ? 'page' : undefined}
-                className={`max-w-[150px] truncate font-mono text-[0.65625rem] ${
+                className={`max-w-[150px] truncate font-mono text-[0.6875rem] ${
                   last ? 'font-semibold text-ink' : 'text-ink-faint hover:text-ink'
                 }`}
               >
@@ -191,15 +191,15 @@ function ReadingColumn({
   const domain = sourceDomain(finding.source_url)
 
   return (
-    <article className="mx-auto max-w-[44rem] px-12 pb-28 pt-9 max-sm:px-5">
-      <div className="font-mono text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-primary">
+    <article className="mx-auto max-w-[44rem] bg-paper px-12 pb-28 pt-9 max-sm:px-5 sm:border-x sm:border-line">
+      <div className="type-kicker text-primary">
         {sectionLabel(finding.agent)}
       </div>
-      <h1 className="mt-3 font-serif text-[2rem] font-semibold leading-[1.15] tracking-[-0.02em] text-ink max-sm:text-[1.6rem]">
+      <h1 className="type-display mt-3 text-[2.25rem] font-[600] text-ink max-sm:text-[1.75rem]">
         {finding.title}
       </h1>
 
-      <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1.5 border-b border-line pb-4 font-mono text-[0.65625rem] text-ink-faint">
+      <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1.5 border-b border-line pb-4 font-mono text-[0.6875rem] text-ink-faint">
         <span className="inline-flex items-center gap-1.5">
           <SourceFavicon url={finding.source_url} name={finding.source_name} />
           {sourceLabel(finding.source_name, finding.source_url)}
@@ -211,18 +211,18 @@ function ReadingColumn({
 
       {isVideo && finding.source_url && <VideoEmbed url={finding.source_url} title={finding.title} />}
 
-      <p className="mt-6 font-serif text-[1.0625rem] leading-[1.72] text-[#23262c]">
+      <p className="mt-6 font-serif text-[1.0625rem] leading-[1.72] text-ink-prose">
         {finding.summary}
       </p>
 
       {finding.source_url && (
         <div className="mt-7 border-t border-line pt-4">
-          <p className="font-mono text-[0.625rem] uppercase tracking-[0.12em] text-ink-faint">Source</p>
+          <p className="type-kicker text-ink-faint">Source</p>
           <div className="mt-2 flex flex-wrap gap-2">
             {domain && (
               <Link
                 href={`/source/${encodeURIComponent(domain)}`}
-                className="inline-block rounded-lg border border-line px-2.5 py-1.5 font-mono text-[0.71875rem] text-primary hover:border-primary hover:bg-accent-wash"
+                className="inline-block rounded-sm border border-line bg-surface px-2.5 py-1.5 font-mono text-[0.6875rem] uppercase tracking-[0.08em] text-ink transition-colors hover:bg-panel hover:text-primary"
               >
                 Source page
               </Link>
@@ -231,7 +231,7 @@ function ReadingColumn({
               href={finding.source_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block rounded-lg border border-line px-2.5 py-1.5 font-mono text-[0.71875rem] text-primary hover:border-primary hover:bg-accent-wash"
+              className="inline-block rounded-sm border border-line bg-surface px-2.5 py-1.5 font-mono text-[0.6875rem] uppercase tracking-[0.08em] text-ink transition-colors hover:bg-panel hover:text-primary"
             >
               {sourceLabel(finding.source_name, finding.source_url)}
             </a>
@@ -240,10 +240,10 @@ function ReadingColumn({
       )}
 
       <div className="mt-9 border-t border-line pt-5">
-        <p className="font-mono text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-ink">
+        <p className="type-kicker text-ink">
           <span className="text-primary">↳</span> Follow the thread
         </p>
-        <div className="mt-3 flex flex-col gap-2">
+        <div className="mt-3 flex flex-col divide-y divide-line">
           {relatedLoading && (
             <p className="font-mono text-[0.71875rem] text-ink-faint">Loading related signals...</p>
           )}
@@ -259,19 +259,19 @@ function ReadingColumn({
             <button
               key={r.id}
               onClick={() => onOpen(r)}
-              className="group rounded-xl border border-line bg-surface px-4 py-3.5 text-left transition-colors hover:border-primary hover:bg-accent-wash active:scale-[0.99]"
+              className="group py-3.5 text-left transition-colors hover:bg-spine active:scale-[0.99]"
             >
-              <div className="font-mono text-[0.625rem] font-semibold uppercase tracking-[0.06em] text-primary">
+              <div className="type-kicker text-primary">
                 {r.connector_labels?.length ? r.connector_labels.join(' / ') : sectionLabel(r.agent)}
               </div>
-              <div className="mt-1.5 text-[0.9375rem] font-semibold leading-snug tracking-[-0.01em] text-ink">
+              <div className="type-display mt-1.5 text-[1.0625rem] font-[560] leading-snug text-ink group-hover:underline">
                 {r.title}
               </div>
-              <div className="mt-1.5 font-mono text-[0.625rem] text-ink-faint">
+              <div className="type-kicker mt-1.5 text-ink-faint">
                 {sourceLabel(r.source_name, r.source_url)}
               </div>
               {r.reason && (
-                <div className="mt-2 font-mono text-[0.625rem] leading-relaxed text-ink-faint">
+                <div className="mt-1.5 font-serif text-[0.875rem] leading-[1.5] text-ink-soft">
                   {r.reason}
                 </div>
               )}

@@ -84,38 +84,38 @@ export default async function EntityPage({ params }: Params) {
       <main className="mx-auto max-w-[760px] px-8 pb-24 pt-9 max-sm:px-5">
         <Link
           href="/"
-          className="font-mono text-[0.6875rem] font-semibold uppercase text-primary hover:underline"
+          className="type-kicker text-primary hover:underline"
         >
           The Wire
         </Link>
 
-        <header className="mt-8 border-b border-line pb-6">
-          <div className="font-mono text-[0.6875rem] font-semibold uppercase text-primary">
+        <header className="mt-8">
+          <div className="type-kicker text-primary">
             Entity trail
           </div>
-          <h1 className="mt-3 font-serif text-[2.25rem] font-semibold leading-[1.08] text-ink max-sm:text-[1.75rem]">
+          <h1 className="type-display mt-3 text-[2.75rem] font-[620] text-ink max-sm:text-[2rem]">
             {entity.name}
           </h1>
-          <p className="mt-3 max-w-[38rem] font-serif text-[1rem] leading-[1.72] text-[#30343b]">
+          <p className="mt-4 max-w-[38rem] font-serif text-[1.125rem] italic leading-[1.6] text-ink-soft">
             Source-backed findings, relationship evidence, citations, and briefing history from the public MindPattern archive.
           </p>
 
-          <div className="mt-5 grid grid-cols-2 gap-3 font-mono text-[0.6875rem] text-ink-faint sm:grid-cols-4">
+          <div className="mt-6 grid grid-cols-2 gap-x-4 gap-y-3 border-y border-line py-3 sm:grid-cols-4">
             <div>
-              <div className="text-ink">Briefing refs</div>
-              <div>{briefingCount}</div>
+              <div className="type-kicker text-ink-faint">Briefing refs</div>
+              <div className="mt-0.5 font-mono text-[0.75rem] text-ink">{briefingCount}</div>
             </div>
             <div>
-              <div className="text-ink">Findings</div>
-              <div>{findingCount}</div>
+              <div className="type-kicker text-ink-faint">Findings</div>
+              <div className="mt-0.5 font-mono text-[0.75rem] text-ink">{findingCount}</div>
             </div>
             <div>
-              <div className="text-ink">Edges</div>
-              <div>{relationshipCount}</div>
+              <div className="type-kicker text-ink-faint">Edges</div>
+              <div className="mt-0.5 font-mono text-[0.75rem] text-ink">{relationshipCount}</div>
             </div>
             <div>
-              <div className="text-ink">Sources</div>
-              <div>{sourceCount}</div>
+              <div className="type-kicker text-ink-faint">Sources</div>
+              <div className="mt-0.5 font-mono text-[0.75rem] text-ink">{sourceCount}</div>
             </div>
           </div>
           {entity.pagination?.has_more && (
@@ -127,18 +127,18 @@ export default async function EntityPage({ params }: Params) {
 
         {dossier && (
           <section className="mt-7">
-            <h2 className="font-mono text-[0.6875rem] font-semibold uppercase text-ink">
+            <h2 className="type-kicker text-ink">
               Dossier
             </h2>
-            <p className="mt-1 font-mono text-[0.6875rem] text-ink-faint">
+            <p className="type-kicker mt-1 text-ink-faint">
               Compiled {dossier.date} · {dossier.confidence}
             </p>
             {dossier.take && (
-              <div className="mt-3 rounded border border-primary/25 bg-primary/[0.04] px-4 py-3">
-                <div className="font-mono text-[0.625rem] font-semibold uppercase tracking-wider text-primary">
+              <div className="mt-4 border border-ink bg-accent-wash px-5 py-4">
+                <div className="type-kicker text-primary">
                   The take
                 </div>
-                <p className="mt-1.5 font-serif text-[1rem] leading-[1.68] text-ink">
+                <p className="mt-2 font-serif text-[1.0625rem] leading-[1.62] text-ink-prose">
                   {dossier.take}
                 </p>
               </div>
@@ -147,7 +147,7 @@ export default async function EntityPage({ params }: Params) {
               <ol className="mt-3 divide-y divide-line">
                 {dossier.timeline.slice(0, 10).map((entry) => (
                   <li key={entry.date} className="py-3">
-                    <div className="font-mono text-[0.625rem] font-semibold uppercase text-primary">
+                    <div className="type-kicker text-primary">
                       {entry.date}
                     </div>
                     <ul className="mt-1.5 space-y-1">
@@ -155,7 +155,7 @@ export default async function EntityPage({ params }: Params) {
                         <li key={item.finding_id}>
                           <Link
                             href={item.target_url}
-                            className="text-[0.9375rem] leading-snug text-ink hover:text-primary"
+                            className="font-serif text-[1rem] leading-snug text-ink hover:underline"
                           >
                             {item.title}
                           </Link>
@@ -172,7 +172,7 @@ export default async function EntityPage({ params }: Params) {
                   <Link
                     key={source.domain}
                     href={source.target_url}
-                    className="rounded border border-line px-2 py-1 font-mono text-[0.6875rem] text-ink-faint hover:border-primary hover:text-primary"
+                    className="rounded-sm border border-line bg-surface px-2 py-1 font-mono text-[0.6875rem] uppercase tracking-[0.08em] text-ink transition-colors hover:bg-panel hover:text-primary"
                   >
                     {source.domain} · {source.finding_count}
                   </Link>
@@ -184,7 +184,7 @@ export default async function EntityPage({ params }: Params) {
 
         {findings.length > 0 && (
           <section className="mt-7">
-            <h2 className="font-mono text-[0.6875rem] font-semibold uppercase text-ink">
+            <h2 className="type-kicker text-ink">
               Corpus findings
             </h2>
             <ol className="mt-3 divide-y divide-line">
@@ -192,15 +192,15 @@ export default async function EntityPage({ params }: Params) {
                 <li key={finding.id}>
                   <Link
                     href={finding.target_url || `/f/${finding.id}`}
-                    className="block py-4 transition-colors hover:bg-accent-wash"
+                    className="block py-4 transition-colors hover:bg-spine"
                   >
-                    <div className="font-mono text-[0.625rem] font-semibold uppercase text-primary">
+                    <div className="type-kicker text-primary">
                       {finding.run_date} / {finding.relationship || finding.agent}
                     </div>
-                    <h3 className="mt-1.5 text-[1rem] font-semibold leading-snug text-ink">
+                    <h3 className="type-display mt-1.5 text-[1.125rem] font-[560] leading-snug text-ink">
                       {finding.title}
                     </h3>
-                    <p className="mt-2 line-clamp-2 font-serif text-[0.9375rem] leading-[1.58] text-[#30343b]">
+                    <p className="mt-2 line-clamp-2 font-serif text-[0.9375rem] leading-[1.58] text-ink-prose">
                       {finding.summary}
                     </p>
                   </Link>
@@ -212,16 +212,16 @@ export default async function EntityPage({ params }: Params) {
 
         {relationships.length > 0 && (
           <section className="mt-8 border-t border-line pt-5">
-            <h2 className="font-mono text-[0.6875rem] font-semibold uppercase text-ink">
+            <h2 className="type-kicker text-ink">
               Graph relationships
             </h2>
             <ol className="mt-3 divide-y divide-line">
               {relationships.slice(0, 12).map((relationship, index) => (
                 <li key={`${relationship.source}-${relationship.relationship}-${index}`} className="py-3">
-                  <div className="font-mono text-[0.625rem] font-semibold uppercase text-primary">
+                  <div className="type-kicker text-primary">
                     {relationshipLabel(relationship.source, relationship.relationship)}
                   </div>
-                  <div className="mt-1.5 text-[0.9375rem] leading-snug text-ink">
+                  <div className="mt-1.5 font-serif text-[1rem] leading-snug text-ink">
                     {relationship.related_entity && relationship.related_entity_slug !== 'unknown' ? (
                       <Link
                         href={`/e/${encodeURIComponent(relationship.related_entity_slug || '')}`}
@@ -238,14 +238,14 @@ export default async function EntityPage({ params }: Params) {
                     )}
                   </div>
                   {relationship.fact_text && (
-                    <p className="mt-2 font-serif text-[0.9375rem] leading-[1.58] text-[#30343b]">
+                    <p className="mt-2 font-serif text-[0.9375rem] leading-[1.58] text-ink-prose">
                       {relationship.fact_text}
                     </p>
                   )}
                   {relationship.target_url && (
                     <Link
                       href={relationship.target_url}
-                      className="mt-2 inline-block font-mono text-[0.625rem] text-primary hover:underline"
+                      className="type-kicker mt-2 inline-block text-primary hover:underline"
                     >
                       Source finding
                     </Link>
@@ -258,7 +258,7 @@ export default async function EntityPage({ params }: Params) {
 
         {sourceTrail.length > 0 && (
           <section className="mt-8 border-t border-line pt-5">
-            <h2 className="font-mono text-[0.6875rem] font-semibold uppercase text-ink">
+            <h2 className="type-kicker text-ink">
               Source trail
             </h2>
             <div className="mt-3 flex flex-wrap gap-2">
@@ -266,7 +266,7 @@ export default async function EntityPage({ params }: Params) {
                 <Link
                   key={source.url}
                   href={`/source/${encodeURIComponent(source.domain)}`}
-                  className="inline-block rounded-lg border border-line px-2.5 py-1.5 font-mono text-[0.71875rem] text-primary hover:border-primary hover:bg-accent-wash"
+                  className="inline-block rounded-sm border border-line bg-surface px-2.5 py-1.5 font-mono text-[0.6875rem] uppercase tracking-[0.08em] text-ink transition-colors hover:bg-panel hover:text-primary"
                 >
                   {source.title || source.domain}
                 </Link>
@@ -277,14 +277,14 @@ export default async function EntityPage({ params }: Params) {
 
         {graphSources.length > 0 && (
           <section className="mt-8 border-t border-line pt-5">
-            <h2 className="font-mono text-[0.6875rem] font-semibold uppercase text-ink">
+            <h2 className="type-kicker text-ink">
               Graph sources
             </h2>
             <div className="mt-3 flex flex-wrap gap-2">
               {graphSources.map((source) => (
                 <span
                   key={source}
-                  className="inline-block rounded-lg border border-line px-2.5 py-1.5 font-mono text-[0.71875rem] text-ink-faint"
+                  className="inline-block rounded-sm border border-line bg-surface px-2.5 py-1.5 font-mono text-[0.6875rem] uppercase tracking-[0.08em] text-ink-soft"
                 >
                   {source.replaceAll('_', ' ')}
                 </span>

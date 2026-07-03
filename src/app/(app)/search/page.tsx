@@ -12,8 +12,8 @@ export default function SearchPage() {
   return (
     <div className="h-full overflow-y-auto">
       <main className="mx-auto max-w-[760px] px-8 pb-24 pt-9 max-sm:px-5">
-        <h1 className="text-[1.875rem] font-extrabold text-ink">Search</h1>
-        <p className="mt-1 font-mono text-[0.71875rem] text-ink-faint">
+        <h1 className="type-display text-[2.5rem] font-[620] text-ink max-sm:text-[2rem]">Search</h1>
+        <p className="mt-3 font-serif text-[1.0625rem] italic leading-[1.6] text-ink-soft">
           Stories, findings, entities, and sources. Semantic where it counts.
         </p>
         <Suspense>

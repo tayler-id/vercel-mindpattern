@@ -11,29 +11,28 @@ export function WireRow({ finding, rank }: { finding: Finding; rank: number }) {
   return (
     <Link
       href={`/f/${finding.id}`}
-      className="group grid grid-cols-[30px_1fr] items-start gap-4 rounded-xl border-b border-line-soft px-3 py-[15px] transition-[background,box-shadow] hover:border-b-transparent hover:bg-surface hover:shadow-[0_1px_2px_rgba(11,13,18,.05),0_12px_32px_-22px_rgba(11,13,18,.32)] active:bg-spine sm:gap-[18px] sm:px-4"
+      className="rule-row group grid grid-cols-[56px_1fr] items-start gap-4 px-3 py-4 transition-colors hover:bg-spine active:bg-panel sm:gap-[18px] sm:px-4"
     >
       <span
-        className={`pt-px text-right font-mono text-sm tabular-nums ${
-          hot ? 'font-bold text-primary' : 'font-medium text-ink-faint'
-        }`}
+        className="numeral-ghost pt-1.5 text-right text-[44px]"
+        style={hot ? { color: 'color-mix(in oklab, var(--accent) 34%, transparent)' } : undefined}
       >
         {rank}
       </span>
 
       <div className="min-w-0">
-        <div className="font-mono text-[0.625rem] font-semibold uppercase tracking-[0.1em] text-primary">
+        <div className="type-kicker text-primary">
           {sectionLabel(finding.agent)}
         </div>
-        <h3 className="mt-[5px] text-[1.03125rem] font-semibold leading-[1.32] tracking-[-0.01em] text-ink">
+        <h3 className="type-display mt-1.5 text-[1.3125rem] font-[560] text-ink underline-offset-[3px] group-hover:underline">
           {finding.title}
         </h3>
         {finding.summary && (
-          <p className="mt-1.5 line-clamp-2 font-serif text-[0.9375rem] leading-[1.55] text-[#30343b]">
+          <p className="mt-1.5 line-clamp-2 font-serif text-[0.9375rem] leading-[1.55] text-ink-soft">
             {finding.summary}
           </p>
         )}
-        <div className="mt-[9px] flex flex-wrap items-center gap-x-3 gap-y-1.5 font-mono text-[0.65625rem] text-ink-faint">
+        <div className="type-kicker mt-[9px] flex flex-wrap items-center gap-x-3 gap-y-1.5 text-ink-faint">
           <span className="inline-flex min-w-0 items-center gap-1.5">
             <SourceFavicon url={finding.source_url} name={finding.source_name} />
             <span className="truncate">{sourceLabel(finding.source_name, finding.source_url)}</span>

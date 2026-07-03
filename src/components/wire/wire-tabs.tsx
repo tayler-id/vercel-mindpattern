@@ -17,8 +17,8 @@ export function WireTabs({ active }: { active: string }) {
             key={t.key}
             href={t.href}
             aria-current={on ? 'page' : undefined}
-            className={`-mb-px border-b-2 px-3 py-2.5 text-[0.78125rem] font-semibold transition-colors ${
-              on ? 'border-primary text-primary' : 'border-transparent text-ink-faint hover:text-ink'
+            className={`type-kicker -mb-px border-b-2 px-3 py-2.5 transition-colors ${
+              on ? 'border-ink text-ink' : 'border-transparent text-ink-soft hover:text-ink'
             }`}
           >
             {t.label}

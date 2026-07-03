@@ -6,41 +6,38 @@
 MindPattern is a public-facing product for AI researchers, developers, and anyone tracking the AI landscape. Users come to query an autonomous 13-agent research pipeline through a conversational interface. They expect to quickly surface findings, trends, and intelligence across sources — treating it like a personal research analyst. The audience is technical, opinionated, and values density of information over hand-holding.
 
 ### Brand Personality
-**Tactical, nerdy, playful.** MindPattern has the soul of a hacker who reads intelligence briefs for fun. It takes its job seriously but doesn't take itself too seriously. The "Wire Room" aesthetic (declassified dossier, intelligence ops) should feel like a lovingly crafted world — immersive but never campy. Think: spy-thriller meets developer tooling.
+**Tactical, nerdy, playful.** MindPattern has the soul of a hacker who reads intelligence briefs for fun. It takes its job seriously but doesn't take itself too seriously. The broadsheet aesthetic (a daily intelligence wire, printed) should feel like a lovingly crafted publication — immersive but never campy. Think: serious newsroom meets developer tooling.
 
 ### Emotional Goal
 **Intrigue & discovery.** Every session should feel like uncovering classified intel. The interface should reward curiosity, make data feel like secrets worth finding, and create moments of "oh, that's interesting." The experience should pull you in, not push information at you.
 
-### Aesthetic Direction
+### Aesthetic Direction — "The Broadsheet"
 
-**Visual tone:** Dense, monospaced, paper-textured — a physical intelligence dossier rendered digitally. Uppercase tracking, stamp badges, grid-paper chart backgrounds, inset-shadow "dossier cards." Light mode only (manila/cream palette).
+Full spec with tokens and voice examples: `docs/design/broadsheet-spec.md`. Source of truth for tokens: `src/app/globals.css`.
 
-**Typography:** JetBrains Mono everywhere. Both `--font-sans` and `--font-mono` resolve to it. Labels are 10-12px, uppercase, heavily tracked. Body text is 13px with generous line-height.
+**Visual tone:** A printed intelligence broadsheet — warm newsprint paper, ink, hairline rules instead of cards, editorial serif display type, one oxblood accent. The signature layout primitive is **the ruled row** (`.rule-row`), with the thick-over-thin `.rule-scotch` for section starts. Light mode only. Subtle print-grain noise overlay on body.
 
-**Color palette (oklch):**
-- Background: warm cream `oklch(0.94 0.01 80)`
-- Foreground: near-black `oklch(0.15 0.01 80)`
-- Primary (red): `oklch(0.45 0.18 25)` — stamps, accents, errors
-- Secondary/olive: `oklch(0.40 0.05 145)` — success states, agent badges
-- Accent/navy: `oklch(0.35 0.08 250)` — links, chart fills, informational
-- Muted: warm gray `oklch(0.88 0.01 80)` background, `oklch(0.45 0.02 60)` text
-- Custom tokens: `--navy`, `--olive` beyond standard shadcn
+**Typography (4 voices, loaded via next/font in `src/app/layout.tsx`):**
+- **Fraunces** (`--font-fraunces`, `.type-display`) — all headlines, story titles, the wordmark. High optical size, weight 500–640, 3x+ size jumps from body.
+- **Newsreader** (`font-serif`) — article/briefing prose (17px, 1.72 line-height, `text-ink-prose`), deks in italic, row summaries.
+- **IBM Plex Mono** (`font-mono`, `.type-kicker`) — the data voice: kickers, folios, dates, counts, tabs, buttons (11px caps, 0.14em tracking).
+- **Archivo** (`font-sans`) — sparing, for small UI copy that isn't data or prose.
 
-**Radius:** 0.25rem base — almost no rounding. Sharp, angular, document-like.
+**Color palette (hex, in `:root`):** paper `#f7f3ea`, surface `#fdfbf5`, panel `#efe9db`, ink `#171310`, ink-prose `#2b251d`, ink-soft `#5c5443`, ink-faint `#8d8371` (meta ≥11px only), line `#ddd4c2`, **accent/primary = oxblood `#8a2318`** (links, CTAs, live markers), ok/forest `#3d5a37`, charts: oxblood/forest/ochre `#a8781f`/slate-navy `#3e4c63`/warm gray.
 
-**Texture:** SVG fractal noise overlay on body (opacity 0.03), `.grid-paper` crosshatch on chart containers.
+**Radius:** `--radius: 0.125rem` (2px) — printed, near-square. **Shadows: none** — rules and background tints do all the lifting. Ranked lists use oversized `.numeral-ghost` Fraunces figures. Thumbnails can take `.plate-duotone` (ink duotone, full color on hover).
 
-**Motion:** Framer Motion (via `motion/react`). Staggered fade-in/slide-up on lists and cards. Subtle, purposeful — never decorative.
+**Motion:** motion/react. Staggered fade/rise ≤ 8px on lists. Subtle, purposeful — never decorative.
 
 **References:**
-- Perplexity — clean research interface, source citations, conversational search
-- Linear — polished developer tool, keyboard-first, precise interactions
-- The Intercept / Bellingcat — investigative dossier presentation of findings
+- The New Yorker / WSJ article pages — typography-carried identity, hairline rules, colophon meta blocks
+- Quartz — colored uppercase kickers as editorial voice
+- The Athletic — ghost numerals on ranked lists, duotone plates, editorial + data density
 
 **Anti-references (never look like these):**
-- Generic ChatGPT clone — no plain white chat bubbles, no generic AI assistant aesthetic
-- Corporate dashboard — no Salesforce/Tableau bloat, no enterprise feel
-- Skeuomorphic/retro kitsch — don't overdo the spy theme into camp territory
+- The "AI-built site" fingerprint: Inter/Geist, cobalt-or-violet accent on white, rounded shadowed cards, bento grids, dot-plus-line eyebrow labels, purple gradients. This site escaped that look deliberately — do not reintroduce any of it.
+- Generic ChatGPT clone or corporate dashboard.
+- Skeuomorphic spy-theme kitsch (no stamps, no typewriter effects).
 
 ### Design Principles
 

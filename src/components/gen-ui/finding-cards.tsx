@@ -9,7 +9,7 @@ export function FindingCards({ data, limit }: { data: unknown; limit?: number })
   const findings = data as Finding[]
   if (!findings?.length) {
     return (
-      <p className="text-xs text-muted-foreground uppercase tracking-wider font-bold">
+      <p className="type-kicker text-ink-soft">
         [NO FINDINGS ON FILE]
       </p>
     )
@@ -18,19 +18,19 @@ export function FindingCards({ data, limit }: { data: unknown; limit?: number })
   const displayed = limit ? findings.slice(0, limit) : findings
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col">
       {displayed.map((f, i) => (
         <motion.div
           key={`${f.id}-${i}`}
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: Math.min(i * 0.03, 0.5) }}
-          className="bg-card border border-border dossier-card p-4 hover:border-primary/30 transition-colors"
+          className="rule-row py-4 transition-colors hover:bg-spine"
         >
           <div className="flex items-start justify-between gap-3 mb-2">
-            <h4 className="text-xs font-bold leading-snug">
+            <h4 className="type-display text-[17px] font-[560] text-ink leading-snug">
               {f.source_url ? (
-                <a href={f.source_url} target="_blank" rel="noopener noreferrer" className="text-navy hover:underline">
+                <a href={f.source_url} target="_blank" rel="noopener noreferrer" className="hover:underline">
                   {f.title}
                 </a>
               ) : f.title}
@@ -41,19 +41,19 @@ export function FindingCards({ data, limit }: { data: unknown; limit?: number })
                   {Math.round(f.similarity * 100)}%
                 </Badge>
               )}
-              <Badge variant="outline" className={`text-[10px] uppercase tracking-wider stamp ${IMPORTANCE_COLORS[f.importance] || ''}`}>
+              <Badge variant="outline" className={`text-[10px] uppercase tracking-wider ${IMPORTANCE_COLORS[f.importance] || ''}`}>
                 {f.importance}
               </Badge>
             </div>
           </div>
-          <p className="text-[11px] text-muted-foreground leading-relaxed">{f.summary}</p>
-          <div className="flex items-center gap-3 mt-2 text-[10px] text-muted-foreground uppercase tracking-wider">
+          <p className="font-serif text-[14px] text-ink-soft leading-relaxed">{f.summary}</p>
+          <div className="type-kicker flex items-center gap-3 mt-2 text-ink-faint">
             <span>[{f.run_date}]</span>
-            <Badge variant="outline" className="text-[10px] uppercase tracking-wider text-olive bg-olive/10 border-olive/20">
+            <Badge variant="outline" className="text-[10px] uppercase tracking-wider text-ok bg-ok/10 border-ok/20">
               {f.agent.replace('-researcher', '')}
             </Badge>
             {f.source_name && f.source_url ? (
-              <a href={f.source_url} target="_blank" rel="noopener noreferrer" className="hover:text-navy transition-colors">
+              <a href={f.source_url} target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">
                 {f.source_name}
               </a>
             ) : f.source_name ? (

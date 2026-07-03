@@ -81,15 +81,15 @@ export default async function WirePage({
   return (
     <div className="h-full overflow-y-auto">
       <header className="mx-auto max-w-[1080px] px-8 pt-9 max-sm:px-[18px]">
-        <p className="flex items-center gap-2 font-mono text-[0.6875rem] font-semibold uppercase text-primary">
+        <p className="type-kicker flex items-center gap-2 text-primary">
           <span className="inline-block size-1.5 animate-pulse rounded-full bg-primary" aria-hidden />
           The Wire · Live
         </p>
-        <h1 className="mt-2 text-[1.875rem] font-extrabold text-ink">
+        <h1 className="type-display mt-3 text-[2.75rem] font-[600] text-ink max-sm:text-[2.125rem]">
           {HEADING[view].h1}
         </h1>
         {stats && (
-          <p className="mt-2 font-mono text-[0.71875rem] text-ink-faint">
+          <p className="type-kicker mt-3 text-ink-faint">
             <b className="font-semibold text-ink-soft">{stats.findings.toLocaleString()}</b> findings
             indexed · <b className="font-semibold text-ink-soft">{stats.sources.toLocaleString()}</b>{' '}
             sources · <b className="font-semibold text-ink-soft">+{today}</b>/day · {HEADING[view].sub}
@@ -113,8 +113,8 @@ export default async function WirePage({
           )
         ) : view === 'topics' ? (
           Object.entries(grouped).map(([section, items]) => (
-            <section key={section} className="mb-5">
-              <h2 className="px-3 pb-1 pt-5 font-mono text-[0.6875rem] font-semibold uppercase text-primary">
+            <section key={section} className="mb-8">
+              <h2 className="type-kicker border-t border-ink px-3 pb-1.5 pt-2.5 text-primary">
                 {section}
                 <span className="ml-2 text-ink-faint">{items.length}</span>
               </h2>

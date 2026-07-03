@@ -56,7 +56,7 @@ export default async function BriefingPage({ params }: Params) {
   if (!report) {
     return (
       <div className="mx-auto max-w-[44rem] px-8 py-16 text-center max-sm:px-5">
-        <Link href="/briefings" className="font-mono text-[0.78125rem] font-semibold text-primary hover:underline">
+        <Link href="/briefings" className="type-kicker text-primary hover:underline">
           ← Briefings
         </Link>
         <p className="mt-10 font-mono text-[0.8125rem] uppercase tracking-[0.12em] text-ink-faint">
@@ -94,18 +94,18 @@ export default async function BriefingPage({ params }: Params) {
           }}
         />
 
-        <Link href="/briefings" className="font-mono text-[0.78125rem] font-semibold text-primary hover:underline">
+        <Link href="/briefings" className="type-kicker text-primary hover:underline">
           ← Briefings
         </Link>
 
         <header className="mb-8 mt-8 border-b border-line pb-6">
-          <p className="font-mono text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-primary">
+          <p className="type-kicker text-primary">
             {shortDate(date)}
           </p>
-          <h1 className="mt-3 font-serif text-[2.5rem] font-semibold leading-[1.1] tracking-[-0.02em] text-ink max-sm:text-[2rem]">
+          <h1 className="type-display mt-3 text-[2.75rem] font-[620] text-ink max-sm:text-[2rem]">
             {report.title}
           </h1>
-          <p className="mt-3 font-mono text-[0.6875rem] text-ink-faint">
+          <p className="type-kicker mt-4 text-ink-faint">
             {wordCount.toLocaleString()} words · {readTime} min read
           </p>
         </header>
@@ -117,16 +117,16 @@ export default async function BriefingPage({ params }: Params) {
         {issue && <BriefingGraphTrail issue={issue} />}
 
         {(prev || next) && (
-          <nav className="mt-12 flex items-center justify-between gap-4 border-t border-line pt-6 font-mono text-[0.71875rem] font-semibold">
+          <nav className="rule-row mt-12 flex items-center justify-between gap-4 pt-6">
             {prev ? (
-              <Link href={`/briefings/${prev}`} className="text-primary hover:underline">
+              <Link href={`/briefings/${prev}`} className="type-kicker text-primary hover:underline">
                 ← {shortDate(prev)}
               </Link>
             ) : (
               <span />
             )}
             {next ? (
-              <Link href={`/briefings/${next}`} className="text-primary hover:underline">
+              <Link href={`/briefings/${next}`} className="type-kicker text-primary hover:underline">
                 {shortDate(next)} →
               </Link>
             ) : (
@@ -151,24 +151,24 @@ function BriefingGraphTrail({ issue }: { issue: PublicIssue }) {
   }
 
   return (
-    <section className="mt-12 border-t border-line pt-8" aria-labelledby="briefing-graph-trail">
+    <section className="rule-scotch mt-14 pt-4" aria-labelledby="briefing-graph-trail">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h2 id="briefing-graph-trail" className="font-mono text-[0.8125rem] font-semibold uppercase text-ink">
+          <h2 id="briefing-graph-trail" className="type-kicker text-ink">
             Graph trail
           </h2>
-          <p className="mt-2 max-w-[38rem] text-[0.9375rem] leading-[1.6] text-ink-soft">
+          <p className="mt-2 max-w-[38rem] font-serif text-[0.9375rem] leading-[1.6] text-ink-soft">
             Source, entity, and story paths extracted from this canonical briefing.
           </p>
         </div>
-        <p className="font-mono text-[0.6875rem] uppercase text-ink-faint">
+        <p className="type-kicker text-ink-faint">
           {issue.story_units.length} stories · {issue.source_trail.length} sources · {issue.entities.length} entities
         </p>
       </div>
 
       {storyPaths.length > 0 && (
         <div className="mt-7">
-          <h3 className="font-mono text-[0.71875rem] font-semibold uppercase text-primary">Story paths</h3>
+          <h3 className="type-kicker text-primary">Story paths</h3>
           <div className="mt-3 divide-y divide-line">
             {storyPaths.map((story) => (
               <StoryPathRow key={story.id} story={story} />
@@ -180,13 +180,13 @@ function BriefingGraphTrail({ issue }: { issue: PublicIssue }) {
       <div className="mt-7 grid gap-7 md:grid-cols-2">
         {entities.length > 0 && (
           <div>
-            <h3 className="font-mono text-[0.71875rem] font-semibold uppercase text-primary">Entities</h3>
+            <h3 className="type-kicker text-primary">Entities</h3>
             <div className="mt-3 flex flex-wrap gap-2">
               {entities.map((entity) => (
                 <Link
                   key={entity.slug}
                   href={`/e/${entity.slug}`}
-                  className="border border-line px-2.5 py-1 font-mono text-[0.71875rem] text-ink hover:border-primary hover:text-primary"
+                  className="rounded-sm border border-line bg-surface px-2.5 py-1 font-mono text-[0.6875rem] uppercase tracking-[0.08em] text-ink transition-colors hover:bg-panel hover:text-primary"
                 >
                   {entity.name}
                 </Link>
@@ -197,13 +197,13 @@ function BriefingGraphTrail({ issue }: { issue: PublicIssue }) {
 
         {sourceTrail.length > 0 && (
           <div>
-            <h3 className="font-mono text-[0.71875rem] font-semibold uppercase text-primary">Sources</h3>
+            <h3 className="type-kicker text-primary">Sources</h3>
             <div className="mt-3 flex flex-wrap gap-2">
               {sourceTrail.map((source) => (
                 <Link
                   key={source.domain}
                   href={`/source/${encodeURIComponent(source.domain)}`}
-                  className="border border-line px-2.5 py-1 font-mono text-[0.71875rem] text-ink hover:border-primary hover:text-primary"
+                  className="rounded-sm border border-line bg-surface px-2.5 py-1 font-mono text-[0.6875rem] uppercase tracking-[0.08em] text-ink transition-colors hover:bg-panel hover:text-primary"
                 >
                   {source.domain}
                 </Link>
@@ -226,14 +226,14 @@ function StoryPathRow({ story }: { story: IssueStoryUnit }) {
       {story.published_story ? (
         <Link
           href={story.published_story.target_url}
-          className="text-[1rem] font-semibold leading-snug text-ink hover:text-primary"
+          className="type-display text-[1.125rem] font-[560] leading-snug text-ink hover:underline"
         >
           {story.title}
         </Link>
       ) : (
-        <div className="text-[1rem] font-semibold leading-snug text-ink">{story.title}</div>
+        <div className="type-display text-[1.125rem] font-[560] leading-snug text-ink">{story.title}</div>
       )}
-      <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 font-mono text-[0.6875rem] uppercase text-ink-faint">
+      <div className="type-kicker mt-2 flex flex-wrap gap-x-4 gap-y-1 text-ink-faint">
         {story.published_story && <span>Public story</span>}
         {sourceDomains.length > 0 && <span>{sourceDomains.join(' · ')}</span>}
         {story.entity_ids.length > 0 && <span>{story.entity_ids.length} entities</span>}

@@ -30,12 +30,12 @@ export function AudioBriefingPlayer({
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="min-w-0">
-          <p className="flex items-center gap-2 font-mono text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-primary">
+          <p className="type-kicker flex items-center gap-2 text-primary">
             <Headphones aria-hidden className="h-3.5 w-3.5" />
             Audio briefing
           </p>
           {!compact && (
-            <p className="mt-1 font-mono text-[0.6875rem] text-ink-faint">
+            <p className="type-kicker mt-1 text-ink-faint">
               {formatDuration(audio.duration_seconds)} · {audio.source_count} sources
             </p>
           )}
@@ -44,7 +44,7 @@ export function AudioBriefingPlayer({
         {transcriptHref && (
           <a
             href={transcriptHref}
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-line px-2.5 py-1.5 font-mono text-[0.6875rem] font-semibold text-primary hover:border-primary hover:bg-accent-wash"
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-sm border border-ink px-2.5 py-1.5 font-mono text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-ink transition-colors hover:bg-panel"
           >
             <FileText aria-hidden className="h-3.5 w-3.5" />
             Transcript
@@ -57,7 +57,7 @@ export function AudioBriefingPlayer({
           controls
           preload="none"
           src={audioSrc}
-          className="mt-3 h-10 w-full max-w-full"
+          className="mt-3 h-10 w-full max-w-full accent-primary"
           aria-label={`Audio briefing for ${audio.date}`}
         />
       ) : (
@@ -65,7 +65,7 @@ export function AudioBriefingPlayer({
       )}
 
       {!compact && (
-        <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 font-mono text-[0.65625rem] text-ink-faint">
+        <div className="type-kicker mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-ink-faint">
           {visibleLabels.map((label) => (
             <span key={label}>{label}</span>
           ))}

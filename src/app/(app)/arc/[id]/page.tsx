@@ -71,63 +71,63 @@ export default async function ArcPage({ params, searchParams }: Params) {
       <main className="mx-auto max-w-[760px] px-8 pb-24 pt-9 max-sm:px-5">
         <Link
           href="/"
-          className="font-mono text-[0.6875rem] font-semibold uppercase text-primary hover:underline"
+          className="type-kicker text-primary hover:underline"
         >
           The Wire
         </Link>
 
-        <header className="mt-8 border-b border-line pb-6">
-          <div className="font-mono text-[0.6875rem] font-semibold uppercase text-primary">
+        <header className="mt-8">
+          <div className="type-kicker text-primary">
             Narrative arc
           </div>
-          <h1 className="mt-3 font-serif text-[2.25rem] font-semibold leading-[1.08] text-ink max-sm:text-[1.75rem]">
+          <h1 className="type-display mt-3 text-[2.75rem] font-[620] text-ink max-sm:text-[2rem]">
             {arc.title}
           </h1>
-          <p className="mt-4 font-serif text-[1.0625rem] leading-[1.72] text-[#30343b]">
+          <p className="mt-4 font-serif text-[1.1875rem] italic leading-[1.6] text-ink-soft">
             {arc.summary}
           </p>
 
-          <div className="mt-5 grid grid-cols-2 gap-3 font-mono text-[0.6875rem] text-ink-faint sm:grid-cols-4">
+          <div className="mt-6 grid grid-cols-2 gap-x-4 gap-y-3 border-y border-line py-3 sm:grid-cols-4">
             <div>
-              <div className="text-ink">Status</div>
-              <div>{arc.status}</div>
+              <div className="type-kicker text-ink-faint">Status</div>
+              <div className="mt-0.5 font-mono text-[0.75rem] text-ink">{arc.status}</div>
             </div>
             <div>
-              <div className="text-ink">Evidence</div>
-              <div>{arc.evidence_count}</div>
+              <div className="type-kicker text-ink-faint">Evidence</div>
+              <div className="mt-0.5 font-mono text-[0.75rem] text-ink">{arc.evidence_count}</div>
             </div>
             <div>
-              <div className="text-ink">Dates</div>
-              <div>{arc.date_count}</div>
+              <div className="type-kicker text-ink-faint">Dates</div>
+              <div className="mt-0.5 font-mono text-[0.75rem] text-ink">{arc.date_count}</div>
             </div>
             <div>
-              <div className="text-ink">Sources</div>
-              <div>{arc.source_domain_count}</div>
+              <div className="type-kicker text-ink-faint">Sources</div>
+              <div className="mt-0.5 font-mono text-[0.75rem] text-ink">{arc.source_domain_count}</div>
             </div>
           </div>
         </header>
 
         <section className="mt-7">
-          <h2 className="font-mono text-[0.6875rem] font-semibold uppercase text-ink">
+          <h2 className="type-kicker text-ink">
             Evidence trail
           </h2>
           <ol className="mt-3 divide-y divide-line">
             {arc.evidence.map((item, index) => (
               <li key={`${item.finding_id ?? index}-${item.source_url}`} className="py-4">
-                <div className="font-mono text-[0.625rem] font-semibold uppercase text-primary">
+                <div className="type-kicker text-primary">
                   {item.run_date} / {item.source_name || item.agent}
                 </div>
                 {item.finding_id != null ? (
                   <Link
                     href={`/f/${item.finding_id}`}
-                    className="mt-1.5 block text-[1rem] font-semibold leading-snug text-ink hover:text-primary"
+                    className="type-display mt-1.5 block text-[1.125rem] font-[560] leading-snug text-ink hover:underline"
                   >
                     {item.title}
                   </Link>
                 ) : (
-                  <h3 className="mt-1.5 text-[1rem] font-semibold leading-snug text-ink">{item.title}</h3>
+                  <h3 className="type-display mt-1.5 text-[1.125rem] font-[560] leading-snug text-ink">{item.title}</h3>
                 )}
-                <p className="mt-2 font-serif text-[0.9375rem] leading-[1.58] text-[#30343b]">
+                <p className="mt-2 font-serif text-[0.9375rem] leading-[1.58] text-ink-prose">
                   {item.summary}
                 </p>
                 {item.source_url && (
@@ -135,7 +135,7 @@ export default async function ArcPage({ params, searchParams }: Params) {
                     href={item.source_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mt-2 inline-block font-mono text-[0.625rem] text-primary hover:underline"
+                    className="type-kicker mt-2 inline-block text-primary hover:underline"
                   >
                     Source
                   </a>
