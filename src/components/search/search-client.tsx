@@ -1,11 +1,11 @@
 'use client'
 
 import Link from 'next/link'
+import { topicFor, topicStyleVars } from '@/lib/topics'
 import type { CSSProperties } from 'react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { trackEvent } from '@/lib/analytics'
-import { topicVars } from '@/lib/topic-color'
 
 type Groups = {
   stories?: { slug: string; title: string; summary: string; issue_date: string; target_url: string; has_take: boolean }[]
@@ -131,7 +131,7 @@ export function SearchClient() {
               <li
                 key={s.slug}
                 className="rise-in flood-row rule-row group"
-                style={{ ...topicVars(s.slug), '--i': i } as CSSProperties}
+                style={{ ...topicStyleVars(topicFor(s.slug)), '--i': i } as CSSProperties}
               >
                 <Link href={s.target_url} className="grid grid-cols-[1fr_auto] gap-4 px-4 py-4">
                   <span className="block min-w-0">
@@ -157,7 +157,7 @@ export function SearchClient() {
               <li
                 key={f.id}
                 className="rise-in flood-row rule-row group"
-                style={{ ...topicVars(String(f.id)), '--i': i } as CSSProperties}
+                style={{ ...topicStyleVars(topicFor(String(f.id))), '--i': i } as CSSProperties}
               >
                 <Link href={f.target_url} className="grid grid-cols-[1fr_auto] gap-4 px-4 py-4">
                   <span className="block min-w-0">
@@ -180,7 +180,7 @@ export function SearchClient() {
                 key={e.slug}
                 href={e.target_url}
                 className={`tag-chip rise-in inline-block transition-transform duration-[var(--dur-fast)] ease-[var(--ease-swift)] hover:-translate-y-0.5 ${FOCUS_RING}`}
-                style={{ ...topicVars(e.slug), '--i': i } as CSSProperties}
+                style={{ ...topicStyleVars(topicFor(e.slug)), '--i': i } as CSSProperties}
               >
                 {e.name}
               </Link>

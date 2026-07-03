@@ -1,10 +1,10 @@
 import type { Metadata } from 'next'
+import { topicFor, topicStyleVars } from '@/lib/topics'
 import type { CSSProperties } from 'react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { JsonLd } from '@/components/json-ld'
 import { getEntity } from '@/lib/api'
-import { topicVars } from '@/lib/topic-color'
 import { absoluteUrl, SITE_NAME } from '@/lib/site'
 
 export const revalidate = 60
@@ -62,7 +62,7 @@ export default async function EntityPage({ params }: Params) {
   const sourceCount = entity.counts?.sources ?? sourceTrail.length
 
   return (
-    <div className="h-full overflow-y-auto" style={topicVars(entity.slug) as CSSProperties}>
+    <div className="h-full overflow-y-auto" style={topicStyleVars(topicFor(entity.slug)) as CSSProperties}>
       <JsonLd
         data={{
           '@context': 'https://schema.org',
