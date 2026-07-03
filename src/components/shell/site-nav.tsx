@@ -113,47 +113,61 @@ const TAB_ITEMS = [
   { href: '/', label: 'Wire', icon: Radio, match: (p: string) => p === '/' },
   { href: '/briefings', label: 'Briefings', icon: Newspaper, match: (p: string) => p.startsWith('/briefings') },
   { href: '/search', label: 'Search', icon: SearchIcon, match: (p: string) => p.startsWith('/search') },
-  { href: '/#subscribe', label: 'Subscribe', icon: Mail, match: () => false },
 ]
 
 /**
- * Native-feel bottom tab bar — THE nav on mobile (spectrum-system §2.9).
- * One ink pill SLIDES between tabs on navigation; the covered tab's icon and
- * label flip to white. View transitions make the page follow the same beat.
+ * Native-feel bottom tab bar — THE nav on mobile. Three equal tabs; one ink
+ * pill SLIDES between them. Position is pure math from the active index
+ * (left: i/3), so it can never desync from the route. No Subscribe tab:
+ * a tab that can't activate isn't navigation — subscribe is a page CTA.
  */
 export function BottomTabBar() {
   const pathname = usePathname()
-  const activeIndex = TAB_ITEMS.findIndex((t) => t.match(pathname))
-  const target = activeIndex >= 0 ? activeIndex : null
-
+  const active = TAB_ITEMS.findIndex((t) => t.match(pathname))
   return (
     <nav
-      className="pb-safe fixed inset-x-0 bottom-0 z-40 flex border-t border-line bg-paper/90 backdrop-blur-xl sm:hidden"
+      className="pb-safe fixed inset-x-0 bottom-0 z-40 border-t border-line bg-paper/90 backdrop-blur-xl sm:hidden"
       aria-label="Primary"
     >
-      {TAB_ITEMS.map((t, i) => {
-        const on = i === target
-        const Icon = t.icon
-        return (
-          <Link
-            key={t.label}
-            href={t.href}
-            aria-current={on ? 'page' : undefined}
-            className="flex h-16 min-h-14 flex-1 items-center justify-center transition-transform duration-(--dur-fast) focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink active:scale-95"
-          >
-            <span
-              className={`relative z-10 flex flex-col items-center gap-0.5 rounded-full px-5 py-1.5 transition-colors duration-(--dur-med) ${
-                on ? 'bg-ink text-white' : 'text-ink-soft'
-              }`}
+      <div className="flex items-stretch">
+        <div className="relative flex flex-1">
+        {active >= 0 && (
+          <span
+            aria-hidden
+            className="absolute bottom-2 top-2 rounded-full bg-ink transition-[left] duration-(--dur-med) ease-(--ease-swift) motion-reduce:transition-none"
+            style={{ left: `calc(${active} * (100% / 3) + 10px)`, width: 'calc(100% / 3 - 20px)' }}
+          />
+        )}
+          {TAB_ITEMS.map((t, i) => {
+          const on = i === active
+          const Icon = t.icon
+          return (
+            <Link
+              key={t.label}
+              href={t.href}
+              aria-current={on ? 'page' : undefined}
+              className="relative z-10 flex h-16 min-h-14 flex-1 flex-col items-center justify-center gap-0.5 transition-[color,transform] duration-(--dur-med) focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink active:scale-95"
             >
-              <Icon size={20} strokeWidth={1.5} aria-hidden />
-              <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.06em]">
+              <span className={on ? 'text-white' : 'text-ink-soft'}>
+                <Icon size={20} strokeWidth={1.5} aria-hidden />
+              </span>
+              <span
+                className={`font-mono text-[10px] font-semibold uppercase tracking-[0.06em] ${on ? 'text-white' : 'text-ink-soft'}`}
+              >
                 {t.label}
               </span>
-            </span>
-          </Link>
-        )
-      })}
+            </Link>
+          )
+          })}
+        </div>
+        <Link
+          href="/#subscribe"
+          className="my-2.5 ml-1 mr-3 flex items-center gap-1.5 self-center rounded-full bg-primary px-4 py-2.5 font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-white transition-transform duration-(--dur-fast) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink active:scale-95"
+        >
+          <Mail size={16} strokeWidth={1.75} aria-hidden />
+          Subscribe
+        </Link>
+      </div>
     </nav>
   )
 }
