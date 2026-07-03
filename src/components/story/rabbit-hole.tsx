@@ -10,6 +10,23 @@ import { ViaAvatar } from '@/components/wire/via-avatar'
 import { VideoEmbed } from '@/components/video/video-embed'
 import { youtubeId } from '@/lib/video'
 
+
+const GENERIC_CONNECTORS = new Set([
+  'same source domain',
+  'semantic neighbor',
+  'shared topic',
+  'same research window',
+  'newsletter context',
+])
+
+/** At most the two most SPECIFIC connectors — never the seven-label wall. */
+function threadKicker(labels: string[] | undefined, fallback: string): string {
+  if (!labels || labels.length === 0) return fallback
+  const specific = labels.filter((l) => !GENERIC_CONNECTORS.has(l.toLowerCase()))
+  const picked = (specific.length > 0 ? specific : labels).slice(0, 2)
+  return picked.join(' / ')
+}
+
 export function RabbitHole({
   initial,
   initialRelated,
@@ -259,22 +276,20 @@ function ReadingColumn({
             <button
               key={r.id}
               onClick={() => onOpen(r)}
-              className="group rounded-xl border border-line bg-surface px-4 py-3.5 text-left transition-colors hover:border-primary hover:bg-accent-wash active:scale-[0.99]"
+              className="flood-row rule-row group w-full px-4 py-4 text-left transition-transform duration-(--dur-fast) focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink active:scale-[0.99]"
             >
-              <div className="font-mono text-[0.625rem] font-semibold uppercase tracking-[0.06em] text-primary">
-                {r.connector_labels?.length ? r.connector_labels.join(' / ') : sectionLabel(r.agent)}
+              <div className="type-kicker text-[0.625rem] text-[color:var(--tc-text)]">
+                {threadKicker(r.connector_labels, sectionLabel(r.agent))}
               </div>
-              <div className="mt-1.5 text-[0.9375rem] font-semibold leading-snug tracking-[-0.01em] text-ink">
+              <div
+                className="type-display mt-1.5 text-[1.0625rem] leading-[1.15] text-ink"
+                style={{ fontVariationSettings: '"wdth" 107', fontWeight: 720 }}
+              >
                 {r.title}
               </div>
-              <div className="mt-1.5 font-mono text-[0.625rem] text-ink-faint">
+              <div className="mt-1.5 font-mono text-[0.625rem] uppercase tracking-[0.08em] text-ink-faint">
                 {sourceLabel(r.source_name, r.source_url)}
               </div>
-              {r.reason && (
-                <div className="mt-2 font-mono text-[0.625rem] leading-relaxed text-ink-faint">
-                  {r.reason}
-                </div>
-              )}
             </button>
           ))}
         </div>
