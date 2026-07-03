@@ -184,7 +184,6 @@ export default async function StoryPage({ params }: Params) {
             </p>
             <ol>
               {story.related_paths.slice(0, 8).map((related, index) => {
-                const vars = topicStyleVars(null) as CSSProperties
                 const labels = (related.connector_labels || ['Connected']).join(' / ')
                 const prevLabels =
                   index > 0
@@ -204,7 +203,7 @@ export default async function StoryPage({ params }: Params) {
                   </>
                 )
                 return (
-                  <li key={`${related.id}-${index}`} className="flood-row rule-row group" style={vars}>
+                  <li key={`${related.id}-${index}`} className="flood-row rule-row group">
                     {related.target_url ? (
                       <TrackedLink
                         href={related.target_url}
