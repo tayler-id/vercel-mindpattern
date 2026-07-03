@@ -145,13 +145,13 @@ export function BottomTabBar() {
             key={t.label}
             href={t.href}
             aria-current={on ? 'page' : undefined}
-            className="relative z-10 flex h-16 min-h-14 flex-1 items-center justify-center transition-transform duration-(--dur-fast) focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink active:scale-95"
+            className="flex h-16 min-h-14 flex-1 items-center justify-center transition-transform duration-(--dur-fast) focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink active:scale-95"
           >
             <span
               ref={(el) => {
                 itemRefs.current[i] = el
               }}
-              className={`flex flex-col items-center gap-0.5 rounded-full px-5 py-1.5 transition-colors duration-(--dur-med) ${
+              className={`relative z-10 flex flex-col items-center gap-0.5 rounded-full px-5 py-1.5 transition-colors duration-(--dur-med) ${
                 on ? 'text-white' : 'text-ink-soft'
               }`}
             >

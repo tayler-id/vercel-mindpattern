@@ -98,7 +98,8 @@ export default async function StoryPage({ params }: Params) {
           </Link>
 
           <p className="rise-in type-kicker mt-6 text-[color:var(--tc-text)]" style={{ '--i': 1 } as CSSProperties}>
-            {sectionName} · {story.issue_date} · {story.confidence}
+            {topic && <span className="tag-chip mr-3 align-middle normal-case">{topic.label}</span>}
+            {[topic ? '' : sectionName, story.issue_date, story.confidence].filter(Boolean).join(' · ')}
           </p>
           <h1
             className="rise-in type-display relative z-[1] mt-2 max-w-[24ch] text-[clamp(2.25rem,5vw,3.5rem)] leading-[1.05] tracking-[-0.02em] text-ink"
@@ -118,7 +119,7 @@ export default async function StoryPage({ params }: Params) {
           )}
 
           {/* Folio strip — 3px ink rule, mono label/value pairs */}
-          <div className="rise-in mt-8 flex flex-wrap items-center gap-x-9 gap-y-3 border-t-[3px] border-ink py-3" style={{ '--i': 5 } as CSSProperties}>
+          <div className="rise-in mt-8 flex flex-wrap items-center gap-x-9 gap-y-3 border-t-[3px] border-(--tc) py-3" style={{ '--i': 5 } as CSSProperties}>
             <div>
               <div className="type-kicker text-ink-faint">Issue</div>
               <TrackedLink
@@ -175,7 +176,7 @@ export default async function StoryPage({ params }: Params) {
         {/* ── Related: flood rows ── */}
         {story.related_paths.length > 0 && (
           <section className="scroll-rise mx-auto mt-10 max-w-[720px] px-8 max-sm:px-5">
-            <h2 className="type-display border-t-[3px] border-ink pt-2.5 text-[25px] uppercase leading-[1.04] text-ink">
+            <h2 className="type-display border-t-[3px] border-(--tc) pt-2.5 text-[25px] uppercase leading-[1.04] text-ink">
               Related stories
             </h2>
             <p className="mb-2 mt-1 font-mono text-[0.6875rem] text-ink-faint">

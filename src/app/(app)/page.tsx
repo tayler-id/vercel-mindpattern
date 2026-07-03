@@ -60,7 +60,7 @@ function toGraphNodes(
     return top.map((s, i) => ({
       slug: s.slug,
       title: s.title,
-      section: sectionLabel(s.section_id || ''),
+      section: s.section_id || '',
       weight: 1 - i / top.length,
       entities: (s.entity_refs ?? []).slice(0, 6).map((e) => e.slug),
       href: `/s/${encodeURIComponent(s.slug)}`,
@@ -70,7 +70,7 @@ function toGraphNodes(
   return top.map((f, i) => ({
     slug: String(f.id),
     title: f.title,
-    section: sectionLabel(f.agent),
+    section: f.agent,
     weight: 1 - i / top.length,
     entities: (f.entities ?? []).slice(0, 6).map((e) => e.slug),
     href: `/f/${f.id}`,

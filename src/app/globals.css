@@ -610,3 +610,10 @@ input:autofill {
   border-top: 3px solid var(--ink);
   width: 4rem;
 }
+
+/* Every client navigation enters like a page being laid down. */
+@media (prefers-reduced-motion: no-preference) {
+  .page-enter {
+    animation: rise var(--dur-slow) var(--ease-settle) both;
+  }
+}

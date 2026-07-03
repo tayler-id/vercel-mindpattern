@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import * as THREE from 'three'
-import { topicFor } from '@/lib/topics'
+import { topicFor, topicForAgent } from '@/lib/topics'
 
 export interface GraphNode {
   slug: string
@@ -15,14 +15,6 @@ export interface GraphNode {
   href: string
 }
 
-/** topicColor() slots resolved to real hexes for WebGL; neutral = ink. */
-const VAR_HEX: Record<string, number> = {
-  'var(--spectrum-1)': 0xe63b12,
-  'var(--spectrum-2)': 0x0797a6,
-  'var(--spectrum-3)': 0xcf2d7b,
-  'var(--spectrum-4)': 0xf5c518,
-  'var(--ink)': 0x0e0e0f,
-}
 
 const INK = 0x0e0e0f
 const MAX_EDGES = 90
@@ -144,7 +136,7 @@ export function KnowledgeGraph({
       px[i] = (0.08 + 0.84 * rand()) * w
       py[i] = (0.18 + 0.64 * rand()) * h
       radius[i] = 4 + nodes[i].weight * 8
-      const t = topicFor(nodes[i].section)
+      const t = topicFor(nodes[i].section) ?? topicForAgent(nodes[i].section)
       const hex = t ? parseInt(t.fill.slice(1), 16) : INK
       const mesh = new THREE.Mesh(circleGeo, matFor(hex))
       mesh.renderOrder = 2
