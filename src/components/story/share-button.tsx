@@ -1,22 +1,20 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useSyncExternalStore } from 'react'
 import { Share } from 'lucide-react'
 import { trackEvent } from '@/lib/analytics'
 
+const noopSubscribe = () => () => {}
+const clientHasShare = () => typeof navigator.share === 'function'
+const serverHasShare = () => false
+
 /**
- * Web Share pill (Addendum 8). Feature-checked in an effect so the server
- * and first client render agree (no hydration mismatch); renders nothing
- * where navigator.share is unsupported.
+ * Web Share pill (Addendum 8). Capability read via useSyncExternalStore so
+ * the server render and first client render agree (no hydration mismatch,
+ * no setState-in-effect); renders nothing where navigator.share is missing.
  */
 export function ShareButton({ title, className = '' }: { title: string; className?: string }) {
-  const [supported, setSupported] = useState(false)
-
-  useEffect(() => {
-    if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
-      setSupported(true)
-    }
-  }, [])
+  const supported = useSyncExternalStore(noopSubscribe, clientHasShare, serverHasShare)
 
   if (!supported) return null
 
