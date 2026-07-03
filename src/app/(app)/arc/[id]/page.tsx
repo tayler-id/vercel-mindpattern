@@ -1,10 +1,10 @@
 import type { Metadata } from 'next'
+import { topicFor, topicStyleVars } from '@/lib/topics'
 import type { CSSProperties } from 'react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { JsonLd } from '@/components/json-ld'
 import { getNarrativeArc } from '@/lib/api'
-import { topicVars } from '@/lib/topic-color'
 import { absoluteUrl, SITE_NAME } from '@/lib/site'
 
 export const revalidate = 60
@@ -52,7 +52,7 @@ export default async function ArcPage({ params, searchParams }: Params) {
   if (!arc) notFound()
 
   return (
-    <div className="h-full overflow-y-auto" style={topicVars(arc.id) as CSSProperties}>
+    <div className="h-full overflow-y-auto" style={topicStyleVars(topicFor(arc.id)) as CSSProperties}>
       <JsonLd
         data={{
           '@context': 'https://schema.org',
@@ -116,7 +116,7 @@ export default async function ArcPage({ params, searchParams }: Params) {
               <li
                 key={`${item.finding_id ?? index}-${item.source_url}`}
                 className={`${index < 8 ? 'rise-in' : 'scroll-rise'} flood-row rule-row group grid grid-cols-[1fr_auto] gap-4 px-4 py-4`}
-                style={{ ...topicVars(item.agent || arc.id), '--i': index + 5 } as CSSProperties}
+                style={{ ...topicStyleVars(topicFor(item.agent || arc.id)), '--i': index + 5 } as CSSProperties}
               >
                 <div className="min-w-0">
                   <div className="type-kicker text-[color:var(--tc-text)]">

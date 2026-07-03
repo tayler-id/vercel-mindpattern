@@ -1,11 +1,11 @@
 import type { Metadata } from 'next'
+import { topicStyleVars } from '@/lib/topics'
 import type { CSSProperties } from 'react'
 import Link from 'next/link'
 import { AudioBriefingPlayer } from '@/components/briefing/audio-briefing-player'
 import { getAudioBriefings, getReports } from '@/lib/api'
 import type { AudioBriefing, ReportListItem } from '@/lib/types'
 import { shortDate } from '@/lib/format'
-import { accentVars } from '@/lib/topic-color'
 
 export const revalidate = 60
 export const dynamic = 'force-dynamic'
@@ -56,7 +56,7 @@ export default async function BriefingsPage() {
             <li
               key={r.date}
               className="rule-row"
-              style={{ ...accentVars(), '--i': index } as CSSProperties}
+              style={{ ...topicStyleVars(null), '--i': index } as CSSProperties}
             >
               <div className={index < 8 ? 'rise-in' : 'scroll-rise'}>
                 <Link href={`/briefings/${r.date}`} className="flood-row block px-4 py-5">

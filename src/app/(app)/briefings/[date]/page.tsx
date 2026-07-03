@@ -1,4 +1,5 @@
 import { ScrollDepthTracker } from '@/components/analytics/scroll-depth'
+import { topicFor, topicStyleVars } from '@/lib/topics'
 import type { Metadata } from 'next'
 import type { CSSProperties } from 'react'
 import Link from 'next/link'
@@ -20,7 +21,6 @@ function stripLeadingTitle(content: string, title: string): string {
 }
 import { absoluteUrl, shortReportDescription, SITE_NAME } from '@/lib/site'
 import { shortDate } from '@/lib/format'
-import { topicVars } from '@/lib/topic-color'
 
 export const revalidate = 60
 
@@ -139,7 +139,7 @@ export default async function BriefingPage({ params }: Params) {
               <Link
                 href={`/briefings/${prev}`}
                 className="flood-row block px-4 py-4"
-                style={topicVars(prev) as CSSProperties}
+                style={topicStyleVars(topicFor(prev)) as CSSProperties}
               >
                 <p className="type-kicker text-[color:var(--tc-text)]">← Previous issue</p>
                 <p className="type-display mt-2 text-[1.25rem] uppercase text-ink">{shortDate(prev)}</p>
@@ -151,7 +151,7 @@ export default async function BriefingPage({ params }: Params) {
               <Link
                 href={`/briefings/${next}`}
                 className="flood-row block px-4 py-4 text-right"
-                style={topicVars(next) as CSSProperties}
+                style={topicStyleVars(topicFor(next)) as CSSProperties}
               >
                 <p className="type-kicker text-[color:var(--tc-text)]">Next issue →</p>
                 <p className="type-display mt-2 text-[1.25rem] uppercase text-ink">{shortDate(next)}</p>
@@ -261,7 +261,7 @@ function StoryPathRow({ story }: { story: IssueStoryUnit }) {
 
   if (story.published_story) {
     return (
-      <div className="flood-row rule-row" style={topicVars(story.slug) as CSSProperties}>
+      <div className="flood-row rule-row" style={topicStyleVars(topicFor(story.slug)) as CSSProperties}>
         <Link href={story.published_story.target_url} className="block px-4 py-4">
           {inner}
         </Link>
@@ -269,7 +269,7 @@ function StoryPathRow({ story }: { story: IssueStoryUnit }) {
     )
   }
   return (
-    <div className="rule-row px-4 py-4" style={topicVars(story.slug) as CSSProperties}>
+    <div className="rule-row px-4 py-4" style={topicStyleVars(topicFor(story.slug)) as CSSProperties}>
       {inner}
     </div>
   )

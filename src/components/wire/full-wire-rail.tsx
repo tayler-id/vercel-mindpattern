@@ -1,7 +1,7 @@
 import Link from 'next/link'
+import { topicFor, topicStyleVars } from '@/lib/topics'
 import type { PublicStory } from '@/lib/types'
 import { sectionLabel } from '@/lib/sections'
-import { topicVars } from '@/lib/topic-color'
 
 /**
  * "THE FULL WIRE" — the complete story list, compact rows. No inner
@@ -32,7 +32,7 @@ export function FullWireRail({ stories, total }: { stories: PublicStory[]; total
             <li key={story.slug}>
               <Link
                 href={`/s/${encodeURIComponent(story.slug)}`}
-                style={topicVars(label) as React.CSSProperties}
+                style={topicStyleVars(topicFor(label)) as React.CSSProperties}
                 className="scroll-rise group grid grid-cols-[32px_1fr] items-baseline gap-3 border-t border-line px-2 py-2.5 transition-[background-color,transform] duration-(--dur-fast) hover:bg-panel active:scale-[0.99]"
               >
                 <span className="font-mono text-[10.5px] text-ink-soft">

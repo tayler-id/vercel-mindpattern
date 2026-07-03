@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import type { Finding, RelatedResponse } from '@/lib/types'
 import { sectionLabel, leaderFrom, sourceDomain, sourceLabel } from '@/lib/sections'
+import { kickerLabel, topicForAgent, topicStyleVars } from '@/lib/topics'
 import { SourceFavicon } from '@/components/wire/source-favicon'
 import { ViaAvatar } from '@/components/wire/via-avatar'
 import { VideoEmbed } from '@/components/video/video-embed'
@@ -209,10 +210,10 @@ function ReadingColumn({
 
   return (
     <article className="mx-auto max-w-[44rem] px-12 pb-28 pt-9 max-sm:px-5">
-      <div className="font-mono text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-primary">
-        {sectionLabel(finding.agent)}
+      <div className="font-mono text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-[color:var(--tc-text)]">
+        {kickerLabel(finding.agent) || sectionLabel(finding.agent)}
       </div>
-      <h1 className="mt-3 font-serif text-[2rem] font-semibold leading-[1.15] tracking-[-0.02em] text-ink max-sm:text-[1.6rem]">
+      <h1 className="type-display mt-2 max-w-[24ch] text-[clamp(1.625rem,3.5vw,2.125rem)] leading-[1.08] text-ink">
         {finding.title}
       </h1>
 
@@ -239,7 +240,7 @@ function ReadingColumn({
             {domain && (
               <Link
                 href={`/source/${encodeURIComponent(domain)}`}
-                className="inline-block rounded-lg border border-line px-2.5 py-1.5 font-mono text-[0.71875rem] text-primary hover:border-primary hover:bg-accent-wash"
+                className="inline-block rounded-lg border border-line px-2.5 py-1.5 font-mono text-[0.71875rem] text-ink hover:bg-ink hover:text-white"
               >
                 Source page
               </Link>
@@ -248,7 +249,7 @@ function ReadingColumn({
               href={finding.source_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block rounded-lg border border-line px-2.5 py-1.5 font-mono text-[0.71875rem] text-primary hover:border-primary hover:bg-accent-wash"
+              className="inline-block rounded-lg border border-line px-2.5 py-1.5 font-mono text-[0.71875rem] text-ink hover:bg-ink hover:text-white"
             >
               {sourceLabel(finding.source_name, finding.source_url)}
             </a>

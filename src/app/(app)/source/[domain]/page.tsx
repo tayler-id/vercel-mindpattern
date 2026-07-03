@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { topicFor, topicStyleVars } from '@/lib/topics'
 import type { CSSProperties } from 'react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -6,7 +7,6 @@ import { JsonLd } from '@/components/json-ld'
 import { SourceFavicon } from '@/components/wire/source-favicon'
 import { getSourceByDomain } from '@/lib/api'
 import { sectionLabel, sourceLabel } from '@/lib/sections'
-import { topicVars } from '@/lib/topic-color'
 import { absoluteUrl, SITE_NAME } from '@/lib/site'
 
 export const revalidate = 60
@@ -46,7 +46,7 @@ export default async function SourcePage({ params }: Params) {
   const firstFinding = findings[0]
 
   return (
-    <div className="h-full overflow-y-auto" style={topicVars(domain) as CSSProperties}>
+    <div className="h-full overflow-y-auto" style={topicStyleVars(topicFor(domain)) as CSSProperties}>
       <JsonLd
         data={{
           '@context': 'https://schema.org',
