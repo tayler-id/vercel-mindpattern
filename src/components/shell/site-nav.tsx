@@ -124,19 +124,13 @@ const TAB_ITEMS = [
 export function BottomTabBar() {
   const pathname = usePathname()
   const activeIndex = TAB_ITEMS.findIndex((t) => t.match(pathname))
-  const itemRefs = useRef<Array<HTMLElement | null>>([])
-  const barRef = useRef<HTMLElement>(null)
-
   const target = activeIndex >= 0 ? activeIndex : null
-  const pillRef = useSlidingPill(target, itemRefs, barRef)
 
   return (
     <nav
-      ref={barRef}
       className="pb-safe fixed inset-x-0 bottom-0 z-40 flex border-t border-line bg-paper/90 backdrop-blur-xl sm:hidden"
       aria-label="Primary"
     >
-      <span aria-hidden ref={pillRef} className={PILL_CLASS} />
       {TAB_ITEMS.map((t, i) => {
         const on = i === target
         const Icon = t.icon
@@ -148,11 +142,8 @@ export function BottomTabBar() {
             className="flex h-16 min-h-14 flex-1 items-center justify-center transition-transform duration-(--dur-fast) focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink active:scale-95"
           >
             <span
-              ref={(el) => {
-                itemRefs.current[i] = el
-              }}
               className={`relative z-10 flex flex-col items-center gap-0.5 rounded-full px-5 py-1.5 transition-colors duration-(--dur-med) ${
-                on ? 'text-white' : 'text-ink-soft'
+                on ? 'bg-ink text-white' : 'text-ink-soft'
               }`}
             >
               <Icon size={20} strokeWidth={1.5} aria-hidden />
