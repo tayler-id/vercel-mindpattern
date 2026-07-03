@@ -121,7 +121,15 @@ export function RabbitHole({
   }, [current.id])
 
   const open = (f: Finding) => {
-    if (f.id === current.id) return
+    // Honest linking: only findings drill in place. Stories, patterns, and
+    // anything else navigate to their own page instead of masquerading as a
+    // finding (which broke the thread 2 levels deep from source/entity paths).
+    const url = (f as Finding & { target_url?: string }).target_url
+    if (url && !url.startsWith('/f/')) {
+      window.location.assign(url)
+      return
+    }
+    if (!f.id || f.id === current.id) return
     setDir(1)
     setTrail((t) => [...t, f])
   }
