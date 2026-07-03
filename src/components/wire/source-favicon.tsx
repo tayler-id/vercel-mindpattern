@@ -21,7 +21,7 @@ export function SourceFavicon({
 
   if (!src || failed) {
     return (
-      <span className="inline-grid size-[15px] place-items-center rounded-[2px] bg-primary text-[8px] font-bold leading-none text-primary-foreground">
+      <span className="inline-grid size-[15px] place-items-center rounded-full bg-primary text-[8px] font-bold leading-none text-primary-foreground">
         {letter}
       </span>
     )
@@ -36,7 +36,7 @@ export function SourceFavicon({
       height={15}
       loading="lazy"
       onError={() => setFailed(true)}
-      className="size-[15px] rounded-[2px] border border-line bg-surface object-cover"
+      className="size-[15px] rounded-full border border-line bg-surface object-cover"
     />
   )
 }

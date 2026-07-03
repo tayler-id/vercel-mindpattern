@@ -8,12 +8,12 @@
 @custom-variant dark (&:is(.dark *));
 
 /* ───────────────────────────────────────────────────────────
-   BROADSHEET design system (light only).
-   Fraunces (display) · Newsreader (body serif) · Archivo (UI sans)
+   SPECTRUM design system (light only).
+   Archivo variable-width (display + UI) · Source Serif 4 (prose)
    · IBM Plex Mono (data voice).
-   Warm newsprint paper, ink, hairline rules instead of cards,
-   one oxblood accent. Signature primitive: the ruled row.
-   No left-border callouts. App-feel mobile.
+   Crisp white + ink; every research topic owns a saturated color.
+   Signature primitives: the ink-ruled row + the color flood.
+   Motion is first-class. No left-border callouts. No cards.
    ─────────────────────────────────────────────────────────── */
 @theme inline {
   --color-background: var(--background);
@@ -21,10 +21,10 @@
 
   --font-sans: var(--font-archivo), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: var(--font-plex-mono), ui-monospace, "SF Mono", Menlo, monospace;
-  --font-serif: var(--font-newsreader), Georgia, "Times New Roman", serif;
-  --font-display: var(--font-fraunces), var(--font-newsreader), Georgia, serif;
+  --font-serif: var(--font-source-serif), Georgia, "Times New Roman", serif;
+  --font-display: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
 
-  /* Broadsheet surface + ink scale (utilities: bg-paper, text-ink-soft, border-line, …) */
+  /* Spectrum surface + ink scale (utilities: bg-paper, text-ink-soft, border-line, …) */
   --color-paper: var(--paper);
   --color-surface: var(--surface);
   --color-panel: var(--panel);
@@ -68,7 +68,7 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  /* legacy aliases retained so existing components keep resolving (now Broadsheet-toned) */
+  /* legacy aliases retained so existing components keep resolving (now Spectrum-toned) */
   --color-navy: var(--navy);
   --color-olive: var(--olive);
 
@@ -79,72 +79,83 @@
   --radius-2xl: calc(var(--radius) * 1.6);
   --radius-3xl: calc(var(--radius) * 2);
   --radius-4xl: calc(var(--radius) * 2.4);
-
-  /* Rules do the lifting; shadows are near-invisible paper lift only. */
-  --shadow-lift: 0 1px 0 var(--line);
 }
 
 :root {
-  /* Broadsheet palette — warm newsprint, ink, oxblood */
-  --paper: #f7f3ea;
-  --surface: #fdfbf5;
-  --panel: #efe9db;
-  --ink: #171310;
-  --ink-prose: #2b251d;
-  --ink-soft: #5c5443;
-  --ink-faint: #8d8371;
-  --line: #ddd4c2;
-  --line-soft: #e9e2d2;
+  /* Spectrum palette — crisp white, ink, five topic hues */
+  --paper: #ffffff;
+  --surface: #fafafa;
+  --panel: #f2f2f4;
+  --ink: #0e0e0f;
+  --ink-prose: #1d1d20;
+  --ink-soft: #55555a;
+  --ink-faint: #77777d;
+  --line: #e8e8ea;
+  --line-soft: #f0f0f2;
   --line-strong: var(--ink);
-  --accent: #8a2318;       /* oxblood */
-  --accent-wash: #f0e2d8;
-  --spine: #f1ecdf;
-  --ok: #3d5a37;
+  --accent: #e63b12;       /* signal red-orange — brand accent */
+  --accent-wash: #fdeae4;
+  --spine: #f5f5f7;
+  --ok: #0797a6;
 
-  /* shadcn token contract → Broadsheet values */
+  /* motion tokens — the only allowed durations/easings (see spectrum-system.md §1.5) */
+  --dur-fast: 150ms;
+  --dur-med: 280ms;
+  --dur-slow: 500ms;
+  --ease-swift: cubic-bezier(0.7, 0, 0.2, 1);
+  --ease-settle: cubic-bezier(0.2, 0.7, 0.2, 1);
+
+  /* topic spectrum — color IS the taxonomy (no green — vetoed) */
+  --spectrum-1: #e63b12;        /* red-orange */
+  --spectrum-2: #0797a6;        /* teal */
+  --spectrum-3: #cf2d7b;        /* magenta */
+  --spectrum-4: #f5c518;        /* yellow — fills only */
+  --spectrum-4-text: #a8850b;   /* yellow's AA text variant on white */
+
+  /* shadcn token contract → Spectrum values */
   --background: var(--paper);
   --foreground: var(--ink);
   --card: var(--surface);
   --card-foreground: var(--ink);
-  --popover: var(--surface);
+  --popover: var(--paper);
   --popover-foreground: var(--ink);
   --primary: var(--accent);
-  --primary-foreground: #fdfbf5;
+  --primary-foreground: #ffffff;
   --secondary: var(--panel);
   --secondary-foreground: var(--ink);
   --muted: var(--spine);
   --muted-foreground: var(--ink-soft);
   --accent-foreground: var(--accent);
-  /* shadcn "accent" = subtle interactive bg → Broadsheet accent-wash */
+  /* shadcn "accent" = subtle interactive bg → Spectrum wash */
   --color-accent-bg: var(--accent-wash);
-  --destructive: #9f2d20;
-  --destructive-foreground: #fdfbf5;
+  --destructive: #c8290f;
+  --destructive-foreground: #ffffff;
   --border: var(--line);
   --input: var(--line);
-  --ring: var(--accent);
-  --radius: 0.125rem;      /* 2px — sharp, printed */
+  --ring: var(--ink);
+  --radius: 0.1875rem;     /* 3px — crisp, not rounded-card */
 
-  /* legacy aliases mapped onto Broadsheet so old utilities don't break */
-  --navy: #3e4c63;
+  /* legacy aliases mapped onto Spectrum so old utilities don't break */
+  --navy: var(--spectrum-2);
   --olive: var(--ok);
 
   --sidebar: var(--panel);
   --sidebar-foreground: var(--ink-soft);
   --sidebar-primary: var(--accent);
-  --sidebar-primary-foreground: #fdfbf5;
+  --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: var(--accent-wash);
   --sidebar-accent-foreground: var(--accent);
   --sidebar-border: var(--line);
-  --sidebar-ring: var(--accent);
+  --sidebar-ring: var(--ink);
 
-  --chart-1: #8a2318;
-  --chart-2: #3d5a37;
-  --chart-3: #a8781f;
-  --chart-4: #3e4c63;
-  --chart-5: #6e6552;
+  --chart-1: var(--spectrum-1);
+  --chart-2: var(--spectrum-2);
+  --chart-3: var(--spectrum-3);
+  --chart-4: var(--spectrum-4);
+  --chart-5: var(--ink-soft);
 }
 
-/* shadcn "accent" surface token resolves to the wash, not the oxblood text color */
+/* shadcn "accent" surface token resolves to the wash, not the accent text color */
 @theme inline {
   --color-accent: var(--accent-wash);
 }
@@ -163,64 +174,26 @@
     -webkit-tap-highlight-color: transparent;
     overscroll-behavior-y: none;
   }
-  /* Print grain — the whole page reads as paper, not a screen. */
-  body::after {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: 9999;
-    pointer-events: none;
-    opacity: 0.032;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  }
   h1, h2, h3, h4 {
     text-wrap: balance;
   }
 }
 
-/* ── Broadsheet primitives ────────────────────────────────────
-   Layered as components so Tailwind utilities (leading-*, text-*,
-   tracking-*, …) can override any single property at call sites. */
+/* ── Spectrum primitives ──────────────────────────────────────
+   Layered as components so Tailwind utilities can override any
+   single property at call sites. */
 @layer components {
-  /* Scotch rule — the classic thick-over-thin newspaper section rule. */
-  .rule-scotch {
-    border-top: 3px solid var(--ink);
-    position: relative;
-  }
-  .rule-scotch::before {
-    content: "";
-    position: absolute;
-    top: 2px;
-    left: 0;
-    right: 0;
-    border-top: 1px solid var(--ink);
-  }
-
-  /* Hairline row rule — the repeated feed primitive. */
-  .rule-row {
-    border-top: 1px solid var(--line);
-  }
-
-  /* Ghost numeral — oversized Fraunces ranking figures. */
-  .numeral-ghost {
-    font-family: var(--font-fraunces), Georgia, serif;
-    font-weight: 320;
-    font-variant-numeric: lining-nums;
-    line-height: 0.8;
-    letter-spacing: -0.04em;
-    color: color-mix(in oklab, var(--ink) 22%, transparent);
-  }
-
-  /* Display headline voice — Fraunces at high optical size. */
+  /* Display voice — Archivo pushed wide and heavy. */
   .type-display {
-    font-family: var(--font-fraunces), Georgia, serif;
-    font-variation-settings: "opsz" 90, "SOFT" 0, "WONK" 0;
+    font-family: var(--font-archivo), ui-sans-serif, sans-serif;
+    font-variation-settings: "wdth" 112;
+    font-weight: 800;
     letter-spacing: -0.015em;
-    line-height: 1.04;
+    line-height: 1.02;
     text-wrap: balance;
   }
 
-  /* Kicker / folio line — letterspaced Plex Mono caps, no dots, no bars. */
+  /* Kicker / folio — Plex Mono caps. Color with var(--tc-text) or ink-faint. */
   .type-kicker {
     font-family: var(--font-mono);
     font-size: 0.6875rem;
@@ -229,15 +202,233 @@
     letter-spacing: 0.14em;
   }
 
-  /* Duotone plate — thumbnails print in ink until inspected. */
-  .plate-duotone {
-    filter: grayscale(1) sepia(0.22) contrast(1.05) brightness(0.98);
-    transition: filter 0.25s ease;
+  /* Ink-ruled row — THE feed primitive. */
+  .rule-row {
+    border-top: 1px solid var(--ink);
   }
-  a:hover .plate-duotone,
-  .plate-duotone:hover {
-    filter: none;
+
+  /* Outlined index numeral. Stroke must be a concrete color — currentColor
+     would resolve to the transparent fill and vanish. Flips on flood hover. */
+  .num-outline {
+    font-family: var(--font-archivo), ui-sans-serif, sans-serif;
+    font-variation-settings: "wdth" 125;
+    font-weight: 900;
+    line-height: 0.85;
+    color: transparent;
+    -webkit-text-stroke: 1.5px var(--ink);
   }
+  .flood-row:hover .num-outline,
+  .flood-row:focus-within .num-outline {
+    -webkit-text-stroke-color: var(--tc-on, #ffffff);
+  }
+
+  /* Signature move: topic color floods the row from the left on hover.
+     Set --tc (flood color) and --tc-on (text color on the flood, default white)
+     inline. Requires position context; provides its own. */
+  .flood-row {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    cursor: pointer;
+  }
+  .flood-row::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--tc, var(--accent));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.28s cubic-bezier(0.7, 0, 0.2, 1);
+  }
+  .flood-row:hover::before,
+  .flood-row:focus-within::before {
+    transform: scaleX(1);
+  }
+  .flood-row:hover,
+  .flood-row:focus-within {
+    color: var(--tc-on, #ffffff);
+  }
+  .flood-row:hover :where(.type-kicker, .num-outline, p, h2, h3, time, span),
+  .flood-row:focus-within :where(.type-kicker, .num-outline, p, h2, h3, time, span) {
+    color: inherit;
+  }
+
+  /* Topic tag pill — solid, circular ends (no bordered squares). */
+  .tag-chip {
+    font-family: var(--font-mono);
+    font-size: 0.65625rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--tc-on, #ffffff);
+    background: var(--tc, var(--accent));
+    border-radius: 999px;
+    padding: 0.42rem 0.9rem;
+    transition: background 0.2s, color 0.2s, transform 0.2s;
+  }
+  .flood-row:hover .tag-chip {
+    background: var(--tc-on, #ffffff);
+    color: var(--tc, var(--accent));
+  }
+
+  /* Underline sweep for nav/links — 3px bar grows from the left. */
+  .sweep-link {
+    position: relative;
+    text-decoration: none;
+    padding-bottom: 4px;
+  }
+  .sweep-link::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 3px;
+    width: 0;
+    background: var(--tc, var(--accent));
+    transition: width 0.22s cubic-bezier(0.7, 0, 0.2, 1);
+  }
+  .sweep-link:hover::after,
+  .sweep-link[aria-current]::after,
+  .sweep-link[data-active="true"]::after {
+    width: 100%;
+  }
+
+  /* CircleBadge — text lives in the inscribed square (70% of diameter),
+     never near the curve. See spectrum-system.md §2.1. */
+  .circle-badge {
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+  }
+  .circle-badge > .circle-content {
+    width: 70%;
+    height: 70%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 0.25em;
+    overflow: hidden;
+  }
+  .circle-badge .circle-title {
+    text-wrap: balance;
+    line-height: 1.05;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    overflow-wrap: break-word;
+  }
+
+  /* Staggered entrance. Add .rise-in to list items; set --i (index) inline. */
+  .rise-in {
+    opacity: 0;
+    transform: translateY(14px);
+    animation: rise 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+    animation-delay: calc(min(var(--i, 0), 10) * 0.08s);
+  }
+
+  /* Live ticker strip — wrap content twice for a seamless loop. */
+  .ticker {
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  .ticker > * {
+    display: inline-block;
+    padding-left: 100%;
+    animation: tick 30s linear infinite;
+  }
+}
+
+@keyframes rise {
+  to { opacity: 1; transform: none; }
+}
+@keyframes tick {
+  to { transform: translateX(-100%); }
+}
+@keyframes pulse-dot {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--accent) 45%, transparent); }
+  50% { box-shadow: 0 0 0 6px transparent; }
+}
+
+/* ── App-like page transitions (cross-document view transitions).
+     Progressive enhancement: unsupported browsers get instant nav. ── */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition {
+    navigation: auto;
+  }
+  ::view-transition-old(root) {
+    animation: 0.22s ease-in both vt-out;
+  }
+  ::view-transition-new(root) {
+    animation: 0.3s ease-out both vt-in;
+  }
+}
+@keyframes vt-out {
+  to { opacity: 0; transform: translateY(-10px); }
+}
+@keyframes vt-in {
+  from { opacity: 0; transform: translateY(14px); }
+}
+
+/* ── Scroll-driven entrance for below-the-fold rows (decorative —
+     no fallback needed; unsupported browsers show rows settled). ── */
+@media (prefers-reduced-motion: no-preference) {
+  @supports ((animation-timeline: view()) and (animation-range: entry)) {
+    /* `both` fill is load-bearing: after the entry range ends the animation
+       must keep holding the `to` state, or elements that pair .scroll-rise
+       with a hidden base style (.rise-in) revert to opacity 0. */
+    .scroll-rise {
+      animation: rise auto linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 60%;
+    }
+  }
+}
+
+/* ── Reading progress bar (story/briefing pages). Color with --tc. ── */
+.progress-rail {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  z-index: 60;
+  pointer-events: none;
+}
+.progress-rail::before {
+  content: "";
+  display: block;
+  height: 100%;
+  background: var(--tc, var(--accent));
+  transform-origin: left;
+  transform: scaleX(0);
+}
+@media (prefers-reduced-motion: no-preference) {
+  @supports ((animation-timeline: scroll()) and (animation-range: 0% 100%)) {
+    .progress-rail::before {
+      animation: progress-grow auto linear both;
+      animation-timeline: scroll(block root);
+    }
+  }
+}
+@keyframes progress-grow {
+  to { transform: scaleX(1); }
+}
+
+/* ── Mobile app-feel: compact the sticky header as the feed scrolls. ── */
+@media (prefers-reduced-motion: no-preference) and (max-width: 640px) {
+  @supports ((animation-timeline: scroll()) and (animation-range: 0% 100%)) {
+    .shrink-header {
+      animation: header-compact auto linear both;
+      animation-timeline: scroll(block root);
+      animation-range: 0px 120px;
+    }
+  }
+}
+@keyframes header-compact {
+  to { padding-top: 0.35rem; padding-bottom: 0.35rem; }
 }
 
 /* Safe-area helpers for the native app shell (paired with viewport-fit=cover). */
@@ -254,7 +445,7 @@
   position: fixed; top: 0.5rem; left: 0.5rem; z-index: 100;
   width: auto; height: auto; margin: 0; padding: 0.5rem 0.75rem;
   overflow: visible; clip: auto;
-  background: var(--surface); color: var(--ink);
+  background: var(--paper); color: var(--ink);
   font-family: var(--font-mono); font-size: 0.6875rem; font-weight: 600;
   text-transform: uppercase; letter-spacing: 0.12em;
   border-radius: var(--radius);
@@ -294,54 +485,55 @@ input:autofill {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+  .rise-in { opacity: 1; transform: none; }
+  .ticker > * { animation: none; padding-left: 0; }
 }
 
 /* ───────────────────────────────────────────────────────────
-   Briefing reading style — Newsreader serif body, Fraunces
-   display headings, scotch-rule section breaks.
-   (Selector name retained for the existing report viewer.)
+   Long-form reading style — Source Serif body, Archivo display
+   headings. (Selector name retained for the report viewer.)
    ─────────────────────────────────────────────────────────── */
 .streamdown-wire-room {
   font-family: var(--font-serif);
-  font-size: 1.0625rem;
-  line-height: 1.72;
+  font-size: 1.09375rem;
+  line-height: 1.7;
   color: var(--ink-prose);
 }
 .streamdown-wire-room [data-streamdown="heading-1"],
 .streamdown-wire-room [data-streamdown="heading-2"],
 .streamdown-wire-room [data-streamdown="heading-3"] {
-  font-family: var(--font-fraunces), Georgia, serif;
-  font-variation-settings: "opsz" 60, "SOFT" 0, "WONK" 0;
-  font-weight: 560;
+  font-family: var(--font-archivo), ui-sans-serif, sans-serif;
+  font-variation-settings: "wdth" 112;
+  font-weight: 800;
   letter-spacing: -0.01em;
   color: var(--ink);
 }
 .streamdown-wire-room [data-streamdown="heading-1"] {
-  font-size: 1.75rem; line-height: 1.15;
+  font-size: 1.875rem; line-height: 1.08;
   margin: 0 0 1.25rem; padding-top: 0.75rem;
   border-top: 3px solid var(--ink);
-  position: relative;
-}
-.streamdown-wire-room [data-streamdown="heading-1"]::before {
-  content: "";
-  position: absolute; top: 2px; left: 0; right: 0;
-  border-top: 1px solid var(--ink);
 }
 .streamdown-wire-room [data-streamdown="heading-2"] {
-  font-size: 1.375rem; line-height: 1.2;
+  font-size: 1.4375rem; line-height: 1.12;
   margin: 2.5rem 0 0.75rem; padding-top: 0.625rem;
   border-top: 1px solid var(--ink);
 }
 .streamdown-wire-room [data-streamdown="heading-3"] {
-  font-size: 1.125rem; line-height: 1.25;
+  font-size: 1.1875rem; line-height: 1.2;
   margin: 1.75rem 0 0.5rem;
 }
 .streamdown-wire-room p { margin: 0 0 1.125rem; }
 .streamdown-wire-room strong { color: var(--ink); font-weight: 600; }
 .streamdown-wire-room [data-streamdown="link"] {
-  color: var(--accent);
+  color: var(--ink);
   text-decoration: underline;
-  text-underline-offset: 2px;
+  text-decoration-color: var(--tc, var(--accent));
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+  transition: color 0.15s;
+}
+.streamdown-wire-room [data-streamdown="link"]:hover {
+  color: var(--tc-text, var(--accent));
 }
 .streamdown-wire-room ul,
 .streamdown-wire-room ol {
@@ -349,15 +541,16 @@ input:autofill {
   display: flex; flex-direction: column; gap: 0.375rem;
 }
 .streamdown-wire-room [data-streamdown="blockquote"] {
-  font-family: var(--font-serif);
-  font-style: italic;
-  font-size: 1.1875rem;
-  color: var(--ink-prose);
-  border-top: 1px solid var(--ink);
+  font-family: var(--font-archivo), ui-sans-serif, sans-serif;
+  font-variation-settings: "wdth" 108;
+  font-weight: 700;
+  font-size: 1.3125rem;
+  line-height: 1.3;
+  color: var(--ink);
+  border-top: 3px solid var(--tc, var(--accent));
   border-bottom: 1px solid var(--ink);
-  padding: 1rem 1.5rem;
+  padding: 1rem 0.25rem;
   margin: 1.5rem 0;
-  text-align: center;
 }
 .streamdown-wire-room [data-streamdown="code-block"] {
   font-family: var(--font-mono);
@@ -368,8 +561,8 @@ input:autofill {
 }
 .streamdown-wire-room [data-streamdown="code-inline"] {
   font-family: var(--font-mono);
-  color: var(--accent);
-  background: var(--accent-wash);
+  color: var(--ink);
+  background: var(--panel);
   border-radius: var(--radius);
   padding: 0.125rem 0.375rem;
   font-size: 0.8125rem;
@@ -390,6 +583,7 @@ input:autofill {
   border-bottom: 1px solid var(--line);
 }
 .streamdown-wire-room hr {
-  margin: 1.75rem auto; border: 0; width: 8rem;
-  border-top: 1px solid var(--ink);
+  margin: 1.75rem 0; border: 0;
+  border-top: 3px solid var(--ink);
+  width: 4rem;
 }

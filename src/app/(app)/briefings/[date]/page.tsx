@@ -1,5 +1,6 @@
 import { ScrollDepthTracker } from '@/components/analytics/scroll-depth'
 import type { Metadata } from 'next'
+import type { CSSProperties } from 'react'
 import Link from 'next/link'
 import { getAudioBriefing, getReport, getReports, getStructuredIssue } from '@/lib/api'
 import type { AudioBriefing, IssueStoryUnit, PublicIssue, Report, ReportListItem } from '@/lib/types'
@@ -8,6 +9,7 @@ import { AudioBriefingPlayer } from '@/components/briefing/audio-briefing-player
 import { ReportMarkdown } from '@/components/briefing/report-markdown'
 import { absoluteUrl, shortReportDescription, SITE_NAME } from '@/lib/site'
 import { shortDate } from '@/lib/format'
+import { topicVars } from '@/lib/topic-color'
 
 export const revalidate = 60
 
@@ -56,7 +58,7 @@ export default async function BriefingPage({ params }: Params) {
   if (!report) {
     return (
       <div className="mx-auto max-w-[44rem] px-8 py-16 text-center max-sm:px-5">
-        <Link href="/briefings" className="type-kicker text-primary hover:underline">
+        <Link href="/briefings" className="type-kicker text-ink-soft transition-colors hover:text-ink">
           ← Briefings
         </Link>
         <p className="mt-10 font-mono text-[0.8125rem] uppercase tracking-[0.12em] text-ink-faint">
@@ -75,7 +77,8 @@ export default async function BriefingPage({ params }: Params) {
 
   return (
     <div className="h-full overflow-y-auto">
-      <article className="mx-auto max-w-[44rem] px-8 pb-24 pt-11 max-sm:px-5">
+      <div className="progress-rail" aria-hidden />
+      <article className="mx-auto max-w-[720px] px-8 pb-24 pt-11 max-sm:px-5">
         <ScrollDepthTracker kind="briefing" id={date} />
         <JsonLd
           data={{
@@ -94,18 +97,21 @@ export default async function BriefingPage({ params }: Params) {
           }}
         />
 
-        <Link href="/briefings" className="type-kicker text-primary hover:underline">
+        <Link href="/briefings" className="rise-in type-kicker inline-block text-ink-soft transition-colors hover:text-ink" style={{ '--i': 0 } as CSSProperties}>
           ← Briefings
         </Link>
 
-        <header className="mb-8 mt-8 border-b border-line pb-6">
-          <p className="type-kicker text-primary">
+        <header className="mb-8 mt-8">
+          <p className="rise-in type-kicker text-primary" style={{ '--i': 1 } as CSSProperties}>
             {shortDate(date)}
           </p>
-          <h1 className="type-display mt-3 text-[2.75rem] font-[620] text-ink max-sm:text-[2rem]">
+          <h1
+            className="rise-in type-display mt-2 text-[clamp(2.25rem,5vw,3.5rem)] uppercase leading-[0.98] tracking-[-0.02em] text-ink"
+            style={{ '--i': 2, fontVariationSettings: '"wdth" 114', fontWeight: 850 } as CSSProperties}
+          >
             {report.title}
           </h1>
-          <p className="type-kicker mt-4 text-ink-faint">
+          <p className="rise-in type-kicker mt-5 border-t-[3px] border-ink pt-3 text-ink-faint" style={{ '--i': 3 } as CSSProperties}>
             {wordCount.toLocaleString()} words · {readTime} min read
           </p>
         </header>
@@ -117,20 +123,30 @@ export default async function BriefingPage({ params }: Params) {
         {issue && <BriefingGraphTrail issue={issue} />}
 
         {(prev || next) && (
-          <nav className="rule-row mt-12 flex items-center justify-between gap-4 pt-6">
+          <nav className="mt-14 grid border-t-[3px] border-ink sm:grid-cols-2" aria-label="Adjacent briefings">
             {prev ? (
-              <Link href={`/briefings/${prev}`} className="type-kicker text-primary hover:underline">
-                ← {shortDate(prev)}
+              <Link
+                href={`/briefings/${prev}`}
+                className="flood-row block px-4 py-4"
+                style={topicVars(prev) as CSSProperties}
+              >
+                <p className="type-kicker text-[color:var(--tc-text)]">← Previous issue</p>
+                <p className="type-display mt-2 text-[1.25rem] uppercase text-ink">{shortDate(prev)}</p>
               </Link>
             ) : (
-              <span />
+              <span aria-hidden />
             )}
             {next ? (
-              <Link href={`/briefings/${next}`} className="type-kicker text-primary hover:underline">
-                {shortDate(next)} →
+              <Link
+                href={`/briefings/${next}`}
+                className="flood-row block px-4 py-4 text-right"
+                style={topicVars(next) as CSSProperties}
+              >
+                <p className="type-kicker text-[color:var(--tc-text)]">Next issue →</p>
+                <p className="type-display mt-2 text-[1.25rem] uppercase text-ink">{shortDate(next)}</p>
               </Link>
             ) : (
-              <span />
+              <span aria-hidden />
             )}
           </nav>
         )}
@@ -151,10 +167,10 @@ function BriefingGraphTrail({ issue }: { issue: PublicIssue }) {
   }
 
   return (
-    <section className="rule-scotch mt-14 pt-4" aria-labelledby="briefing-graph-trail">
+    <section className="scroll-rise mt-14 border-t-[3px] border-ink pt-4" aria-labelledby="briefing-graph-trail">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h2 id="briefing-graph-trail" className="type-kicker text-ink">
+          <h2 id="briefing-graph-trail" className="type-display text-[25px] uppercase leading-[1.04] text-ink">
             Graph trail
           </h2>
           <p className="mt-2 max-w-[38rem] font-serif text-[0.9375rem] leading-[1.6] text-ink-soft">
@@ -168,8 +184,8 @@ function BriefingGraphTrail({ issue }: { issue: PublicIssue }) {
 
       {storyPaths.length > 0 && (
         <div className="mt-7">
-          <h3 className="type-kicker text-primary">Story paths</h3>
-          <div className="mt-3 divide-y divide-line">
+          <h3 className="type-kicker mb-2 text-primary">Story paths</h3>
+          <div>
             {storyPaths.map((story) => (
               <StoryPathRow key={story.id} story={story} />
             ))}
@@ -181,12 +197,12 @@ function BriefingGraphTrail({ issue }: { issue: PublicIssue }) {
         {entities.length > 0 && (
           <div>
             <h3 className="type-kicker text-primary">Entities</h3>
-            <div className="mt-3 flex flex-wrap gap-2">
+            <div className="mt-3 flex flex-wrap gap-3">
               {entities.map((entity) => (
                 <Link
                   key={entity.slug}
                   href={`/e/${entity.slug}`}
-                  className="rounded-sm border border-line bg-surface px-2.5 py-1 font-mono text-[0.6875rem] uppercase tracking-[0.08em] text-ink transition-colors hover:bg-panel hover:text-primary"
+                  className="inline-block rounded-full bg-panel px-4 py-2 font-mono text-[0.65625rem] font-semibold uppercase tracking-[0.1em] text-ink transition-all duration-[var(--dur-fast)] ease-[var(--ease-swift)] hover:-translate-y-0.5 hover:bg-ink hover:text-white focus-visible:outline-2 focus-visible:outline-ink focus-visible:outline-offset-2"
                 >
                   {entity.name}
                 </Link>
@@ -198,12 +214,12 @@ function BriefingGraphTrail({ issue }: { issue: PublicIssue }) {
         {sourceTrail.length > 0 && (
           <div>
             <h3 className="type-kicker text-primary">Sources</h3>
-            <div className="mt-3 flex flex-wrap gap-2">
+            <div className="mt-3 flex flex-wrap gap-3">
               {sourceTrail.map((source) => (
                 <Link
                   key={source.domain}
                   href={`/source/${encodeURIComponent(source.domain)}`}
-                  className="rounded-sm border border-line bg-surface px-2.5 py-1 font-mono text-[0.6875rem] uppercase tracking-[0.08em] text-ink transition-colors hover:bg-panel hover:text-primary"
+                  className="inline-block rounded-full bg-panel px-4 py-2 font-mono text-[0.65625rem] font-semibold uppercase tracking-[0.1em] text-ink transition-all duration-[var(--dur-fast)] ease-[var(--ease-swift)] hover:-translate-y-0.5 hover:bg-ink hover:text-white focus-visible:outline-2 focus-visible:outline-ink focus-visible:outline-offset-2"
                 >
                   {source.domain}
                 </Link>
@@ -221,23 +237,29 @@ function StoryPathRow({ story }: { story: IssueStoryUnit }) {
     .slice(0, 3)
     .map((source) => source.domain)
 
-  return (
-    <div className="py-3">
-      {story.published_story ? (
-        <Link
-          href={story.published_story.target_url}
-          className="type-display text-[1.125rem] font-[560] leading-snug text-ink hover:underline"
-        >
-          {story.title}
-        </Link>
-      ) : (
-        <div className="type-display text-[1.125rem] font-[560] leading-snug text-ink">{story.title}</div>
-      )}
-      <div className="type-kicker mt-2 flex flex-wrap gap-x-4 gap-y-1 text-ink-faint">
+  const inner = (
+    <>
+      <h4 className="type-display text-[1.125rem] leading-[1.1] text-ink">{story.title}</h4>
+      <p className="type-kicker mt-3 flex flex-wrap gap-x-4 gap-y-1 text-ink-faint">
         {story.published_story && <span>Public story</span>}
         {sourceDomains.length > 0 && <span>{sourceDomains.join(' · ')}</span>}
         {story.entity_ids.length > 0 && <span>{story.entity_ids.length} entities</span>}
+      </p>
+    </>
+  )
+
+  if (story.published_story) {
+    return (
+      <div className="flood-row rule-row" style={topicVars(story.slug) as CSSProperties}>
+        <Link href={story.published_story.target_url} className="block px-4 py-4">
+          {inner}
+        </Link>
       </div>
+    )
+  }
+  return (
+    <div className="rule-row px-4 py-4" style={topicVars(story.slug) as CSSProperties}>
+      {inner}
     </div>
   )
 }

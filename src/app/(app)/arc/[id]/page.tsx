@@ -1,8 +1,10 @@
 import type { Metadata } from 'next'
+import type { CSSProperties } from 'react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { JsonLd } from '@/components/json-ld'
 import { getNarrativeArc } from '@/lib/api'
+import { topicVars } from '@/lib/topic-color'
 import { absoluteUrl, SITE_NAME } from '@/lib/site'
 
 export const revalidate = 60
@@ -50,7 +52,7 @@ export default async function ArcPage({ params, searchParams }: Params) {
   if (!arc) notFound()
 
   return (
-    <div className="h-full overflow-y-auto">
+    <div className="h-full overflow-y-auto" style={topicVars(arc.id) as CSSProperties}>
       <JsonLd
         data={{
           '@context': 'https://schema.org',
@@ -68,78 +70,86 @@ export default async function ArcPage({ params, searchParams }: Params) {
         }}
       />
 
-      <main className="mx-auto max-w-[760px] px-8 pb-24 pt-9 max-sm:px-5">
-        <Link
-          href="/"
-          className="type-kicker text-primary hover:underline"
-        >
-          The Wire
+      <main className="mx-auto max-w-[720px] px-8 pb-24 pt-9 max-sm:px-5">
+        <Link href="/" className="rise-in type-kicker inline-block text-ink-soft transition-colors hover:text-ink" style={{ '--i': 0 } as CSSProperties}>
+          ← The Wire
         </Link>
 
         <header className="mt-8">
-          <div className="type-kicker text-primary">
+          <div className="rise-in type-kicker text-[color:var(--tc-text)]" style={{ '--i': 1 } as CSSProperties}>
             Narrative arc
           </div>
-          <h1 className="type-display mt-3 text-[2.75rem] font-[620] text-ink max-sm:text-[2rem]">
+          <h1
+            className="rise-in type-display mt-2 text-[clamp(2.25rem,5vw,3.5rem)] uppercase leading-[0.98] tracking-[-0.02em] text-ink"
+            style={{ '--i': 2, fontVariationSettings: '"wdth" 114', fontWeight: 850 } as CSSProperties}
+          >
             {arc.title}
           </h1>
-          <p className="mt-4 font-serif text-[1.1875rem] italic leading-[1.6] text-ink-soft">
+          <p className="rise-in mt-2 max-w-[56ch] font-serif text-[1.1875rem] leading-[1.5] text-ink-soft" style={{ '--i': 3 } as CSSProperties}>
             {arc.summary}
           </p>
 
-          <div className="mt-6 grid grid-cols-2 gap-x-4 gap-y-3 border-y border-line py-3 sm:grid-cols-4">
+          <div className="rise-in mt-8 flex flex-wrap gap-x-9 gap-y-3 border-t-[3px] border-ink py-3" style={{ '--i': 4 } as CSSProperties}>
             <div>
               <div className="type-kicker text-ink-faint">Status</div>
-              <div className="mt-0.5 font-mono text-[0.75rem] text-ink">{arc.status}</div>
+              <div className="mt-0.5 font-mono text-[0.75rem] font-semibold uppercase text-ink">{arc.status}</div>
             </div>
             <div>
               <div className="type-kicker text-ink-faint">Evidence</div>
-              <div className="mt-0.5 font-mono text-[0.75rem] text-ink">{arc.evidence_count}</div>
+              <div className="mt-0.5 font-mono text-[0.75rem] font-semibold text-ink">{arc.evidence_count}</div>
             </div>
             <div>
               <div className="type-kicker text-ink-faint">Dates</div>
-              <div className="mt-0.5 font-mono text-[0.75rem] text-ink">{arc.date_count}</div>
+              <div className="mt-0.5 font-mono text-[0.75rem] font-semibold text-ink">{arc.date_count}</div>
             </div>
             <div>
               <div className="type-kicker text-ink-faint">Sources</div>
-              <div className="mt-0.5 font-mono text-[0.75rem] text-ink">{arc.source_domain_count}</div>
+              <div className="mt-0.5 font-mono text-[0.75rem] font-semibold text-ink">{arc.source_domain_count}</div>
             </div>
           </div>
         </header>
 
-        <section className="mt-7">
-          <h2 className="type-kicker text-ink">
-            Evidence trail
-          </h2>
-          <ol className="mt-3 divide-y divide-line">
+        <section className="mt-10">
+          <h2 className="type-display text-[25px] uppercase leading-[1.04] text-ink">Evidence trail</h2>
+          <ol className="mt-3">
             {arc.evidence.map((item, index) => (
-              <li key={`${item.finding_id ?? index}-${item.source_url}`} className="py-4">
-                <div className="type-kicker text-primary">
-                  {item.run_date} / {item.source_name || item.agent}
+              <li
+                key={`${item.finding_id ?? index}-${item.source_url}`}
+                className={`${index < 8 ? 'rise-in' : 'scroll-rise'} flood-row rule-row group grid grid-cols-[1fr_auto] gap-4 px-4 py-4`}
+                style={{ ...topicVars(item.agent || arc.id), '--i': index + 5 } as CSSProperties}
+              >
+                <div className="min-w-0">
+                  <div className="type-kicker text-[color:var(--tc-text)]">
+                    {item.run_date} / {item.source_name || item.agent}
+                  </div>
+                  {item.finding_id != null ? (
+                    <Link
+                      href={`/f/${item.finding_id}`}
+                      className="type-display mt-2 block text-[1.1875rem] leading-[1.1] text-ink"
+                    >
+                      {item.title}
+                    </Link>
+                  ) : (
+                    <h3 className="type-display mt-2 text-[1.1875rem] leading-[1.1] text-ink">{item.title}</h3>
+                  )}
+                  <p className="mt-2 font-serif text-[0.9375rem] leading-[1.58] text-ink-prose">
+                    {item.summary}
+                  </p>
+                  {item.source_url && (
+                    <a
+                      href={item.source_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="type-kicker mt-2 inline-block text-[color:var(--tc-text)] hover:underline"
+                    >
+                      Source
+                    </a>
+                  )}
                 </div>
-                {item.finding_id != null ? (
-                  <Link
-                    href={`/f/${item.finding_id}`}
-                    className="type-display mt-1.5 block text-[1.125rem] font-[560] leading-snug text-ink hover:underline"
-                  >
-                    {item.title}
-                  </Link>
-                ) : (
-                  <h3 className="type-display mt-1.5 text-[1.125rem] font-[560] leading-snug text-ink">{item.title}</h3>
-                )}
-                <p className="mt-2 font-serif text-[0.9375rem] leading-[1.58] text-ink-prose">
-                  {item.summary}
-                </p>
-                {item.source_url && (
-                  <a
-                    href={item.source_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="type-kicker mt-2 inline-block text-primary hover:underline"
-                  >
-                    Source
-                  </a>
-                )}
+                <span
+                  aria-hidden
+                  className="h-3 w-3 shrink-0 self-center rounded-full bg-[var(--tc)] transition-colors group-hover:bg-[var(--tc-on)] group-focus-within:bg-[var(--tc-on)]"
+                />
               </li>
             ))}
           </ol>

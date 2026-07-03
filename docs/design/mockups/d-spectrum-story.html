@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>D — Spectrum · Story</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #ffffff; --ink: #0e0e0f; --gray: #55555a; --hair: #e8e8ea;
+    --t1: #e63b12; --t2: #0797a6; --t3: #cf2d7b; --t4: #f5c518; --t4t: #a8850b;
+    --tc: var(--t2); /* this story's topic: Tooling = teal */
+  }
+  * { margin: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--ink); font-family: "Archivo", sans-serif; overflow-x: hidden; }
+  a { color: inherit; text-decoration: none; }
+
+  header { display: flex; align-items: center; gap: 2.5rem; padding: 1rem 2.2rem; border-bottom: 1px solid var(--ink); }
+  .mark { font-variation-settings: "wdth" 122, "wght" 880; font-size: 20px; text-transform: uppercase; letter-spacing: -.01em; }
+  .mark i { font-style: normal; color: var(--t1); }
+  nav { margin-left: auto; display: flex; gap: 1.8rem; font-size: 13px; font-weight: 600; }
+  nav a { position: relative; padding-bottom: 5px; }
+  nav a::after { content: ""; position: absolute; left: 0; bottom: 0; height: 3px; width: 0; background: var(--t1); transition: width .22s cubic-bezier(.7,0,.2,1); }
+  nav a:hover::after, nav a.on::after { width: 100%; }
+
+  /* ── hero: giant topic circle anchors the headline ── */
+  .hero { position: relative; max-width: 1080px; margin: 0 auto; padding: 3.2rem 2.2rem 2.4rem; }
+  .bigc {
+    position: absolute; top: 2rem; right: -40px; width: 300px; height: 300px; border-radius: 50%;
+    background: var(--tc); color: #fff; z-index: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .5rem; text-align: center;
+    transform: scale(.6); opacity: 0; animation: pop .55s cubic-bezier(.2,.8,.3,1.1) .25s forwards;
+  }
+  @keyframes pop { to { transform: scale(1); opacity: 1; } }
+  .bigc .r { font-variation-settings: "wdth" 125, "wght" 900; font-size: 64px; line-height: .8; color: transparent; -webkit-text-stroke: 2px #fff; }
+  .bigc .t { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: .2em; }
+  .bigc .s { font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: .12em; opacity: .85; }
+  @media (max-width: 860px) { .bigc { position: static; margin: 0 auto 1.5rem; width: 200px; height: 200px; } }
+
+  .crumb { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: .14em; color: var(--gray); margin-bottom: 1.6rem; display: inline-block; }
+  .crumb:hover { color: var(--ink); }
+  .kick { font-family: "IBM Plex Mono", monospace; font-size: 11px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--tc); margin-bottom: .8rem; }
+  h1 {
+    font-variation-settings: "wdth" 114, "wght" 850; font-size: clamp(36px, 5.4vw, 64px);
+    line-height: .98; letter-spacing: -.02em; text-transform: uppercase; max-width: 15ch; position: relative; z-index: 1;
+    clip-path: inset(0 0 100% 0); animation: reveal .6s cubic-bezier(.2,.8,.2,1) .1s forwards;
+  }
+  @keyframes reveal { to { clip-path: inset(0 0 -10% 0); } }
+  .dek { font-family: "Source Serif 4", serif; font-size: 21px; line-height: 1.45; color: var(--gray); max-width: 56ch; margin-top: 1.2rem; }
+
+  .folio { display: flex; flex-wrap: wrap; gap: 2.2rem; border-top: 3px solid var(--ink); margin-top: 2rem; padding: .7rem 0;
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--gray); }
+  .folio b { color: var(--ink); display: block; font-size: 12px; margin-top: 2px; }
+
+  /* ── body ── */
+  .body { max-width: 720px; margin: 0 auto; padding: 1.5rem 2.2rem 3rem; }
+  .body > * { opacity: 0; transform: translateY(10px); animation: rise .5s cubic-bezier(.2,.7,.2,1) forwards; }
+  .body > *:nth-child(1){animation-delay:.35s} .body > *:nth-child(2){animation-delay:.45s}
+  .body > *:nth-child(3){animation-delay:.55s} .body > *:nth-child(n+4){animation-delay:.65s}
+  @keyframes rise { to { opacity: 1; transform: none; } }
+  .body p { font-family: "Source Serif 4", serif; font-size: 17.5px; line-height: 1.7; color: #1d1d20; margin-bottom: 1.15rem; }
+  .body p a { text-decoration: underline; text-decoration-color: var(--tc); text-decoration-thickness: 2px; text-underline-offset: 3px; }
+  .body p a:hover { color: var(--tc); }
+
+  /* the take — solid topic block, pill label */
+  .take { background: var(--tc); color: #fff; border-radius: 20px; padding: 1.6rem 1.8rem; margin: 2rem 0; }
+  .take .pill { display: inline-block; background: #fff; color: var(--tc); font-family: "IBM Plex Mono", monospace; font-size: 10.5px; font-weight: 600; letter-spacing: .14em; padding: .35rem .9rem; border-radius: 999px; margin-bottom: .9rem; }
+  .take p { font-variation-settings: "wdth" 106, "wght" 680; font-family: "Archivo", sans-serif; font-size: 21px; line-height: 1.25; color: #fff; margin: 0; }
+
+  /* ── related: flood rows ── */
+  .rel { max-width: 1080px; margin: 0 auto; padding: 1rem 2.2rem 5rem; }
+  .rel h2 { font-variation-settings: "wdth" 115, "wght" 850; font-size: 22px; text-transform: uppercase; border-top: 3px solid var(--ink); padding-top: .6rem; margin-bottom: .4rem; }
+  .row { --rc: var(--t1); display: grid; grid-template-columns: 1fr auto; gap: 1.2rem; align-items: center;
+    padding: 1.05rem .9rem; border-top: 1px solid var(--ink); cursor: pointer;
+    position: relative; isolation: isolate; overflow: hidden; }
+  .row::before { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--rc);
+    transform: scaleX(0); transform-origin: left; transition: transform .26s cubic-bezier(.7,0,.2,1); }
+  .row:hover::before { transform: scaleX(1); }
+  .row:hover { color: #fff; }
+  .row:hover .rk { color: inherit; }
+  .rk { font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--rc); margin-bottom: .3rem; transition: color .2s; }
+  .row h3 { font-variation-settings: "wdth" 107, "wght" 720; font-size: 19px; line-height: 1.1; }
+  .pillhead { display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: var(--rc); transition: background .2s; }
+  .row:hover .pillhead { background: #fff; }
+
+  /* source trail pills */
+  .src { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: 1rem; }
+  .spill { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
+    border-radius: 999px; padding: .45rem 1rem; background: #f2f2f4; color: var(--ink); transition: all .18s; }
+  .spill:hover { background: var(--ink); color: #fff; transform: translateY(-2px); }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, ::before, ::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+    .body > *, .bigc, h1 { opacity: 1; transform: none; clip-path: none; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <a class="mark" href="d-spectrum.html">Mind<i>Pattern</i></a>
+  <nav><a class="on" href="d-spectrum.html">Wire</a><a href="#">Briefings</a><a href="#">Search</a></nav>
+</header>
+
+<div class="hero">
+  <div class="bigc">
+    <span class="r">02</span>
+    <span class="t">TOOLING</span>
+    <span class="s">5 SOURCES · 14 ENTITIES</span>
+  </div>
+  <a class="crumb" href="d-spectrum.html">← THE WIRE</a>
+  <div class="kick">Tooling · 2026-06-26 · Source-backed</div>
+  <h1>The bottleneck stopped being code generation. It's verification.</h1>
+  <p class="dek">The binding constraint in AI-assisted coding is no longer how fast you can generate code — it's how fast you can verify it. The HN consensus crystallized around a specific shape this week.</p>
+  <div class="folio">
+    <span>ISSUE<b>2026-06-26</b></span>
+    <span>CONFIDENCE<b>SOURCE-BACKED</b></span>
+    <span>SOURCES<b>5</b></span>
+    <span>REDACTION<b>PASSED</b></span>
+  </div>
+</div>
+
+<div class="body">
+  <p>I've felt this for months and couldn't name it cleanly. <a href="#">Hacker News named it for me this week</a>. The binding constraint in AI-assisted coding is no longer how fast you can generate code. It's how fast you can verify it.</p>
+  <div class="take">
+    <span class="pill">THE TAKE</span>
+    <p>Generation is free now. The teams that win are the ones who industrialize verification — tests, gates, and loops — not the ones with the fastest model.</p>
+  </div>
+  <p>The consensus crystallized around a specific shape: the engineer's job is shifting from author to editor, from writing the function to writing the test, the constraint, the verification gate, and the loop that runs the agent until those hold.</p>
+  <p>That maps to how shipping teams already describe their workflow. Shopify's 2026 "agentic harness" framing, corroborated by Pragmatic Engineer and Bessemer coverage, treats toilsome coding as delegable and reserves the human for direction and evaluation.</p>
+  <div class="src">
+    <a class="spill" href="#">news.ycombinator.com</a>
+    <a class="spill" href="#">pragmaticengineer.com</a>
+    <a class="spill" href="#">bessemer.com</a>
+    <a class="spill" href="#">x.com</a>
+    <a class="spill" href="#">shopify.engineering</a>
+  </div>
+</div>
+
+<div class="rel">
+  <h2>Connected stories</h2>
+  <a class="row" style="--rc:var(--t1)" href="d-spectrum.html"><div>
+    <div class="rk">Shared entities / Same source domain / Earlier coverage</div>
+    <h3>Enterprise AI can't be sold as software. Three companies proved it this month.</h3>
+  </div><span class="pillhead"></span></a>
+  <a class="row" style="--rc:var(--t3)" href="d-spectrum.html"><div>
+    <div class="rk">Shared entity: TechCrunch / Shared topic / What happened next</div>
+    <h3>Cursor puts coding agent controls on your phone</h3>
+  </div><span class="pillhead"></span></a>
+  <a class="row" style="--rc:var(--t2)" href="d-spectrum.html"><div>
+    <div class="rk">Shared entities / Earlier coverage / Tension</div>
+    <h3>Stanford studied 31 real AI deployments. The results challenge everything.</h3>
+  </div><span class="pillhead"></span></a>
+</div>
+</body>
+</html>

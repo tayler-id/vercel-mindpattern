@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spectrum — Design System</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper:#ffffff; --surface:#fafafa; --panel:#f2f2f4; --spine:#f5f5f7;
+    --ink:#0e0e0f; --ink-prose:#1d1d20; --ink-soft:#55555a; --ink-faint:#77777d;
+    --line:#e8e8ea; --line-soft:#f0f0f2;
+    --accent:#e63b12; --s1:#e63b12; --s2:#0797a6; --s3:#cf2d7b; --s4:#f5c518; --s4t:#a8850b;
+    --ok:#0797a6; --destructive:#c8290f;
+    --dur-fast:150ms; --dur-med:280ms; --dur-slow:500ms;
+    --ease-swift:cubic-bezier(.7,0,.2,1); --ease-settle:cubic-bezier(.2,.7,.2,1);
+  }
+  * { margin:0; box-sizing:border-box; }
+  body { background:var(--paper); color:var(--ink); font-family:"Archivo",sans-serif; }
+  .mono { font-family:"IBM Plex Mono",monospace; }
+  .disp { font-variation-settings:"wdth" 112; font-weight:800; letter-spacing:-.015em; }
+
+  header { padding:2.5rem 2rem 2rem; border-bottom:1px solid var(--ink); max-width:1180px; margin:0 auto; }
+  header h1 { font-variation-settings:"wdth" 118; font-weight:850; font-size:clamp(40px,6vw,64px); line-height:.95; text-transform:uppercase; letter-spacing:-.02em; }
+  header h1 em { font-style:normal; color:#fff; background:var(--ink); padding:0 .12em; }
+  header p { font-family:"IBM Plex Mono",monospace; font-size:11.5px; letter-spacing:.12em; color:var(--ink-soft); margin-top:1rem; text-transform:uppercase; }
+
+  main { max-width:1180px; margin:0 auto; padding:0 2rem 6rem; }
+  section { margin-top:4rem; }
+  h2 { font-variation-settings:"wdth" 115; font-weight:850; font-size:26px; text-transform:uppercase; border-top:3px solid var(--ink); padding-top:.7rem; }
+  h2 .no { color:var(--accent); margin-right:.4rem; }
+  .note { font-size:14px; color:var(--ink-soft); margin:.6rem 0 1.6rem; max-width:72ch; line-height:1.55; }
+  h3 { font-family:"IBM Plex Mono",monospace; font-size:11px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-faint); margin:2rem 0 .9rem; }
+  .lab { font-family:"IBM Plex Mono",monospace; font-size:10.5px; letter-spacing:.1em; color:var(--ink-faint); }
+
+  /* color */
+  .swatches { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:12px; }
+  .sw { border:1px solid var(--line); border-radius:3px; overflow:hidden; }
+  .sw .chip { height:64px; }
+  .sw .m { padding:8px 10px; font-family:"IBM Plex Mono",monospace; font-size:10px; letter-spacing:.06em; line-height:1.5; }
+  .sw .m b { display:block; font-size:11px; color:var(--ink); }
+
+  /* type scale */
+  .trow { display:grid; grid-template-columns:210px 1fr; gap:24px; align-items:baseline; padding:14px 0; border-top:1px solid var(--line); }
+  .trow .lab b { display:block; color:var(--ink); font-size:11px; }
+
+  /* spacing */
+  .space { display:flex; align-items:flex-end; gap:12px; }
+  .space div { background:var(--s2); width:28px; }
+  .space span { display:block; font-family:"IBM Plex Mono",monospace; font-size:9.5px; text-align:center; color:var(--ink-faint); margin-top:6px; }
+
+  /* shape */
+  .shapes { display:flex; gap:20px; flex-wrap:wrap; align-items:center; }
+  .shape { border:1.5px solid var(--ink); display:grid; place-items:center; font-family:"IBM Plex Mono",monospace; font-size:10px; color:var(--ink-soft); }
+
+  /* motion demos */
+  .demos { display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:16px; }
+  .demo { border:1px solid var(--line); border-radius:3px; padding:18px; }
+  .demo .lab { display:block; margin-bottom:12px; }
+  .replay { margin-top:12px; font-family:"IBM Plex Mono",monospace; font-size:10px; letter-spacing:.1em; background:none; border:1px solid var(--line); border-radius:999px; padding:4px 12px; cursor:pointer; }
+  .replay:hover { border-color:var(--ink); }
+
+  /* components */
+  .row-demo { --tc:var(--s2); --on:#fff; display:grid; grid-template-columns:88px 1fr auto; gap:20px; align-items:start; padding:20px 16px; border-top:1px solid var(--ink); border-bottom:1px solid var(--ink); position:relative; isolation:isolate; overflow:hidden; cursor:pointer; }
+  .row-demo::before { content:""; position:absolute; inset:0; z-index:-1; background:var(--tc); transform:scaleX(0); transform-origin:left; transition:transform var(--dur-med) var(--ease-swift); }
+  .row-demo:hover::before { transform:scaleX(1); }
+  .row-demo:hover { color:var(--on); }
+  .row-demo:hover .k, .row-demo:hover .s, .row-demo:hover .mt { color:inherit; }
+  .row-demo .n { font-variation-settings:"wdth" 125; font-weight:900; font-size:50px; line-height:.85; color:transparent; -webkit-text-stroke:1.5px currentColor; }
+  .row-demo .k { font-family:"IBM Plex Mono",monospace; font-size:10.5px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:var(--tc); margin-bottom:8px; transition:color var(--dur-fast); }
+  .row-demo h4 { font-variation-settings:"wdth" 108; font-weight:760; font-size:25px; line-height:1.04; }
+  .row-demo .s { font-size:14px; line-height:1.55; color:var(--ink-soft); margin-top:8px; max-width:58ch; transition:color var(--dur-fast); }
+  .row-demo .mt { font-family:"IBM Plex Mono",monospace; font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-faint); margin-top:12px; transition:color var(--dur-fast); }
+  .pill-tag { align-self:center; font-family:"IBM Plex Mono",monospace; font-size:10.5px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#fff; background:var(--tc); padding:8px 16px; border-radius:999px; transition:all var(--dur-fast); }
+  .row-demo:hover .pill-tag { background:var(--on); color:var(--tc); }
+
+  .btnrow { display:flex; gap:14px; flex-wrap:wrap; align-items:center; }
+  .btn { font-weight:600; font-size:13px; border-radius:999px; padding:12px 24px; border:none; cursor:pointer; transition:all var(--dur-fast); }
+  .btn:active { transform:scale(.95); }
+  .btn:focus-visible { outline:2px solid var(--ink); outline-offset:2px; }
+  .btn.pri { background:var(--accent); color:#fff; }
+  .btn.pri:hover { background:#cf3208; }
+  .btn.sec { background:none; border:1.5px solid var(--ink); color:var(--ink); padding:10.5px 22.5px; }
+  .btn.sec:hover { background:var(--ink); color:#fff; }
+  .btn.dis { background:var(--panel); color:var(--ink-faint); cursor:not-allowed; }
+  .fpill { font-family:"IBM Plex Mono",monospace; font-size:10.5px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; border-radius:999px; padding:8px 16px; cursor:pointer; border:none; transition:all var(--dur-fast); }
+  .fpill.on { background:var(--ink); color:#fff; }
+  .fpill.off { background:var(--panel); color:var(--ink); }
+  .fpill.off:hover { background:var(--spine); }
+  .fpill:focus-visible { outline:2px solid var(--ink); outline-offset:2px; }
+
+  .inp { display:block; width:320px; max-width:100%; background:#fff; border:1.5px solid var(--ink); border-radius:3px; padding:10px 16px; font-family:"Archivo",sans-serif; font-size:14px; }
+  .inp::placeholder { font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--ink-faint); letter-spacing:.06em; }
+  .inp:focus { outline:2px solid var(--ink); outline-offset:0; }
+
+  /* circle badge */
+  .cwrap { display:flex; gap:40px; flex-wrap:wrap; align-items:center; }
+  .circle-badge { border-radius:50%; display:grid; place-items:center; overflow:hidden; color:#fff; cursor:pointer; transition:transform var(--dur-med) var(--ease-settle); animation:drift 7s ease-in-out infinite alternate; }
+  .circle-badge:hover { transform:scale(1.05) rotate(-2deg); }
+  @keyframes drift { to { translate:0 -8px; } }
+  .circle-content { width:70%; height:70%; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; gap:.25em; overflow:hidden; }
+  .circle-title { font-variation-settings:"wdth" 112; font-weight:820; text-transform:uppercase; text-wrap:balance; line-height:1.05; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; overflow-wrap:break-word; }
+  .ck { font-family:"IBM Plex Mono",monospace; letter-spacing:.2em; }
+  .guide { position:relative; }
+  .guide::after { content:""; position:absolute; inset:15%; border:1px dashed rgba(255,255,255,.55); pointer-events:none; }
+
+  /* take */
+  .take { background:var(--s3); color:#fff; border-radius:20px; padding:28px; max-width:640px; }
+  .take .pl { display:inline-block; background:#fff; color:var(--s3); font-family:"IBM Plex Mono",monospace; font-size:10.5px; font-weight:600; letter-spacing:.14em; padding:6px 14px; border-radius:999px; margin-bottom:14px; }
+  .take p { font-variation-settings:"wdth" 106; font-weight:680; font-size:21px; line-height:1.25; }
+
+  /* ticker + folio */
+  .tick { height:34px; display:flex; align-items:center; overflow:hidden; white-space:nowrap; border-top:1px solid var(--line); border-bottom:1px solid var(--line); font-family:"IBM Plex Mono",monospace; font-size:11px; letter-spacing:.1em; color:var(--ink-faint); }
+  .tick span { display:inline-block; padding-left:100%; animation:tk 28s linear infinite; }
+  .tick b { color:var(--ink); font-weight:600; }
+  @keyframes tk { to { transform:translateX(-100%); } }
+  .folio { display:flex; flex-wrap:wrap; gap:36px; border-top:3px solid var(--ink); padding:12px 0; }
+  .folio div span { display:block; font-family:"IBM Plex Mono",monospace; font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-faint); }
+  .folio div b { font-family:"IBM Plex Mono",monospace; font-size:12px; }
+
+  /* tabbar */
+  .tabbar { max-width:390px; border:1px solid var(--line); border-radius:14px; overflow:hidden; }
+  .tabbar .bar { display:flex; background:rgba(255,255,255,.9); border-top:1px solid var(--line); padding:8px 12px 14px; }
+  .tabbar .t { flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; padding:8px 0; font-family:"IBM Plex Mono",monospace; font-size:10px; letter-spacing:.08em; color:var(--ink-soft); cursor:pointer; transition:transform var(--dur-fast); }
+  .tabbar .t:active { transform:scale(.95); }
+  .tabbar .t svg { width:20px; height:20px; }
+  .tabbar .t.on { position:relative; color:#fff; }
+  .tabbar .t.on::before { content:""; position:absolute; inset:2px 10%; background:var(--ink); border-radius:999px; z-index:-1; }
+  .tabbar .t.on { z-index:0; isolation:isolate; }
+
+  /* motion demo helpers */
+  .risebox { display:flex; flex-direction:column; gap:6px; }
+  .risebox div { height:18px; background:var(--panel); border-radius:3px; opacity:0; transform:translateY(14px); animation:rr var(--dur-slow) var(--ease-settle) forwards; animation-delay:calc(var(--i) * 80ms); }
+  @keyframes rr { to { opacity:1; transform:none; } }
+  .sweep { font-weight:600; font-size:13px; position:relative; display:inline-block; padding-bottom:5px; cursor:pointer; }
+  .sweep::after { content:""; position:absolute; left:0; bottom:0; height:3px; width:0; background:var(--accent); transition:width var(--dur-fast) var(--ease-swift); }
+  .sweep:hover::after { width:100%; }
+
+  @media (prefers-reduced-motion:reduce) {
+    *,::before,::after { animation-duration:.01ms !important; transition-duration:.01ms !important; }
+    .risebox div { opacity:1; transform:none; }
+    .tick span { animation:none; padding-left:0; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Spectrum <em>System</em></h1>
+  <p>Rabbit Hole / MindPattern · v1 · 2026-07-02 · spec: docs/design/spectrum-system.md</p>
+</header>
+<main>
+
+<section>
+  <h2><span class="no">01</span>Color</h2>
+  <p class="note">White + ink carry the interface. Four saturated hues are the topic taxonomy — assigned by <span class="mono">topicColor()</span>, never hand-picked. No green, no gradients, no shadows, no cream.</p>
+  <h3>Surfaces & ink</h3>
+  <div class="swatches">
+    <div class="sw"><div class="chip" style="background:var(--paper); border-bottom:1px solid var(--line)"></div><div class="m"><b>--paper</b>#FFFFFF · page</div></div>
+    <div class="sw"><div class="chip" style="background:var(--surface)"></div><div class="m"><b>--surface</b>#FAFAFA · inputs</div></div>
+    <div class="sw"><div class="chip" style="background:var(--panel)"></div><div class="m"><b>--panel</b>#F2F2F4 · tints, hovers</div></div>
+    <div class="sw"><div class="chip" style="background:var(--ink)"></div><div class="m"><b>--ink</b>#0E0E0F · type, rules</div></div>
+    <div class="sw"><div class="chip" style="background:var(--ink-soft)"></div><div class="m"><b>--ink-soft</b>#55555A · secondary</div></div>
+    <div class="sw"><div class="chip" style="background:var(--ink-faint)"></div><div class="m"><b>--ink-faint</b>#77777D · meta ≥11px</div></div>
+    <div class="sw"><div class="chip" style="background:var(--line)"></div><div class="m"><b>--line</b>#E8E8EA · hairlines</div></div>
+  </div>
+  <h3>Topic spectrum + status</h3>
+  <div class="swatches">
+    <div class="sw"><div class="chip" style="background:var(--s1)"></div><div class="m"><b>--spectrum-1</b>#E63B12 · also brand accent</div></div>
+    <div class="sw"><div class="chip" style="background:var(--s2)"></div><div class="m"><b>--spectrum-2</b>#0797A6 · teal (also --ok)</div></div>
+    <div class="sw"><div class="chip" style="background:var(--s3)"></div><div class="m"><b>--spectrum-3</b>#CF2D7B · magenta</div></div>
+    <div class="sw"><div class="chip" style="background:var(--s4)"></div><div class="m"><b>--spectrum-4</b>#F5C518 · fills only</div></div>
+    <div class="sw"><div class="chip" style="background:var(--s4t)"></div><div class="m"><b>--spectrum-4-text</b>#A8850B · yellow as text</div></div>
+    <div class="sw"><div class="chip" style="background:var(--destructive)"></div><div class="m"><b>--destructive</b>#C8290F · errors only</div></div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="no">02</span>Type scale</h2>
+  <p class="note">Three voices, never mixed in one block: Archivo variable-width (display + UI) · Source Serif 4 (prose only) · IBM Plex Mono (data only). Sizes come from this scale — no arbitrary values.</p>
+  <div class="trow"><span class="lab"><b>display-xl</b>Archivo wdth118 · 850 · clamp 40–68</span><span style="font-variation-settings:'wdth' 118; font-weight:850; font-size:52px; line-height:.95; text-transform:uppercase; letter-spacing:-.02em">Trending now</span></div>
+  <div class="trow"><span class="lab"><b>display-md</b>Archivo wdth108 · 760 · 25px</span><span style="font-variation-settings:'wdth' 108; font-weight:760; font-size:25px; line-height:1.04">The bottleneck stopped being code generation</span></div>
+  <div class="trow"><span class="lab"><b>title-xs</b>Archivo wdth105 · 640 · 13.5px</span><span style="font-variation-settings:'wdth' 105; font-weight:640; font-size:13.5px">Vercel quietly becomes a container host</span></div>
+  <div class="trow"><span class="lab"><b>dek</b>Source Serif · 21px · ink-soft</span><span style="font-family:'Source Serif 4',serif; font-size:21px; color:var(--ink-soft); line-height:1.45">The HN consensus crystallized around a specific shape this week.</span></div>
+  <div class="trow"><span class="lab"><b>prose</b>Source Serif · 17.5px / 1.7</span><span style="font-family:'Source Serif 4',serif; font-size:17.5px; color:var(--ink-prose); line-height:1.7">Generation is free now. The teams that win are the ones who industrialize verification.</span></div>
+  <div class="trow"><span class="lab"><b>kicker</b>Plex Mono 600 · 11px · .14em caps</span><span class="mono" style="font-size:11px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--s2)">Tooling · 2026-06-26 · Source-backed</span></div>
+  <div class="trow"><span class="lab"><b>meta</b>Plex Mono · 10.5px · .12em caps</span><span class="mono" style="font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-faint)">HN Consensus · 5 sources · 14 entities</span></div>
+</section>
+
+<section>
+  <h2><span class="no">03</span>Spacing — 4px base</h2>
+  <p class="note">Allowed steps only. Anatomy rhythm: kicker→title 8 · title→summary 8 · summary→meta 12 · row padding 20/16 · section gap 40 · gutters 32 desktop / 20 mobile.</p>
+  <div class="space">
+    <div style="height:4px"></div><div style="height:8px"></div><div style="height:12px"></div><div style="height:16px"></div><div style="height:20px"></div><div style="height:24px"></div><div style="height:32px"></div><div style="height:40px"></div><div style="height:48px"></div><div style="height:64px"></div>
+  </div>
+  <div class="space" style="gap:12px; margin-top:4px">
+    <span style="width:28px">4</span><span style="width:28px">8</span><span style="width:28px">12</span><span style="width:28px">16</span><span style="width:28px">20</span><span style="width:28px">24</span><span style="width:28px">32</span><span style="width:28px">40</span><span style="width:28px">48</span><span style="width:28px">64</span>
+  </div>
+</section>
+
+<section>
+  <h2><span class="no">04</span>Shape</h2>
+  <p class="note">Exactly four radii. Borders: 1px hairline · 1px ink row rules · 1.5px ink controls · 3px ink section rules.</p>
+  <div class="shapes">
+    <div class="shape" style="width:120px;height:56px;border-radius:3px">3px · inputs</div>
+    <div class="shape" style="width:140px;height:72px;border-radius:20px">20px · color blocks</div>
+    <div class="shape" style="width:120px;height:40px;border-radius:999px">999px · pills</div>
+    <div class="shape" style="width:72px;height:72px;border-radius:50%">50%</div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="no">05</span>Motion</h2>
+  <p class="note">Tokens: <span class="mono">--dur-fast 150ms · --dur-med 280ms · --dur-slow 500ms · --ease-swift (moves) · --ease-settle (arrives)</span>. Transform/opacity only. Everything has a reduced-motion final state.</p>
+  <div class="demos">
+    <div class="demo"><span class="lab">ENTRANCE STAGGER · 80MS × INDEX</span>
+      <div class="risebox" id="rb"><div style="--i:0"></div><div style="--i:1"></div><div style="--i:2"></div><div style="--i:3"></div></div>
+      <button class="replay" onclick="replay('rb')">REPLAY</button>
+    </div>
+    <div class="demo"><span class="lab">NAV SWEEP · HOVER ME</span>
+      <span class="sweep">Briefings</span>&nbsp;&nbsp;<span class="sweep" style="--accent:var(--s2)">Search</span>&nbsp;&nbsp;<span class="sweep" style="--accent:var(--s3)">Wire</span>
+    </div>
+    <div class="demo"><span class="lab">COUNT-UP · 900MS EASE-OUT</span>
+      <span class="mono" id="cu" style="font-size:26px; font-weight:600">0</span><span class="mono" style="font-size:11px; color:var(--ink-faint)"> FINDINGS</span>
+      <button class="replay" onclick="countUp()">REPLAY</button>
+    </div>
+    <div class="demo"><span class="lab">LIVE TICKER · 34PX STRIP</span>
+      <div class="tick"><span><b>LIVE</b> · WED JULY 2, 2026 · <b>15,513</b> FINDINGS · <b>+85</b>/DAY · MODELS 4,210 · TOOLING 3,455 &nbsp;·&nbsp; <b>LIVE</b> · WED JULY 2, 2026 · <b>15,513</b> FINDINGS · <b>+85</b>/DAY · MODELS 4,210 · TOOLING 3,455</span></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="no">06</span>Components</h2>
+
+  <h3>Wire row — the signature primitive (hover it: topic flood)</h3>
+  <div class="row-demo" tabindex="0">
+    <div class="n">02</div>
+    <div>
+      <div class="k">Tooling · 2026-06-26 · Source-backed</div>
+      <h4>The bottleneck stopped being code generation. It's verification.</h4>
+      <p class="s">The binding constraint in AI-assisted coding is no longer how fast you can generate code — it's how fast you can verify it.</p>
+      <div class="mt">HN Consensus · 5 sources · 14 entities</div>
+    </div>
+    <span class="pill-tag">Tooling</span>
+  </div>
+
+  <h3>Buttons — every state defined</h3>
+  <div class="btnrow">
+    <button class="btn pri">Subscribe</button>
+    <button class="btn sec">Load more</button>
+    <button class="btn dis" disabled>Disabled</button>
+    <span class="sweep">Ghost link</span>
+    <span class="lab">tab/click each — focus ring is 2px ink</span>
+  </div>
+
+  <h3>Filter pills + input</h3>
+  <div class="btnrow" style="margin-bottom:14px">
+    <button class="fpill on">Stories</button>
+    <button class="fpill off">Findings</button>
+    <button class="fpill off">Entities</button>
+    <button class="fpill off">Sources</button>
+  </div>
+  <input class="inp" placeholder="SEARCH ALL STORIES…">
+
+  <h3>CircleBadge — text lives in the inscribed square (70% of Ø, dashed = safe zone)</h3>
+  <div class="cwrap">
+    <div class="circle-badge guide" style="width:240px;height:240px;background:var(--s1)">
+      <div class="circle-content">
+        <span class="ck" style="font-size:10px">TODAY'S BRIEFING</span>
+        <span class="circle-title" style="font-size:24px">July 2, 2026</span>
+        <span class="ck" style="font-size:10px">5,498 WORDS · 27 MIN</span>
+      </div>
+    </div>
+    <div class="circle-badge guide" style="width:200px;height:200px;background:var(--s2)">
+      <div class="circle-content">
+        <span style="font-variation-settings:'wdth' 125; font-weight:900; font-size:52px; line-height:.8; color:transparent; -webkit-text-stroke:2px #fff">02</span>
+        <span class="ck" style="font-size:10px">TOOLING</span>
+        <span class="ck" style="font-size:9px; opacity:.85">5 SOURCES · 14 ENTITIES</span>
+      </div>
+    </div>
+    <div class="circle-badge guide" style="width:200px;height:200px;background:var(--s3)">
+      <div class="circle-content">
+        <span class="ck" style="font-size:9px">LONGEST TITLE CASE</span>
+        <span class="circle-title" style="font-size:17px">A very long briefing title that must clamp at three lines maximum without ever touching the curve</span>
+      </div>
+    </div>
+  </div>
+
+  <h3>Take block</h3>
+  <div class="take">
+    <span class="pl">THE TAKE</span>
+    <p>Generation is free now. The teams that win are the ones who industrialize verification — not the ones with the fastest model.</p>
+  </div>
+
+  <h3>Folio strip</h3>
+  <div class="folio">
+    <div><span>Issue</span><b>2026-06-26</b></div>
+    <div><span>Confidence</span><b>SOURCE-BACKED</b></div>
+    <div><span>Sources</span><b>5</b></div>
+    <div><span>Redaction</span><b>PASSED</b></div>
+  </div>
+
+  <h3>Mobile tab bar — the app nav (bottom, pb-safe, active pill)</h3>
+  <div class="tabbar"><div class="bar">
+    <div class="t on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 6h16M4 12h16M4 18h10"/></svg>WIRE</div>
+    <div class="t"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 4h14v16H5z M9 8h6 M9 12h6"/></svg>BRIEFINGS</div>
+    <div class="t"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="6"/><path d="m20 20-4-4"/></svg>SEARCH</div>
+  </div></div>
+</section>
+
+<section>
+  <h2><span class="no">07</span>Gates</h2>
+  <p class="note">Shipping checklist — a component missing any of these is a defect.</p>
+  <div class="folio" style="border-top-width:1px">
+    <div><span>Contrast</span><b>WCAG AA (yellow → text twin)</b></div>
+    <div><span>Focus</span><b>:focus-visible 2px ink on everything</b></div>
+    <div><span>Meaning</span><b>never color alone</b></div>
+    <div><span>Touch</span><b>≥44px (56px tab bar)</b></div>
+    <div><span>Motion</span><b>reduced-motion final states</b></div>
+    <div><span>Semantics</span><b>landmarks + one h1</b></div>
+  </div>
+</section>
+
+</main>
+<script>
+  function replay(id){ const el=document.getElementById(id); el.querySelectorAll('div').forEach(d=>{ d.style.animation='none'; d.offsetHeight; d.style.animation=''; }); }
+  function countUp(){
+    const el=document.getElementById('cu'), end=15513, t0=performance.now(), dur=900;
+    (function tick(t){ const p=Math.min((t-t0)/dur,1), e=1-Math.pow(1-p,3);
+      el.textContent=Math.round(end*e).toLocaleString(); if(p<1)requestAnimationFrame(tick); })(t0);
+  }
+  countUp();
+</script>
+</body>
+</html>

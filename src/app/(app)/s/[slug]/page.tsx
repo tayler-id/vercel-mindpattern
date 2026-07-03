@@ -1,11 +1,14 @@
 import type { Metadata } from 'next'
+import type { CSSProperties } from 'react'
 import Link from 'next/link'
 import { TrackedLink } from '@/components/analytics/tracked-link'
 import { ScrollDepthTracker } from '@/components/analytics/scroll-depth'
 import { notFound } from 'next/navigation'
 import { JsonLd } from '@/components/json-ld'
 import { ReportMarkdown } from '@/components/briefing/report-markdown'
+import { ShareButton } from '@/components/story/share-button'
 import { getStory } from '@/lib/api'
+import { topicVars } from '@/lib/topic-color'
 import { absoluteUrl, SITE_NAME } from '@/lib/site'
 
 export const revalidate = 60
@@ -44,9 +47,12 @@ export default async function StoryPage({ params }: Params) {
   const bodyMarkdown = story.body_markdown || story.body_excerpt || story.summary
   const issueHref = story.issue_url || `/briefings/${story.issue_date}`
   const summary = story.summary || story.dek || story.take || ''
+  const topicKey = story.section_id || story.slug
+  const sectionName = story.section_id ? story.section_id.replace(/[-_]/g, ' ') : 'Public story'
 
   return (
-    <div className="h-full overflow-y-auto">
+    <div className="h-full overflow-y-auto" style={topicVars(topicKey) as CSSProperties}>
+      <div className="progress-rail" aria-hidden />
       <JsonLd
         data={{
           '@context': 'https://schema.org',
@@ -76,186 +82,168 @@ export default async function StoryPage({ params }: Params) {
         }}
       />
 
-      <main className="mx-auto max-w-[760px] px-8 pb-24 pt-9 max-sm:px-5">
+      <main className="pb-24">
         <ScrollDepthTracker kind="story" id={story.slug} />
-        <Link
-          href="/"
-          className="type-kicker text-primary hover:underline"
-        >
-          The Wire
-        </Link>
 
-        <header className="mt-8">
-          <div className="type-kicker text-primary">
-            Public story
+        {/* ── Hero: big topic circle + giant Archivo headline ── */}
+        <header className="relative mx-auto max-w-[1080px] px-8 pb-2 pt-10 max-sm:px-5 max-sm:pt-6">
+          <div
+            aria-hidden
+            className="circle-badge animate-in fade-in zoom-in-50 fill-mode-both pointer-events-none z-0 mx-auto mb-6 h-[200px] w-[200px] lg:absolute lg:-right-10 lg:top-8 lg:mx-0 lg:mb-0 lg:h-[300px] lg:w-[300px]"
+            style={{
+              background: 'var(--tc)',
+              color: 'var(--tc-on)',
+              animationDuration: 'var(--dur-slow)',
+              animationDelay: '200ms',
+              animationTimingFunction: 'var(--ease-settle)',
+            }}
+          >
+            <div className="circle-content">
+              <span className="font-mono text-[9px] font-semibold uppercase tracking-[0.2em] lg:text-[10px]">
+                {story.issue_date}
+              </span>
+              <span
+                className="circle-title text-[clamp(1.125rem,2vw,1.625rem)] uppercase"
+                style={{ fontVariationSettings: '"wdth" 112', fontWeight: 820 }}
+              >
+                {sectionName}
+              </span>
+              <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.12em] opacity-85 lg:text-[10.5px]">
+                {story.source_refs.length} sources · {story.entity_refs.length} entities
+              </span>
+            </div>
           </div>
-          <h1 className="type-display mt-3 text-[2.75rem] font-[620] text-ink max-sm:text-[2rem]">
+
+          <Link
+            href="/"
+            className="rise-in type-kicker inline-block text-ink-soft transition-colors duration-[var(--dur-fast)] hover:text-ink focus-visible:outline-2 focus-visible:outline-ink focus-visible:outline-offset-2"
+            style={{ '--i': 0 } as CSSProperties}
+          >
+            ← The Wire
+          </Link>
+
+          <p className="rise-in type-kicker mt-6 text-[color:var(--tc-text)]" style={{ '--i': 1 } as CSSProperties}>
+            {sectionName} · {story.issue_date} · {story.confidence}
+          </p>
+          <h1
+            className="rise-in type-display relative z-[1] mt-2 max-w-[15ch] text-[clamp(2.25rem,5vw,3.5rem)] uppercase leading-[0.98] tracking-[-0.02em] text-ink"
+            style={{ '--i': 2, fontVariationSettings: '"wdth" 114', fontWeight: 850 } as CSSProperties}
+          >
             {story.title}
           </h1>
           {story.dek && (
-            <p className="mt-4 font-serif text-[1.25rem] italic leading-[1.55] text-ink-soft">
+            <p className="rise-in mt-2 max-w-[56ch] font-serif text-[1.3125rem] leading-[1.45] text-ink-soft" style={{ '--i': 3 } as CSSProperties}>
               {story.dek}
             </p>
           )}
-          {story.take && (
-            <div className="mt-5 border border-ink bg-accent-wash px-5 py-4">
-              <div className="type-kicker text-primary">
-                The take
-              </div>
-              <p className="mt-2 font-serif text-[1.0625rem] leading-[1.62] text-ink-prose">
-                {story.take}
-              </p>
-            </div>
-          )}
           {story.why_now && (
-            <p className="mt-3 font-mono text-[0.75rem] leading-relaxed text-ink-faint">
+            <p className="rise-in mt-3 max-w-[64ch] font-mono text-[0.75rem] leading-relaxed text-ink-faint" style={{ '--i': 4 } as CSSProperties}>
               Why now: {story.why_now}
             </p>
           )}
 
-          <div className="mt-6 grid grid-cols-2 gap-x-4 gap-y-3 border-y border-line py-3 sm:grid-cols-4">
+          {/* Folio strip — 3px ink rule, mono label/value pairs */}
+          <div className="rise-in mt-8 flex flex-wrap items-center gap-x-9 gap-y-3 border-t-[3px] border-ink py-3" style={{ '--i': 5 } as CSSProperties}>
             <div>
               <div className="type-kicker text-ink-faint">Issue</div>
               <TrackedLink
                 href={issueHref}
                 event="briefing_click"
                 eventProps={{ from: story.slug, date: story.issue_date }}
-                className="mt-0.5 block font-mono text-[0.75rem] text-primary hover:underline"
+                className="mt-0.5 block font-mono text-[0.75rem] font-semibold text-ink hover:underline"
               >
                 {story.issue_date}
               </TrackedLink>
             </div>
             <div>
-              <div className="type-kicker text-ink-faint">Sources</div>
-              <div className="mt-0.5 font-mono text-[0.75rem] text-ink">{story.source_refs.length}</div>
+              <div className="type-kicker text-ink-faint">Confidence</div>
+              <div className="mt-0.5 font-mono text-[0.75rem] font-semibold uppercase text-ink">{story.confidence}</div>
             </div>
             <div>
-              <div className="type-kicker text-ink-faint">Confidence</div>
-              <div className="mt-0.5 font-mono text-[0.75rem] text-ink">{story.confidence}</div>
+              <div className="type-kicker text-ink-faint">Sources</div>
+              <div className="mt-0.5 font-mono text-[0.75rem] font-semibold text-ink">{story.source_refs.length}</div>
             </div>
             <div>
               <div className="type-kicker text-ink-faint">Redaction</div>
-              <div className="mt-0.5 font-mono text-[0.75rem] text-ink">{story.provenance.redaction_status}</div>
+              <div className="mt-0.5 font-mono text-[0.75rem] font-semibold uppercase text-ink">{story.provenance.redaction_status}</div>
             </div>
+            <ShareButton title={story.title} className="ml-auto" />
           </div>
         </header>
 
-        {bodyMarkdown && (
-          <section className="mt-7">
-            <h2 className="type-kicker text-ink">
-              Story
-            </h2>
-            <div className="mt-3">
-              <ReportMarkdown content={bodyMarkdown} />
-            </div>
-          </section>
-        )}
+        {/* ── Body column ── */}
+        <div className="mx-auto max-w-[720px] px-8 max-sm:px-5">
+          {story.take && (
+            <aside className="scroll-rise mt-6 rounded-[20px] p-7 max-sm:px-5" style={{ background: 'var(--tc)' }}>
+              <span className="type-kicker inline-block rounded-full bg-paper px-4 py-1 text-[color:var(--tc-text)]">
+                The take
+              </span>
+              <p
+                className="mt-3 text-[1.3125rem] leading-[1.25]"
+                style={{ color: 'var(--tc-on)', fontVariationSettings: '"wdth" 106', fontWeight: 680 }}
+              >
+                {story.take}
+              </p>
+            </aside>
+          )}
 
+          {bodyMarkdown && (
+            <section className="mt-8">
+              <h2 className="type-kicker text-ink">Story</h2>
+              <div className="mt-3">
+                <ReportMarkdown content={bodyMarkdown} />
+              </div>
+            </section>
+          )}
+        </div>
+
+        {/* ── Related: flood rows ── */}
         {story.related_paths.length > 0 && (
-          <section className="mt-8 border-t border-line pt-5">
-            <h2 className="type-kicker text-ink">
+          <section className="scroll-rise mx-auto mt-10 max-w-[1080px] px-8 max-sm:px-5">
+            <h2 className="type-display border-t-[3px] border-ink pt-2.5 text-[25px] uppercase leading-[1.04] text-ink">
               Related stories
             </h2>
-            <p className="mt-1 font-mono text-[0.6875rem] text-ink-faint">
+            <p className="mb-2 mt-1 font-mono text-[0.6875rem] text-ink-faint">
               Each link below shares sources, entities, or timing with this story.
             </p>
-            <ol className="mt-3 divide-y divide-line">
-              {story.related_paths.slice(0, 8).map((related, index) => (
-                <li key={`${related.id}-${index}`} className="py-3">
-                  <div className="type-kicker text-primary">
-                    {(related.connector_labels || ['Connected']).join(' / ')}
-                  </div>
-                  {related.target_url ? (
-                    <TrackedLink
-                      href={related.target_url}
-                      event="related_click"
-                      eventProps={{
-                        from: story.slug,
-                        to: String(related.slug || related.target_url),
-                        connectors: (related.connector_labels || []).join(' / '),
-                      }}
-                      className="type-display mt-1.5 block text-[1.125rem] font-[560] leading-snug text-ink hover:underline"
-                    >
-                      {related.title}
-                    </TrackedLink>
-                  ) : (
-                    <div className="type-display mt-1.5 text-[1.125rem] font-[560] leading-snug text-ink">{related.title}</div>
-                  )}
-                  <p className="mt-1 font-serif text-[0.9375rem] leading-[1.58] text-ink-prose">
-                    {related.reason || related.summary}
-                  </p>
-                </li>
-              ))}
-            </ol>
-          </section>
-        )}
-
-        <section className="mt-8 border-t border-line pt-5">
-          <h2 className="type-kicker text-ink">
-            Source trail
-          </h2>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {story.source_refs.map((source) => (
-              <TrackedLink
-                key={source.url}
-                href={`/source/${encodeURIComponent(source.domain)}`}
-                event="source_click"
-                eventProps={{ from: story.slug, domain: source.domain }}
-                className="inline-block rounded-sm border border-line bg-surface px-2.5 py-1.5 font-mono text-[0.6875rem] uppercase tracking-[0.08em] text-ink transition-colors hover:bg-panel hover:text-primary"
-              >
-                {source.title || source.domain}
-              </TrackedLink>
-            ))}
-          </div>
-        </section>
-
-        {story.entity_refs.length > 0 && (
-          <section className="mt-8 border-t border-line pt-5">
-            <h2 className="type-kicker text-ink">
-              Entities
-            </h2>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {story.entity_refs.slice(0, 16).map((entity) => (
-                <TrackedLink
-                  key={entity.id}
-                  href={`/e/${encodeURIComponent(entity.slug)}`}
-                  event="entity_click"
-                  eventProps={{ from: story.slug, entity: entity.slug }}
-                  className="inline-block rounded-sm border border-line bg-surface px-2.5 py-1.5 font-mono text-[0.6875rem] uppercase tracking-[0.08em] text-ink transition-colors hover:bg-panel hover:text-primary"
-                >
-                  {entity.name}
-                </TrackedLink>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {story.claim_evidence.length > 0 && (
-          <section className="mt-8 border-t border-line pt-5">
-            <h2 className="type-kicker text-ink">
-              Claim evidence
-            </h2>
-            <ol className="mt-3 divide-y divide-line">
-              {story.claim_evidence.slice(0, 8).map((item, index) => {
-                const evidence = item as { claim?: string; source_url?: string; finding_id?: number | null }
+            <ol>
+              {story.related_paths.slice(0, 8).map((related, index) => {
+                const vars = topicVars(String(related.slug || related.id)) as CSSProperties
+                const inner = (
+                  <>
+                    <div className="min-w-0">
+                      <p className="type-kicker text-[color:var(--tc-text)]">
+                        {(related.connector_labels || ['Connected']).join(' / ')}
+                      </p>
+                      <h3 className="type-display mt-2 text-[1.1875rem] leading-[1.1] text-ink">{related.title}</h3>
+                      <p className="mt-2 font-serif text-[0.9375rem] leading-[1.5] text-ink-soft">
+                        {related.reason || related.summary}
+                      </p>
+                    </div>
+                    <span
+                      aria-hidden
+                      className="h-3 w-3 shrink-0 self-center rounded-full bg-[var(--tc)] transition-colors group-hover:bg-[var(--tc-on)] group-focus-within:bg-[var(--tc-on)]"
+                    />
+                  </>
+                )
                 return (
-                  <li key={`${evidence.finding_id ?? index}-${evidence.claim ?? ''}`} className="py-3">
-                    <div className="font-serif text-[0.9375rem] leading-[1.58] text-ink-prose">
-                      {evidence.claim}
-                    </div>
-                    <div className="type-kicker mt-1.5 flex flex-wrap gap-3 text-primary">
-                      {evidence.finding_id != null && <Link href={`/f/${evidence.finding_id}`}>Finding {evidence.finding_id}</Link>}
-                      {evidence.source_url && (
-                        <TrackedLink
-                          href={evidence.source_url}
-                          external
-                          event="outbound_source_click"
-                          eventProps={{ from: story.slug }}
-                        >
-                          Source
-                        </TrackedLink>
-                      )}
-                    </div>
+                  <li key={`${related.id}-${index}`} className="flood-row rule-row group" style={vars}>
+                    {related.target_url ? (
+                      <TrackedLink
+                        href={related.target_url}
+                        event="related_click"
+                        eventProps={{
+                          from: story.slug,
+                          to: String(related.slug || related.target_url),
+                          connectors: (related.connector_labels || []).join(' / '),
+                        }}
+                        className="grid grid-cols-[1fr_auto] gap-5 px-4 py-4"
+                      >
+                        {inner}
+                      </TrackedLink>
+                    ) : (
+                      <div className="grid grid-cols-[1fr_auto] gap-5 px-4 py-4">{inner}</div>
+                    )}
                   </li>
                 )
               })}
@@ -263,33 +251,106 @@ export default async function StoryPage({ params }: Params) {
           </section>
         )}
 
-        <section className="mt-8 border-t border-line pt-5">
-          <h2 className="type-kicker text-ink">
-            Provenance
-          </h2>
-          <dl className="mt-4 grid grid-cols-1 gap-x-6 gap-y-2.5 sm:grid-cols-2">
-            <div className="rule-row pt-2.5">
-              <dt className="type-kicker text-ink-faint">Canonical issue</dt>
-              <dd className="mt-0.5 font-mono text-[0.75rem] text-ink">
-                <Link href={issueHref} className="text-primary hover:underline">
-                  {story.issue_title || story.issue_date}
-                </Link>
-              </dd>
+        <div className="mx-auto max-w-[720px] px-8 max-sm:px-5">
+          {/* ── Source trail: pill links ── */}
+          <section className="scroll-rise mt-10 border-t border-ink pt-5">
+            <h2 className="type-kicker text-ink">Source trail</h2>
+            <div className="mt-3 flex flex-wrap gap-3">
+              {story.source_refs.map((source) => (
+                <TrackedLink
+                  key={source.url}
+                  href={`/source/${encodeURIComponent(source.domain)}`}
+                  event="source_click"
+                  eventProps={{ from: story.slug, domain: source.domain }}
+                  className="inline-block rounded-full bg-panel px-4 py-2 font-mono text-[0.65625rem] font-semibold uppercase tracking-[0.1em] text-ink transition-all duration-[var(--dur-fast)] ease-[var(--ease-swift)] hover:-translate-y-0.5 hover:bg-ink hover:text-white focus-visible:outline-2 focus-visible:outline-ink focus-visible:outline-offset-2"
+                >
+                  {source.title || source.domain}
+                </TrackedLink>
+              ))}
             </div>
-            <div className="rule-row pt-2.5">
-              <dt className="type-kicker text-ink-faint">AI generated</dt>
-              <dd className="mt-0.5 font-mono text-[0.75rem] text-ink">{story.provenance.ai_generated ? 'yes' : 'no'}</dd>
-            </div>
-            <div className="rule-row pt-2.5">
-              <dt className="type-kicker text-ink-faint">Story unit</dt>
-              <dd className="mt-0.5 font-mono text-[0.75rem] text-ink">{story.provenance.source_story_unit_id || story.provenance.source_finding_ids?.join(', ') || 'site artifact'}</dd>
-            </div>
-            <div className="rule-row pt-2.5">
-              <dt className="type-kicker text-ink-faint">Labels</dt>
-              <dd className="mt-0.5 font-mono text-[0.75rem] text-ink">{story.labels.length ? story.labels.join(', ') : 'source-backed'}</dd>
-            </div>
-          </dl>
-        </section>
+          </section>
+
+          {story.entity_refs.length > 0 && (
+            <section className="scroll-rise mt-10 border-t border-ink pt-5">
+              <h2 className="type-kicker text-ink">Entities</h2>
+              <div className="mt-3 flex flex-wrap gap-3">
+                {story.entity_refs.slice(0, 16).map((entity) => (
+                  <TrackedLink
+                    key={entity.id}
+                    href={`/e/${encodeURIComponent(entity.slug)}`}
+                    event="entity_click"
+                    eventProps={{ from: story.slug, entity: entity.slug }}
+                    className="inline-block rounded-full bg-panel px-4 py-2 font-mono text-[0.65625rem] font-semibold uppercase tracking-[0.1em] text-ink transition-all duration-[var(--dur-fast)] ease-[var(--ease-swift)] hover:-translate-y-0.5 hover:bg-ink hover:text-white focus-visible:outline-2 focus-visible:outline-ink focus-visible:outline-offset-2"
+                  >
+                    {entity.name}
+                  </TrackedLink>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {story.claim_evidence.length > 0 && (
+            <section className="scroll-rise mt-10 border-t border-ink pt-5">
+              <h2 className="type-kicker text-ink">Claim evidence</h2>
+              <ol className="mt-3">
+                {story.claim_evidence.slice(0, 8).map((item, index) => {
+                  const evidence = item as { claim?: string; source_url?: string; finding_id?: number | null }
+                  return (
+                    <li key={`${evidence.finding_id ?? index}-${evidence.claim ?? ''}`} className="border-t border-line py-3 first:border-t-0">
+                      <div className="font-serif text-[0.9375rem] leading-[1.58] text-ink-prose">
+                        {evidence.claim}
+                      </div>
+                      <div className="type-kicker mt-2 flex flex-wrap gap-3 text-[color:var(--tc-text)]">
+                        {evidence.finding_id != null && (
+                          <Link href={`/f/${evidence.finding_id}`} className="hover:underline">
+                            Finding {evidence.finding_id}
+                          </Link>
+                        )}
+                        {evidence.source_url && (
+                          <TrackedLink
+                            href={evidence.source_url}
+                            external
+                            event="outbound_source_click"
+                            eventProps={{ from: story.slug }}
+                            className="hover:underline"
+                          >
+                            Source
+                          </TrackedLink>
+                        )}
+                      </div>
+                    </li>
+                  )
+                })}
+              </ol>
+            </section>
+          )}
+
+          <section className="scroll-rise mt-10 border-t border-ink pt-5">
+            <h2 className="type-kicker text-ink">Provenance</h2>
+            <dl className="mt-4 grid grid-cols-1 gap-x-6 gap-y-2.5 sm:grid-cols-2">
+              <div className="border-t border-line pt-2.5">
+                <dt className="type-kicker text-ink-faint">Canonical issue</dt>
+                <dd className="mt-0.5 font-mono text-[0.75rem] text-ink">
+                  <Link href={issueHref} className="text-[color:var(--tc-text)] hover:underline">
+                    {story.issue_title || story.issue_date}
+                  </Link>
+                </dd>
+              </div>
+              <div className="border-t border-line pt-2.5">
+                <dt className="type-kicker text-ink-faint">AI generated</dt>
+                <dd className="mt-0.5 font-mono text-[0.75rem] text-ink">{story.provenance.ai_generated ? 'yes' : 'no'}</dd>
+              </div>
+              <div className="border-t border-line pt-2.5">
+                <dt className="type-kicker text-ink-faint">Story unit</dt>
+                <dd className="mt-0.5 font-mono text-[0.75rem] text-ink">{story.provenance.source_story_unit_id || story.provenance.source_finding_ids?.join(', ') || 'site artifact'}</dd>
+              </div>
+              <div className="border-t border-line pt-2.5">
+                <dt className="type-kicker text-ink-faint">Labels</dt>
+                <dd className="mt-0.5 font-mono text-[0.75rem] text-ink">{story.labels.length ? story.labels.join(', ') : 'source-backed'}</dd>
+              </div>
+            </dl>
+          </section>
+        </div>
       </main>
     </div>
   )

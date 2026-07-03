@@ -24,7 +24,7 @@ export function AudioBriefingPlayer({
       className={
         compact
           ? 'mt-3 border-t border-line-soft pt-3'
-          : 'my-8 border-y border-line py-5'
+          : 'my-8 border-y border-ink py-5'
       }
       aria-label="Audio briefing"
     >
@@ -44,7 +44,7 @@ export function AudioBriefingPlayer({
         {transcriptHref && (
           <a
             href={transcriptHref}
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-sm border border-ink px-2.5 py-1.5 font-mono text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-ink transition-colors hover:bg-panel"
+            className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-full bg-panel px-4 py-2 font-mono text-[0.65625rem] font-semibold uppercase tracking-[0.1em] text-ink transition-all duration-[var(--dur-fast)] ease-[var(--ease-swift)] hover:-translate-y-0.5 hover:bg-ink hover:text-white focus-visible:outline-2 focus-visible:outline-ink focus-visible:outline-offset-2"
           >
             <FileText aria-hidden className="h-3.5 w-3.5" />
             Transcript
@@ -57,7 +57,7 @@ export function AudioBriefingPlayer({
           controls
           preload="none"
           src={audioSrc}
-          className="mt-3 h-10 w-full max-w-full accent-primary"
+          className="mt-3 h-10 w-full max-w-full rounded-full accent-primary"
           aria-label={`Audio briefing for ${audio.date}`}
         />
       ) : (
@@ -75,7 +75,7 @@ export function AudioBriefingPlayer({
               href={note.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-primary hover:underline"
+              className="inline-flex items-center gap-1 rounded-full bg-panel px-3 py-1 text-ink transition-all duration-[var(--dur-fast)] ease-[var(--ease-swift)] hover:-translate-y-0.5 hover:bg-ink hover:text-white focus-visible:outline-2 focus-visible:outline-ink focus-visible:outline-offset-2"
             >
               {note.label}
               <ExternalLink aria-hidden className="h-3 w-3" />

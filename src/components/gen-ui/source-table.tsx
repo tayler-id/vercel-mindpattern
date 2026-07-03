@@ -33,9 +33,9 @@ export function SourceTable({ data }: { data: unknown }) {
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          className="border border-line bg-surface p-4"
+          className="border-t border-line pt-4"
         >
-          <p className="type-kicker text-ink mb-3">
+          <p className="type-display text-[19px] leading-[1.1] text-ink mb-3">
             Top sources by high-value findings
           </p>
           <ResponsiveContainer width="100%" height={120}>
@@ -55,15 +55,15 @@ export function SourceTable({ data }: { data: unknown }) {
                   if (!active || !payload?.length) return null
                   const d = payload[0]?.payload
                   return (
-                    <div className="bg-surface border border-line px-3 py-2 font-mono text-xs">
+                    <div className="rounded-[3px] border border-ink bg-paper px-3 py-2 font-mono text-[11px] leading-[1.5]">
                       <p className="text-ink font-semibold">{d.name}</p>
-                      <p className="text-chart-2">{d.highValue} high-value</p>
+                      <p className="text-(--chart-2)">{d.highValue} high-value</p>
                       <p className="text-ink-soft">{d.total} total hits</p>
                     </div>
                   )
                 }}
               />
-              <Bar dataKey="highValue" barSize={24} fill="var(--chart-2)" fillOpacity={0.8} />
+              <Bar dataKey="highValue" barSize={24} fill="var(--chart-2)" />
             </BarChart>
           </ResponsiveContainer>
         </motion.div>
@@ -102,14 +102,14 @@ export function SourceTable({ data }: { data: unknown }) {
                     </a>
                   </td>
                   <td className="px-4 py-2.5 text-right">
-                    <span className="font-mono text-ok font-semibold">{s.high_value_count}</span>
+                    <span className="font-mono text-ink font-semibold">{s.high_value_count}</span>
                   </td>
                   <td className="px-4 py-2.5 text-right font-mono text-ink-soft">{s.hit_count}</td>
                   <td className="px-4 py-2.5 text-right hidden sm:table-cell">
                     <div className="flex items-center justify-end gap-1.5">
-                      <div className="w-12 h-1 bg-panel overflow-hidden">
+                      <div className="w-12 h-1 rounded-full bg-panel overflow-hidden">
                         <div
-                          className="h-full"
+                          className="h-full rounded-full"
                           style={{
                             width: `${qualityRatio}%`,
                             backgroundColor: qualityRatio > 50 ? 'var(--chart-2)' : qualityRatio > 25 ? 'var(--chart-3)' : 'var(--chart-1)',

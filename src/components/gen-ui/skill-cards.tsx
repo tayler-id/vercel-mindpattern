@@ -2,16 +2,21 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ChevronDown } from 'lucide-react'
-import { DIFFICULTY_COLORS } from '@/lib/constants'
 import type { Skill } from '@/lib/types'
 
 const DIFFICULTY_ICON: Record<string, string> = {
   beginner: 'I',
   intermediate: 'II',
   advanced: 'III',
+}
+
+/* Solid pill treatments per difficulty — spectrum only, no green; yellow carries ink text. */
+const DIFFICULTY_VARS: Record<string, React.CSSProperties> = {
+  beginner: { '--tc': 'var(--spectrum-2)', '--tc-on': '#ffffff' } as React.CSSProperties,
+  intermediate: { '--tc': 'var(--spectrum-4)', '--tc-on': 'var(--ink)' } as React.CSSProperties,
+  advanced: { '--tc': 'var(--spectrum-1)', '--tc-on': '#ffffff' } as React.CSSProperties,
 }
 
 function SkillCard({ skill, index }: { skill: Skill; index: number }) {
@@ -22,11 +27,11 @@ function SkillCard({ skill, index }: { skill: Skill; index: number }) {
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: Math.min(index * 0.03, 0.5) }}
-      className="border border-line bg-surface overflow-hidden transition-colors"
+      className="rounded-[3px] border-[1.5px] border-ink bg-paper overflow-hidden transition-colors"
     >
       <div className="p-4">
-        <div className="flex items-start justify-between gap-3 mb-2">
-          <h4 className="type-display text-[17px] font-[560] text-ink leading-snug">
+        <div className="flex items-start justify-between gap-5 mb-2">
+          <h4 className="type-display text-[19px] leading-[1.1] text-ink">
             {skill.source_url ? (
               <a href={skill.source_url} target="_blank" rel="noopener noreferrer" className="hover:underline">
                 {skill.title}
@@ -34,16 +39,16 @@ function SkillCard({ skill, index }: { skill: Skill; index: number }) {
             ) : skill.title}
           </h4>
           <div className="flex gap-1.5 shrink-0">
-            <Badge variant="outline" className={`text-[10px] uppercase tracking-wider ${DIFFICULTY_COLORS[skill.difficulty] || ''}`}>
+            <span className="tag-chip" style={DIFFICULTY_VARS[skill.difficulty]}>
               {DIFFICULTY_ICON[skill.difficulty] || ''} {skill.difficulty}
-            </Badge>
-            <Badge variant="outline" className="text-[10px] uppercase tracking-wider text-ok bg-ok/10 border-ok/20">
+            </span>
+            <span className="inline-flex items-center rounded-full bg-ink px-3 py-1 font-mono text-[10.5px] leading-none font-semibold uppercase tracking-[0.12em] text-white">
               {skill.domain}
-            </Badge>
+            </span>
           </div>
         </div>
-        <p className="font-serif text-[14px] text-ink-soft leading-relaxed">{skill.description}</p>
-        <div className="type-kicker flex items-center gap-3 mt-3 text-ink-faint">
+        <p className="text-[14px] text-ink-soft leading-[1.55]">{skill.description}</p>
+        <div className="type-kicker flex flex-wrap items-center gap-3 mt-3 text-ink-faint">
           <span>[{skill.run_date}]</span>
           {skill.source_name && skill.source_url ? (
             <a href={skill.source_url} target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">
@@ -53,9 +58,9 @@ function SkillCard({ skill, index }: { skill: Skill; index: number }) {
             <span>{skill.source_name}</span>
           ) : null}
           {skill.similarity !== undefined && (
-            <Badge variant="outline" className="text-[10px] uppercase tracking-wider">
+            <span className="inline-flex items-center rounded-full bg-panel px-3 py-1 font-mono text-[10.5px] leading-none font-semibold uppercase tracking-[0.12em] text-ink">
               {Math.round(skill.similarity * 100)}% match
-            </Badge>
+            </span>
           )}
         </div>
       </div>
@@ -67,7 +72,7 @@ function SkillCard({ skill, index }: { skill: Skill; index: number }) {
               variant="ghost"
               size="sm"
               onClick={() => setExpanded(!expanded)}
-              className="w-full text-[10px] h-8 rounded-none text-ink-soft hover:text-ink tracking-[0.12em]"
+              className="w-full h-8 rounded-none text-[10.5px] text-ink-soft hover:text-ink tracking-[0.12em] active:scale-100"
             >
               {expanded ? 'Hide steps' : 'Show steps'}
               <ChevronDown data-icon="inline-end" className={`transition-transform ${expanded ? 'rotate-180' : ''}`} />

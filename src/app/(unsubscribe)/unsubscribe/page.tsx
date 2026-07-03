@@ -29,32 +29,33 @@ export default function UnsubscribePage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center bg-paper px-5 py-8">
       <div className="w-full max-w-sm">
-        <div className="flex items-center gap-2.5 mb-8">
-          <div className="flex items-center justify-center size-7 border border-primary bg-accent-wash">
-            <span className="type-display text-primary text-sm font-[640]">MP</span>
-          </div>
-          <span className="type-display text-[17px] font-[600] text-ink">
+        <div className="flex items-baseline gap-1 mb-8">
+          <span
+            className="type-display text-[17px] uppercase text-ink"
+            style={{ fontVariationSettings: '"wdth" 122', fontWeight: 880 }}
+          >
             MindPattern
           </span>
+          <span className="inline-block size-1.5 rounded-full bg-primary" aria-hidden />
         </div>
 
         {status === 'done' ? (
-          <div className="border border-ink bg-surface p-6">
-            <p className="type-kicker text-ink mb-2">
+          <div className="rounded-[3px] border-[1.5px] border-ink bg-paper p-6">
+            <p className="type-kicker text-ok mb-2">
               Unsubscribed
             </p>
-            <p className="font-serif text-[13px] text-ink-soft">
+            <p className="font-mono text-[11px] tracking-[0.08em] text-ink-soft">
               You have been removed from the daily briefing.
             </p>
           </div>
         ) : (
-          <div className="border border-ink bg-surface p-6">
-            <p className="type-kicker text-ink mb-1">
+          <div className="rounded-[3px] border-[1.5px] border-ink bg-paper p-6">
+            <p className="type-kicker text-ink mb-2">
               Unsubscribe
             </p>
-            <p className="font-serif text-[13px] text-ink-soft mb-4">
+            <p className="text-[14px] leading-[1.55] text-ink-soft mb-4">
               Enter your email to stop receiving the daily briefing.
             </p>
             <form onSubmit={handleSubmit} className="flex flex-col gap-3">
@@ -64,12 +65,13 @@ export default function UnsubscribePage() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="agent@email.com"
                 required
-                className="h-8 w-full rounded-sm border border-line bg-paper px-2.5 font-mono text-xs placeholder:text-ink-faint focus:outline-none focus:border-ring"
+                aria-label="Email address"
+                className="h-11 w-full rounded-full border-[1.5px] border-ink bg-paper px-4 font-mono text-[16px] md:h-9 md:text-xs placeholder:text-ink-faint outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
               />
               <button
                 type="submit"
                 disabled={status === 'loading'}
-                className="h-8 w-full rounded-sm bg-primary text-primary-foreground font-mono text-[10px] font-semibold uppercase tracking-wider hover:bg-primary/90 disabled:opacity-50"
+                className="h-11 w-full rounded-full bg-primary px-6 font-mono text-[11px] font-semibold uppercase tracking-[0.12em] text-white transition-all hover:bg-[#c8290f] active:scale-95 disabled:bg-panel disabled:text-ink-faint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink md:h-9"
               >
                 {status === 'loading' ? 'Processing...' : 'Unsubscribe'}
               </button>

@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>D — Spectrum</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #ffffff; --ink: #0e0e0f; --gray: #55555a; --hair: #e8e8ea;
+    --t1: #e63b12; --t2: #0797a6; --t3: #cf2d7b; --t4: #f5c518; --t4t: #a8850b;
+  }
+  * { margin: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--ink); font-family: "Archivo", sans-serif; overflow-x: hidden; }
+  a { color: inherit; text-decoration: none; }
+
+  header { display: flex; align-items: center; gap: 2.5rem; padding: 1rem 2.2rem; border-bottom: 1px solid var(--ink); }
+  .mark { font-variation-settings: "wdth" 122, "wght" 880; font-size: 20px; text-transform: uppercase; letter-spacing: -.01em; }
+  .mark i { font-style: normal; color: var(--t1); }
+  nav { margin-left: auto; display: flex; gap: 1.8rem; font-size: 13px; font-weight: 600; }
+  nav a { position: relative; padding-bottom: 5px; }
+  nav a::after { content: ""; position: absolute; left: 0; bottom: 0; height: 3px; width: 0; background: var(--t1); transition: width .22s cubic-bezier(.7,0,.2,1); }
+  nav a:hover::after, nav a.on::after { width: 100%; }
+
+  /* live ticker — fixed height, circular topic dots */
+  .ticker { height: 34px; display: flex; align-items: center; overflow: hidden; white-space: nowrap; border-bottom: 1px solid var(--hair); font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: .1em; color: #77777d; }
+  .ticker span { display: inline-block; padding-left: 100%; animation: tick 32s linear infinite; }
+  .ticker b { font-weight: 600; }
+  .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin: 0 6px -1px 20px; }
+  .live { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--t1); margin-right: 7px; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(230,59,18,.4);} 50% { box-shadow: 0 0 0 6px rgba(230,59,18,0);} }
+  @keyframes tick { to { transform: translateX(-100%); } }
+
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 2.6rem 2.2rem 5rem; display: grid; grid-template-columns: 1fr 300px; gap: 3.5rem; }
+  @media (max-width: 900px) { .wrap { grid-template-columns: 1fr; } }
+
+  h1 { font-variation-settings: "wdth" 118, "wght" 850; font-size: clamp(40px, 5.6vw, 68px); line-height: .95; text-transform: uppercase; letter-spacing: -.02em; }
+  h1 .flood { color: #fff; background: var(--ink); padding: 0 .12em; }
+  .stats { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .12em; color: var(--gray); margin: 1rem 0 2.4rem; }
+  .stats b { color: var(--ink); }
+
+  /* main ranked rows — unchanged move: color flood on hover */
+  .row { --tc: var(--t1); --on: #fff;
+    display: grid; grid-template-columns: 88px 1fr auto; gap: 1.3rem; align-items: start;
+    padding: 1.3rem 1rem; border-top: 1px solid var(--ink); cursor: pointer;
+    position: relative; isolation: isolate; overflow: hidden;
+    opacity: 0; transform: translateY(14px); animation: rise .5s cubic-bezier(.2,.7,.2,1) forwards;
+  }
+  .row:nth-child(1){animation-delay:.1s}.row:nth-child(2){animation-delay:.18s}.row:nth-child(3){animation-delay:.26s}.row:nth-child(4){animation-delay:.34s}.row:nth-child(5){animation-delay:.42s}
+  @keyframes rise { to { opacity: 1; transform: none; } }
+  .row::before { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--tc);
+    transform: scaleX(0); transform-origin: left; transition: transform .28s cubic-bezier(.7,0,.2,1); }
+  .row:hover::before { transform: scaleX(1); }
+  .row:hover { color: var(--on); }
+  .row:hover .kick, .row:hover .meta, .row:hover .sum { color: inherit; }
+  .num { font-variation-settings: "wdth" 125, "wght" 900; font-size: 50px; line-height: .85; color: transparent; -webkit-text-stroke: 1.5px currentColor; }
+  .kick { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--tct, var(--tc)); margin-bottom: .45rem; transition: color .2s; }
+  .row h3 { font-variation-settings: "wdth" 108, "wght" 760; font-size: 25px; line-height: 1.04; letter-spacing: -.01em; }
+  .sum { font-size: 14px; line-height: 1.55; color: var(--gray); margin-top: .5rem; max-width: 58ch; transition: color .2s; }
+  .meta { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .12em; color: var(--gray); margin-top: .55rem; text-transform: uppercase; transition: color .2s; }
+  .tag { align-self: center; font-family: "IBM Plex Mono", monospace; font-size: 10.5px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: #fff; background: var(--tc); padding: .45rem .95rem; border-radius: 999px; transition: all .2s; }
+  .tag.dk { color: var(--ink); }
+  .row:hover .tag { background: var(--on); color: var(--tc); }
+
+  /* ── side rail ── */
+  aside { opacity: 0; animation: rise .5s cubic-bezier(.2,.7,.2,1) .3s forwards; }
+
+  /* featured briefing = the giant circle (Quartz-featured energy) */
+  .circle {
+    width: 240px; height: 240px; border-radius: 50%; background: var(--t1); color: #fff;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+    gap: .4rem; margin: 0 auto 2.4rem; cursor: pointer;
+    transition: transform .3s cubic-bezier(.2,.7,.2,1);
+    animation: drift 7s ease-in-out infinite alternate;
+  }
+  .circle:hover { transform: scale(1.05) rotate(-2deg); }
+  @keyframes drift { from { transform: translateY(0); } to { transform: translateY(-8px); } }
+  .circle .ck { font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: .2em; }
+  .circle .ct { font-variation-settings: "wdth" 112, "wght" 820; font-size: 26px; line-height: 1; text-transform: uppercase; padding: 0 1.6rem; }
+  .circle .ca { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .12em; border-bottom: 1px solid #fff; padding-bottom: 2px; margin-top: .3rem; }
+
+  .rail-h { display: flex; align-items: baseline; gap: .7rem; border-top: 3px solid var(--ink); padding-top: .6rem; margin-bottom: .4rem; }
+  .rail-h b { font-variation-settings: "wdth" 115, "wght" 850; font-size: 15px; text-transform: uppercase; letter-spacing: .02em; }
+  .rail-h span { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--gray); letter-spacing: .12em; }
+  .rail { /* full list — no inner crop; the page scrolls */ }
+  .ritem { --tc: var(--t3); display: grid; grid-template-columns: 30px 1fr; gap: .6rem; padding: .6rem .4rem; border-top: 1px solid var(--hair); cursor: pointer; align-items: baseline; transition: background .15s; }
+  .ritem:hover { background: #f5f5f7; }
+  .ritem:hover .rt { text-decoration: underline; text-decoration-color: var(--tc); text-decoration-thickness: 2px; text-underline-offset: 3px; }
+  .rn { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--gray); }
+  .rdot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--tc); margin-right: 6px; }
+  .rt { font-variation-settings: "wdth" 105, "wght" 640; font-size: 13.5px; line-height: 1.25; }
+
+  /* ── knowledge graph band ── */
+  .graph-band { position: relative; border-bottom: 1px solid var(--ink); height: 270px; overflow: hidden; }
+  .graph-band canvas { display: block; }
+  .graph-label { position: absolute; left: 2.2rem; top: 1.2rem; z-index: 2; pointer-events: none; }
+  .graph-label b { display: block; font-variation-settings: "wdth" 118, "wght" 850; font-size: 24px; text-transform: uppercase; letter-spacing: -.01em; }
+  .graph-label span { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .14em; color: var(--gray); text-transform: uppercase; }
+
+  /* rows slide out as they leave the viewport, back in as they return (Chrome/Safari 26+) */
+  @media (prefers-reduced-motion: no-preference) {
+    @supports ((animation-timeline: view()) and (animation-range: entry)) {
+      .ritem, .row {
+        animation: slide-en auto linear backwards, slide-ex auto linear forwards;
+        animation-timeline: view();
+        animation-range: entry 0% entry 70%, exit 30% exit 100%;
+        opacity: 1; transform: none;
+      }
+      @keyframes slide-en { from { opacity: 0; transform: translateX(-24px); } }
+      @keyframes slide-ex { to { opacity: 0; transform: translateX(24px); } }
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, ::before, ::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+    .row, aside { opacity: 1; transform: none; }
+    .ticker span { animation: none; padding-left: 0; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <span class="mark">Mind<i>Pattern</i></span>
+  <nav><a class="on" href="#">Wire</a><a href="#">Briefings</a><a href="#">Search</a></nav>
+</header>
+<div class="ticker"><span>
+  <b>LIVE</b> · WED JULY 2, 2026 · <b>15,513</b> FINDINGS · <b>+85</b>/DAY · MODELS 4,210 · AI-SAFETY 2,873 · TOOLING 3,455 · INDUSTRY 2,990 · RESEARCH 1,985
+  &nbsp;·&nbsp; <b>LIVE</b> · WED JULY 2, 2026 · <b>15,513</b> FINDINGS · <b>+85</b>/DAY · MODELS 4,210 · AI-SAFETY 2,873 · TOOLING 3,455 · INDUSTRY 2,990 · RESEARCH 1,985
+</span></div>
+
+<div class="wrap">
+  <main>
+    <h1>Trending <span class="flood">now</span></h1>
+    <p class="stats"><b data-count="15513">0</b> FINDINGS INDEXED · <b data-count="2002">0</b> SOURCES · RANKED BY READER SIGNAL</p>
+    <div>
+      <a class="row" style="--tc:var(--t1)" href="d-spectrum-story.html"><div class="num">01</div><div>
+        <div class="kick">Models · 2026-07-02 · High</div>
+        <h3>Meituan open-sources 1.6T coding model built on Chinese chips</h3>
+        <p class="sum">MIT-licensed LongCat-2.0 activates only ~33B-56B params per token via a 'Zero-Compute Experts' router and supports a 1M-token context.</p>
+        <div class="meta">Venturebeat · 1 source</div>
+      </div><span class="tag">Models</span></a>
+
+      <a class="row" style="--tc:var(--t2)" href="d-spectrum-story.html"><div class="num">02</div><div>
+        <div class="kick">Tooling · 2026-06-26 · Source-backed</div>
+        <h3>The bottleneck stopped being code generation. It's verification.</h3>
+        <p class="sum">The binding constraint in AI-assisted coding is no longer how fast you can generate code — it's how fast you can verify it.</p>
+        <div class="meta">HN consensus · 5 sources · 14 entities</div>
+      </div><span class="tag">Tooling</span></a>
+
+      <a class="row" style="--tc:var(--t3)" href="d-spectrum-story.html"><div class="num">03</div><div>
+        <div class="kick">Industry · 2026-06-30 · High</div>
+        <h3>Cursor puts coding agent controls on your phone</h3>
+        <p class="sum">A native iOS app lets you kick off, monitor, and steer background coding agents from your pocket.</p>
+        <div class="meta">TechCrunch · 3 sources · 21 entities</div>
+      </div><span class="tag">Industry</span></a>
+
+      <a class="row" style="--tc:var(--t4); --tct:var(--t4t); --on:var(--ink)" href="d-spectrum-story.html"><div class="num">04</div><div>
+        <div class="kick">Research · 2026-07-02 · High</div>
+        <h3>Researchers explain why models forget their plan mid-generation</h3>
+        <p class="sum">Transformers overload one forward stream to both predict the next token and store state for future tokens.</p>
+        <div class="meta">arXiv · 2 sources</div>
+      </div><span class="tag dk">Research</span></a>
+
+      <a class="row" style="--tc:var(--t2)" href="d-spectrum-story.html"><div class="num">05</div><div>
+        <div class="kick">AI-Safety · 2026-06-27 · Source-backed</div>
+        <h3>Shopify's Thawar: "AI writes the code, AI reviews the code."</h3>
+        <p class="sum">The orchestration thesis on record: your job is to write the loops around it.</p>
+        <div class="meta">X/Twitter · 2 sources · 14 entities</div>
+      </div><span class="tag">AI-Safety</span></a>
+    </div>
+  </main>
+
+  <aside>
+    <div class="circle">
+      <span class="ck">TODAY'S BRIEFING</span>
+      <span class="ct">July 2, 2026</span>
+      <span class="ck">5,498 WORDS · 27 MIN</span>
+      <span class="ca">READ IT →</span>
+    </div>
+
+    <div class="rail-h"><b>The full wire</b><span>128 STORIES</span></div>
+    <div class="rail" id="rail"></div>
+  </aside>
+</div>
+
+<script>
+  const rm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  document.querySelectorAll('[data-count]').forEach(el => {
+    const end = +el.dataset.count;
+    if (rm) { el.textContent = end.toLocaleString(); return; }
+    const t0 = performance.now(), dur = 900;
+    (function tick(t) {
+      const p = Math.min((t - t0) / dur, 1), e = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.round(end * e).toLocaleString();
+      if (p < 1) requestAnimationFrame(tick);
+    })(t0);
+  });
+
+  // full-wire rail: everything past the top ranks, compact, color-dotted
+  const topics = [
+    ['var(--t1)'], ['var(--t2)'], ['var(--t3)'], ['var(--t4)']
+  ];
+  const titles = [
+    "Google's agents-cli standardizes skill authoring", "OpenKnowledge launches as AI-first Obsidian alternative",
+    "A wave of local-first coding agents is forming", "Adrafinil keeps a lid-closed Mac awake for agents",
+    "IBM ships CUGA: 24 copyable agentic examples", "The Fable 5 export ban was triggered by 'fix this code'",
+    "Stanford studied 31 real AI deployments", "GM lays off 600 IT workers, backfills AI-native",
+    "Three engineers, one million lines of code", "Enterprise AI can't be sold as software",
+    "Anthropic ships agentic evals framework", "Open-weight models close the gap on tool use",
+    "Karpathy turns a config file into doctrine", "Cloudflare turns HTTP 402 into a real product",
+    "Johns Hopkins hijacks three coding agents via PR titles", "SaaSStr publishes its own Salesforce invoice",
+    "Washington blocks a company's own AI models", "Vercel quietly becomes a container host",
+    "The people who built your CRM are coming back", "Agent fleets need tested fallbacks in config"
+  ];
+  const rail = document.getElementById('rail');
+  for (let i = 0; i < 123; i++) {
+    const t = titles[i % titles.length];
+    const c = topics[i % 4][0];
+    const el = document.createElement('a');
+    el.className = 'ritem'; el.href = 'd-spectrum-story.html';
+    el.style.setProperty('--tc', c);
+    el.innerHTML = `<span class="rn">${String(i + 6).padStart(2, '0')}</span><span class="rt"><span class="rdot"></span>${t}</span>`;
+    rail.appendChild(el);
+  }
+</script>
+</body>
+</html>

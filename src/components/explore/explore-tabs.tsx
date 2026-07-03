@@ -9,7 +9,6 @@ import { useState, useEffect, useCallback } from 'react'
 import { motion } from 'motion/react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import {
@@ -66,10 +65,7 @@ function LoadingSkeleton({ rows = 5 }: { rows?: number }) {
   return (
     <div className="flex flex-col gap-3">
       {Array.from({ length: rows }).map((_, i) => (
-        <div key={i} className="flex items-center gap-2">
-          <span className="text-primary font-mono font-bold text-xs">_</span>
-          <Skeleton className="h-16 w-full" />
-        </div>
+        <Skeleton key={i} className="h-16 w-full" />
       ))}
     </div>
   )
@@ -129,7 +125,7 @@ function SearchTab() {
           placeholder="SEARCH ALL FINDINGS..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="pl-9 h-10 font-mono uppercase tracking-[0.08em] text-xs placeholder:text-ink-faint"
+          className="pl-9 h-10 font-mono uppercase tracking-[0.08em] md:text-xs"
         />
       </div>
       {loading && <LoadingSkeleton rows={4} />}
@@ -187,7 +183,7 @@ function AllFindingsTab() {
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap gap-2">
         <Select value={agentFilter} onValueChange={(v) => setAgentFilter(v ?? 'all')}>
-          <SelectTrigger size="sm" className="text-[10px] uppercase tracking-wider">
+          <SelectTrigger size="sm" className="text-[10.5px] uppercase tracking-[0.12em]">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -202,7 +198,7 @@ function AllFindingsTab() {
           </SelectContent>
         </Select>
         <Select value={importanceFilter} onValueChange={(v) => setImportanceFilter(v ?? 'all')}>
-          <SelectTrigger size="sm" className="text-[10px] uppercase tracking-wider">
+          <SelectTrigger size="sm" className="text-[10.5px] uppercase tracking-[0.12em]">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -215,7 +211,7 @@ function AllFindingsTab() {
           </SelectContent>
         </Select>
         <Select value={dateFilter} onValueChange={(v) => setDateFilter(v ?? 'all')}>
-          <SelectTrigger size="sm" className="text-[10px] uppercase tracking-wider">
+          <SelectTrigger size="sm" className="text-[10.5px] uppercase tracking-[0.12em]">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -240,7 +236,7 @@ function AllFindingsTab() {
           {displayCount < findings.length && (
             <button
               onClick={() => setDisplayCount((c) => c + 20)}
-              className="type-kicker w-full py-2 text-ink transition-colors border border-ink bg-transparent hover:bg-panel"
+              className="type-kicker w-full rounded-full border-[1.5px] border-ink bg-paper py-2.5 text-ink transition-all hover:bg-ink hover:text-white active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
             >
               Load more ({findings.length - displayCount} remaining)
             </button>
@@ -347,11 +343,11 @@ function SkillsTab() {
             placeholder="SEARCH SKILLS..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="pl-9 h-8 font-mono uppercase tracking-[0.08em] text-xs placeholder:text-ink-faint"
+            className="pl-9 h-10 font-mono uppercase tracking-[0.08em] md:h-8 md:text-xs"
           />
         </div>
         <Select value={domainFilter} onValueChange={(v) => setDomainFilter(v ?? 'all')}>
-          <SelectTrigger size="sm" className="text-[10px] uppercase tracking-wider">
+          <SelectTrigger size="sm" className="text-[10.5px] uppercase tracking-[0.12em]">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -392,8 +388,8 @@ function HealthTab() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="rule-scotch pt-2">
-        <h3 className="type-display text-[22px] font-[560] text-ink">System Health</h3>
+      <div className="border-t-[3px] border-ink pt-2">
+        <h3 className="type-display text-[25px] leading-[1.04] text-ink">System Health</h3>
         <p className="type-kicker text-ink-faint mt-1">
           Pipeline performance and agent activity
         </p>
@@ -425,10 +421,11 @@ const AGENT_TABLE = [
   { agent: 'reddit-researcher', focus: 'r/ML, r/LocalLLaMA, r/SaaS', output: '5-8 findings', category: 'API' },
 ]
 
-const CATEGORY_STYLE: Record<string, string> = {
-  'Web Search': 'text-chart-4 bg-chart-4/10 border-chart-4/20',
-  'API': 'text-chart-2 bg-chart-2/10 border-chart-2/20',
-  'RSS': 'text-chart-3 bg-chart-3/10 border-chart-3/20',
+/* Solid topic-color pills (yellow floods carry ink text per AA rule). */
+const CATEGORY_VARS: Record<string, React.CSSProperties> = {
+  'Web Search': { '--tc': 'var(--spectrum-4)', '--tc-on': 'var(--ink)' } as React.CSSProperties,
+  'API': { '--tc': 'var(--spectrum-2)', '--tc-on': '#ffffff' } as React.CSSProperties,
+  'RSS': { '--tc': 'var(--spectrum-3)', '--tc-on': '#ffffff' } as React.CSSProperties,
 }
 
 const MEMORY_TABLES = [
@@ -447,9 +444,9 @@ function SystemTab() {
   return (
     <div className="flex flex-col gap-8">
       {/* Hero */}
-      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="rule-scotch pt-2">
-        <h3 className="type-display text-[22px] font-[560] text-ink">System Architecture</h3>
-        <p className="font-serif text-[15px] text-ink-soft mt-2 leading-relaxed max-w-3xl">
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="border-t-[3px] border-ink pt-2">
+        <h3 className="type-display text-[25px] leading-[1.04] text-ink">System Architecture</h3>
+        <p className="text-[14px] text-ink-soft mt-2 leading-[1.55] max-w-3xl">
           MindPattern is a fully autonomous AI research pipeline that runs daily on macOS via launchd.
           It dispatches 13 parallel research agents, synthesizes findings into a newsletter, stores
           everything in a SQLite memory database with vector embeddings, and posts curated content to
@@ -459,8 +456,8 @@ function SystemTab() {
 
       {/* Execution Flow */}
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
-        <h4 className="type-kicker mb-3 text-ink">Execution Flow</h4>
-        <div className="border border-line bg-surface p-5 overflow-x-auto">
+        <h4 className="type-display text-[19px] leading-[1.1] text-ink border-t border-line pt-4 mb-3">Execution Flow</h4>
+        <div className="rounded-[3px] border border-line bg-panel p-5 overflow-x-auto">
           <pre className="text-[11px] leading-relaxed text-ink-soft">
             <code>{`launchd (7:00 AM daily)
 +-- run-all-users.sh
@@ -489,7 +486,7 @@ function SystemTab() {
 
       {/* Orchestrator Phases */}
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-        <h4 className="type-kicker mb-3 text-ink">Orchestrator Phases</h4>
+        <h4 className="type-display text-[19px] leading-[1.1] text-ink border-t border-line pt-4 mb-3">Orchestrator Phases</h4>
         <div className="flex flex-col gap-3">
           {[
             { num: '1', title: 'Initialization', desc: 'Reads SOUL.md, vertical config, learnings.md, and user preferences from memory DB' },
@@ -500,12 +497,12 @@ function SystemTab() {
             { num: '5b', title: 'Agent Evolution', desc: 'Dynamic team adjustment -- can propose adding, merging, or retiring agents based on performance data' },
           ].map((phase) => (
             <div key={phase.num} className="rule-row flex gap-3 items-start pt-3">
-              <span className="numeral-ghost text-[28px] w-9 shrink-0 text-right" aria-hidden>
+              <span className="num-outline text-[28px] w-9 shrink-0 text-right text-ink" aria-hidden>
                 {phase.num}
               </span>
               <div>
                 <p className="type-kicker text-ink">{phase.title}</p>
-                <p className="font-serif text-[13px] text-ink-soft leading-relaxed">{phase.desc}</p>
+                <p className="text-[14px] text-ink-soft leading-[1.55] mt-1">{phase.desc}</p>
               </div>
             </div>
           ))}
@@ -514,7 +511,7 @@ function SystemTab() {
 
       {/* Research Agents Table */}
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-        <h4 className="type-kicker mb-3 text-ink">Research Agents</h4>
+        <h4 className="type-display text-[19px] leading-[1.1] text-ink border-t border-line pt-4 mb-3">Research Agents</h4>
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
             <thead>
@@ -532,9 +529,9 @@ function SystemTab() {
                   <td className="px-4 py-2.5 text-ink-soft text-[11px]">{a.focus}</td>
                   <td className="px-4 py-2.5 text-ink-soft text-[11px]">{a.output}</td>
                   <td className="px-4 py-2.5">
-                    <Badge variant="outline" className={`text-[10px] uppercase tracking-wider ${CATEGORY_STYLE[a.category] || ''}`}>
+                    <span className="tag-chip" style={CATEGORY_VARS[a.category]}>
                       {a.category}
-                    </Badge>
+                    </span>
                   </td>
                 </tr>
               ))}
@@ -545,7 +542,7 @@ function SystemTab() {
 
       {/* Memory Database Table */}
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-        <h4 className="type-kicker mb-3 text-ink">Memory Database</h4>
+        <h4 className="type-display text-[19px] leading-[1.1] text-ink border-t border-line pt-4 mb-3">Memory Database</h4>
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
             <thead>
@@ -565,7 +562,7 @@ function SystemTab() {
                     {t.embedding === '--' ? (
                       <span className="text-ink-faint">--</span>
                     ) : (
-                      <span className="font-mono text-ok">{t.embedding}</span>
+                      <span className="font-mono font-semibold text-ink">{t.embedding}</span>
                     )}
                   </td>
                   <td className="px-4 py-2.5 text-ink-soft text-[11px]">{t.keys}</td>
@@ -578,18 +575,18 @@ function SystemTab() {
 
       {/* Social Media Pipeline */}
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
-        <h4 className="type-kicker mb-3 text-ink">Social Media Pipeline</h4>
+        <h4 className="type-display text-[19px] leading-[1.1] text-ink border-t border-line pt-4 mb-3">Social Media Pipeline</h4>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {[
             { title: 'Curator', desc: 'Selects top findings for social posting using opus model, 15 turns. Analyzes engagement history and platform fit.', detail: 'opus / 15 turns', color: 'text-primary' },
-            { title: 'Gate 1', desc: 'Sends curated selections to user via iMessage for approval before writing begins.', detail: 'iMessage approval', color: 'text-chart-4' },
-            { title: 'Writers', desc: 'Generates platform-specific content with 3 self-critic rounds for quality. Adapts tone per platform.', detail: 'sonnet / 8 turns / 3 critic rounds', color: 'text-chart-2' },
-            { title: 'Gate 2 + Post', desc: 'Final approval via iMessage, then automated posting to configured platforms.', detail: 'iMessage + auto-post', color: 'text-chart-4' },
+            { title: 'Gate 1', desc: 'Sends curated selections to user via iMessage for approval before writing begins.', detail: 'iMessage approval', color: 'text-(--spectrum-4-text)' },
+            { title: 'Writers', desc: 'Generates platform-specific content with 3 self-critic rounds for quality. Adapts tone per platform.', detail: 'sonnet / 8 turns / 3 critic rounds', color: 'text-(--spectrum-2)' },
+            { title: 'Gate 2 + Post', desc: 'Final approval via iMessage, then automated posting to configured platforms.', detail: 'iMessage + auto-post', color: 'text-(--spectrum-4-text)' },
           ].map((phase) => (
-            <div key={phase.title} className="border border-line bg-surface p-4">
+            <div key={phase.title} className="rule-row pt-3 pb-1">
               <h5 className={`type-kicker ${phase.color}`}>{phase.title}</h5>
-              <p className="font-serif text-[13px] text-ink-soft mt-1 leading-relaxed">{phase.desc}</p>
-              <p className="type-kicker text-ink-faint mt-2">{phase.detail}</p>
+              <p className="text-[14px] text-ink-soft mt-2 leading-[1.55]">{phase.desc}</p>
+              <p className="type-kicker text-ink-faint mt-3">{phase.detail}</p>
             </div>
           ))}
         </div>
@@ -597,23 +594,23 @@ function SystemTab() {
 
       {/* Cloud & Infrastructure */}
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-        <h4 className="type-kicker mb-3 text-ink">Cloud &amp; Infrastructure</h4>
+        <h4 className="type-display text-[19px] leading-[1.1] text-ink border-t border-line pt-4 mb-3">Cloud &amp; Infrastructure</h4>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div className="border border-line bg-surface p-4">
+          <div className="rule-row pt-3 pb-1">
             <h5 className="type-kicker text-primary">Fly.io</h5>
-            <p className="font-serif text-[13px] text-ink-soft mt-1 leading-relaxed">
+            <p className="text-[14px] text-ink-soft mt-2 leading-[1.55]">
               Hosts the Flask API + SQLite DB. Single machine in sjc region.
             </p>
           </div>
-          <div className="border border-line bg-surface p-4">
-            <h5 className="type-kicker text-chart-2">DB Sync</h5>
-            <p className="font-serif text-[13px] text-ink-soft mt-1 leading-relaxed">
+          <div className="rule-row pt-3 pb-1">
+            <h5 className="type-kicker text-(--spectrum-2)">DB Sync</h5>
+            <p className="text-[14px] text-ink-soft mt-2 leading-[1.55]">
               After each run, sync-to-fly.sh uploads SQLite via sftp.
             </p>
           </div>
-          <div className="border border-line bg-surface p-4">
-            <h5 className="type-kicker text-chart-4">Email (Resend)</h5>
-            <p className="font-serif text-[13px] text-ink-soft mt-1 leading-relaxed">
+          <div className="rule-row pt-3 pb-1">
+            <h5 className="type-kicker text-(--spectrum-4-text)">Email (Resend)</h5>
+            <p className="text-[14px] text-ink-soft mt-2 leading-[1.55]">
               Daily newsletter delivered via Resend API. HTML-formatted.
             </p>
           </div>
@@ -622,8 +619,8 @@ function SystemTab() {
 
       {/* File Map */}
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
-        <h4 className="type-kicker mb-3 text-ink">File Map</h4>
-        <div className="border border-line bg-surface p-5 overflow-x-auto">
+        <h4 className="type-display text-[19px] leading-[1.1] text-ink border-t border-line pt-4 mb-3">File Map</h4>
+        <div className="rounded-[3px] border border-line bg-panel p-5 overflow-x-auto">
           <pre className="text-[11px] leading-relaxed text-ink-soft">
             <code>{`daily-research-agent/
 +-- run-all-users.sh        # Entry point (launchd)
@@ -655,7 +652,7 @@ function SystemTab() {
 
       {/* Tech Stack */}
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
-        <h4 className="type-kicker mb-3 text-ink">Tech Stack</h4>
+        <h4 className="type-display text-[19px] leading-[1.1] text-ink border-t border-line pt-4 mb-3">Tech Stack</h4>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {[
             { title: 'Core AI', desc: 'Claude CLI for orchestration. Opus for orchestrator + curator, Sonnet for writers. AI SDK for chat.' },
@@ -665,9 +662,9 @@ function SystemTab() {
             { title: 'Shell & Python', desc: 'Bash for pipeline orchestration, Python 3.9 for fetcher tools and memory.py CLI.' },
             { title: 'Frontend', desc: 'Next.js 16, React 19, Tailwind CSS 4, AI SDK, shadcn/ui, Motion.' },
           ].map((item) => (
-            <div key={item.title} className="border border-line bg-surface p-4">
+            <div key={item.title} className="rule-row pt-3 pb-1">
               <h5 className="type-kicker text-ink">{item.title}</h5>
-              <p className="font-serif text-[13px] text-ink-soft mt-1 leading-relaxed">{item.desc}</p>
+              <p className="text-[14px] text-ink-soft mt-2 leading-[1.55]">{item.desc}</p>
             </div>
           ))}
         </div>
@@ -693,13 +690,9 @@ const TAB_ITEMS = [
 export function ExploreTabs() {
   return (
     <Tabs defaultValue="search">
-      <TabsList className="h-auto w-full justify-start overflow-x-auto flex-nowrap gap-0 bg-transparent p-0 border-b border-line">
+      <TabsList className="h-auto w-full justify-start overflow-x-auto flex-nowrap">
         {TAB_ITEMS.map(({ value, label, icon: Icon }) => (
-          <TabsTrigger
-            key={value}
-            value={value}
-            className="h-auto gap-1.5 px-3 py-2 font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-soft border-0 border-b-2 border-transparent -mb-px hover:text-ink data-active:border-ink data-active:bg-transparent data-active:text-ink"
-          >
+          <TabsTrigger key={value} value={value} className="flex-none">
             <Icon data-icon="inline-start" />
             <span className="hidden sm:inline">{label}</span>
           </TabsTrigger>

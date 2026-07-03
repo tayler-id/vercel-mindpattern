@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A — Ops Console (alive)</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #131417; --raise: #1a1c21; --panel: #20232a;
+    --line: #2b2f37; --line-soft: #23262d;
+    --hi: #e8eaee; --mid: #9aa1ab; --low: #7d848f;
+    --em: #3fd68f; --am: #e8a33d; --red: #e5533f;
+  }
+  * { margin: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg); color: var(--hi);
+    font-family: "IBM Plex Mono", monospace;
+    min-height: 100vh; overflow-x: hidden;
+  }
+  /* faint sweep — the screen feels powered on */
+  body::after {
+    content: ""; position: fixed; inset: 0; pointer-events: none;
+    background: linear-gradient(180deg, transparent 0%, rgba(63,214,143,.018) 48%, transparent 52%);
+    background-size: 100% 260px;
+    animation: sweep 9s linear infinite;
+  }
+  @keyframes sweep { to { background-position: 0 260px; } }
+
+  header {
+    display: flex; align-items: baseline; gap: 2.5rem;
+    padding: 1.1rem 2.2rem; border-bottom: 1px solid var(--line);
+  }
+  .mark { font-weight: 700; letter-spacing: .05em; font-size: 15px; }
+  .mark::after {
+    content: "▮"; color: var(--em); margin-left: 2px;
+    animation: blink 1.1s steps(1) infinite;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+  nav { display: flex; gap: 1.6rem; margin-left: auto; }
+  nav a {
+    color: var(--mid); text-decoration: none; font-size: 11px;
+    letter-spacing: .16em; padding-bottom: 4px; position: relative;
+  }
+  nav a::after {
+    content: ""; position: absolute; left: 0; bottom: 0; height: 2px; width: 0;
+    background: var(--em); transition: width .22s cubic-bezier(.6,0,.2,1);
+  }
+  nav a:hover { color: var(--hi); }
+  nav a:hover::after, nav a.on::after { width: 100%; }
+  nav a.on { color: var(--em); }
+
+  .status {
+    display: flex; gap: 2rem; align-items: center;
+    padding: .8rem 2.2rem; border-bottom: 1px solid var(--line-soft);
+    font-size: 11px; letter-spacing: .14em; color: var(--mid);
+  }
+  .dot {
+    width: 7px; height: 7px; border-radius: 50%; background: var(--em);
+    display: inline-block; margin-right: 8px;
+    animation: pulse 2s cubic-bezier(.4,0,.6,1) infinite;
+  }
+  @keyframes pulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(63,214,143,.45); }
+    50% { box-shadow: 0 0 0 6px rgba(63,214,143,0); }
+  }
+  .status b { color: var(--em); font-weight: 600; }
+  .status .am { color: var(--am); }
+
+  main { max-width: 1000px; margin: 0 auto; padding: 2.4rem 2.2rem 4rem; }
+  h1 { font-size: 26px; font-weight: 700; letter-spacing: .02em; margin-bottom: 2rem; }
+  h1 span { color: var(--em); }
+
+  .row {
+    display: grid; grid-template-columns: 64px 1fr; gap: 1.2rem;
+    padding: 1.15rem .9rem; border-top: 1px solid var(--line);
+    cursor: pointer; position: relative;
+    opacity: 0; transform: translateY(10px);
+    animation: enter .45s cubic-bezier(.2,.7,.3,1) forwards;
+    transition: background .18s;
+  }
+  .row:nth-child(1) { animation-delay: .05s; } .row:nth-child(2) { animation-delay: .13s; }
+  .row:nth-child(3) { animation-delay: .21s; } .row:nth-child(4) { animation-delay: .29s; }
+  .row:nth-child(5) { animation-delay: .37s; }
+  @keyframes enter { to { opacity: 1; transform: none; } }
+  .row:hover { background: var(--raise); }
+  .idx { font-size: 22px; font-weight: 600; color: var(--am); padding-top: 2px; }
+  .idx::before { content: "▸ "; color: transparent; transition: color .18s; margin-left: -18px; }
+  .row:hover .idx::before { color: var(--em); }
+  .kick { font-size: 10.5px; letter-spacing: .16em; color: var(--low); margin-bottom: 6px; }
+  .kick em { color: var(--am); font-style: normal; }
+  .row h3 { font-size: 16.5px; font-weight: 600; line-height: 1.45; letter-spacing: .01em; transition: color .18s; }
+  .row:hover h3 { color: var(--em); }
+  .sum {
+    font-family: "IBM Plex Sans", sans-serif; font-size: 13.5px; color: var(--mid);
+    line-height: 1.6; margin-top: 6px; max-width: 60ch;
+  }
+  .meta { font-size: 10.5px; letter-spacing: .14em; color: var(--low); margin-top: 8px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, ::before, ::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+    .row { opacity: 1; transform: none; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <span class="mark">MINDPATTERN</span>
+  <nav><a class="on" href="#">WIRE</a><a href="#">BRIEFINGS</a><a href="#">SEARCH</a></nav>
+</header>
+<div class="status">
+  <span><span class="dot"></span>LIVE · WED 2026-07-02</span>
+  <span><b data-count="15513">0</b> FINDINGS</span>
+  <span><b data-count="2002">0</b> SOURCES</span>
+  <span class="am">+85/DAY</span>
+</div>
+<main>
+  <h1>TRENDING <span>NOW</span></h1>
+  <div class="feed">
+    <article class="row"><div class="idx">01</div><div>
+      <div class="kick">2026-07-02 · <em>HIGH</em> · AI-SAFETY</div>
+      <h3>Meituan open-sources 1.6T coding model built on Chinese chips</h3>
+      <p class="sum">MIT-licensed LongCat-2.0 activates only ~33B-56B params per token via a 'Zero-Compute Experts' router and supports a 1M-token context.</p>
+      <div class="meta">VENTUREBEAT · 1 SOURCE</div>
+    </div></article>
+    <article class="row"><div class="idx">02</div><div>
+      <div class="kick">2026-06-26 · <em>SOURCE-BACKED</em> · CODING</div>
+      <h3>The bottleneck stopped being code generation. It's verification.</h3>
+      <p class="sum">The binding constraint in AI-assisted coding is no longer how fast you can generate code — it's how fast you can verify it.</p>
+      <div class="meta">HN CONSENSUS · 5 SOURCES · 14 ENTITIES</div>
+    </div></article>
+    <article class="row"><div class="idx">03</div><div>
+      <div class="kick">2026-06-30 · <em>HIGH</em> · TOOLING</div>
+      <h3>Cursor puts coding agent controls on your phone</h3>
+      <p class="sum">A native iOS app lets you kick off, monitor, and steer background coding agents from your pocket — and that reorganizes the whole workflow.</p>
+      <div class="meta">TECHCRUNCH · 3 SOURCES · 21 ENTITIES</div>
+    </div></article>
+    <article class="row"><div class="idx">04</div><div>
+      <div class="kick">2026-07-02 · <em>HIGH</em> · RESEARCH</div>
+      <h3>Researchers explain why models forget their plan mid-generation</h3>
+      <p class="sum">Transformers overload one forward stream to both predict the next token and store state for future tokens — pulling those roles apart helps.</p>
+      <div class="meta">ARXIV · 2 SOURCES</div>
+    </div></article>
+    <article class="row"><div class="idx">05</div><div>
+      <div class="kick">2026-06-27 · <em>SOURCE-BACKED</em> · INDUSTRY</div>
+      <h3>Shopify's Thawar: "AI writes the code, AI reviews the code."</h3>
+      <p class="sum">The VP of Engineering puts the orchestration thesis on record: your job is to write the loops around it.</p>
+      <div class="meta">X/TWITTER · 2 SOURCES · 14 ENTITIES</div>
+    </div></article>
+  </div>
+</main>
+<script>
+  // count-up on load (skipped under reduced motion)
+  const rm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  document.querySelectorAll('[data-count]').forEach(el => {
+    const end = +el.dataset.count;
+    if (rm) { el.textContent = end.toLocaleString(); return; }
+    const t0 = performance.now(), dur = 900;
+    (function tick(t) {
+      const p = Math.min((t - t0) / dur, 1), eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.round(end * eased).toLocaleString();
+      if (p < 1) requestAnimationFrame(tick);
+    })(t0);
+  });
+</script>
+</body>
+</html>

@@ -1,9 +1,11 @@
 import type { Metadata } from 'next'
+import type { CSSProperties } from 'react'
 import Link from 'next/link'
 import { AudioBriefingPlayer } from '@/components/briefing/audio-briefing-player'
 import { getAudioBriefings, getReports } from '@/lib/api'
 import type { AudioBriefing, ReportListItem } from '@/lib/types'
 import { shortDate } from '@/lib/format'
+import { topicVars } from '@/lib/topic-color'
 
 export const revalidate = 60
 export const dynamic = 'force-dynamic'
@@ -32,40 +34,51 @@ export default async function BriefingsPage() {
 
   return (
     <div className="h-full overflow-y-auto">
-      <header className="mx-auto max-w-[44rem] px-8 pt-11 max-sm:px-5">
-        <p className="type-kicker text-primary">
+      <header className="mx-auto max-w-[720px] px-8 pt-11 max-sm:px-5">
+        <p className="rise-in type-kicker text-primary" style={{ '--i': 0 } as CSSProperties}>
           Briefings
         </p>
-        <h1 className="type-display mt-3 text-[2.75rem] font-[620] text-ink max-sm:text-[2rem]">
+        <h1
+          className="rise-in type-display mt-2 text-[clamp(2.5rem,6vw,4.25rem)] uppercase leading-[0.95] tracking-[-0.02em] text-ink"
+          style={{ '--i': 1, fontVariationSettings: '"wdth" 118', fontWeight: 850 } as CSSProperties}
+        >
           The daily dispatch
         </h1>
-        <p className="mt-3 font-serif text-[1.0625rem] italic leading-[1.6] text-ink-soft">
+        <p className="rise-in mt-2 max-w-[52ch] font-serif text-[1.1875rem] leading-[1.5] text-ink-soft" style={{ '--i': 2 } as CSSProperties}>
           One issue a day. The top stories, written long-form, with their sources.
         </p>
       </header>
 
-      <ol className="mx-auto max-w-[44rem] px-8 pb-24 pt-6 max-sm:px-5">
-        {reports.map((r) => {
+      <ol className="mx-auto max-w-[720px] px-8 pb-24 pt-8 max-sm:px-5">
+        {reports.map((r, index) => {
           const audio = audioByDate.get(r.date)
           return (
-            <li key={r.date} className="rule-row py-5">
-              <Link
-                href={`/briefings/${r.date}`}
-                className="group block"
-              >
-                <div className="type-kicker text-primary">
-                  {shortDate(r.date)}
-                </div>
-                <div className="type-display mt-1.5 text-[1.375rem] font-[560] text-ink group-hover:underline">
-                  {r.title}
-                </div>
-                {r.subtitle && (
-                  <p className="mt-1.5 max-w-[42rem] font-serif text-[0.9375rem] leading-[1.6] text-ink-soft">
-                    {r.subtitle}
-                  </p>
+            <li
+              key={r.date}
+              className="rule-row"
+              style={{ ...topicVars(r.date), '--i': index } as CSSProperties}
+            >
+              <div className={index < 8 ? 'rise-in' : 'scroll-rise'}>
+                <Link href={`/briefings/${r.date}`} className="flood-row block px-4 py-5">
+                  <p className="type-kicker text-[color:var(--tc-text)]">{shortDate(r.date)}</p>
+                  <h2
+                    className="type-display mt-2 text-[25px] leading-[1.04] text-ink"
+                    style={{ fontVariationSettings: '"wdth" 108', fontWeight: 760 }}
+                  >
+                    {r.title}
+                  </h2>
+                  {r.subtitle && (
+                    <p className="mt-2 max-w-[46rem] font-serif text-[0.9375rem] leading-[1.55] text-ink-soft">
+                      {r.subtitle}
+                    </p>
+                  )}
+                </Link>
+                {audio && (
+                  <div className="px-4 pb-4">
+                    <AudioBriefingPlayer audio={audio} compact />
+                  </div>
                 )}
-              </Link>
-              {audio && <AudioBriefingPlayer audio={audio} compact />}
+              </div>
             </li>
           )
         })}

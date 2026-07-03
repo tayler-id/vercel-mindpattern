@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 
 export default function ExplorePage() {
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8">
+    <div className="max-w-5xl mx-auto px-5 py-8 md:px-8">
       <JsonLd
         data={{
           '@context': 'https://schema.org',
@@ -43,11 +43,16 @@ export default function ExplorePage() {
           ],
         }}
       />
-      <div className="rule-scotch mb-6 pt-3">
+      <div className="mb-6 border-t-[3px] border-ink pt-3">
         <p className="type-kicker text-primary">
           Browse the research database
         </p>
-        <h1 className="type-display text-[32px] font-[560] text-ink mt-1 sm:text-[40px]">AI Research Archive</h1>
+        <h1
+          className="type-display uppercase text-[clamp(40px,6vw,68px)] leading-[0.95] text-ink mt-2"
+          style={{ fontVariationSettings: '"wdth" 118', fontWeight: 850 }}
+        >
+          AI Research Archive
+        </h1>
       </div>
       <ExploreTabs />
     </div>

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Archivo, Fraunces, IBM_Plex_Mono, Newsreader } from 'next/font/google'
+import { Archivo, IBM_Plex_Mono, Source_Serif_4 } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { WebVitalsTracker } from '@/components/analytics/web-vitals'
 import { SearchHotkey } from '@/components/search/search-hotkey'
@@ -7,12 +7,10 @@ import { TooltipProvider } from '@/components/ui/tooltip'
 import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL } from '@/lib/site'
 import './globals.css'
 
-const archivo = Archivo({ variable: '--font-archivo', subsets: ['latin'], display: 'swap' })
-const fraunces = Fraunces({
-  variable: '--font-fraunces',
+const archivo = Archivo({
+  variable: '--font-archivo',
   subsets: ['latin'],
-  style: ['normal', 'italic'],
-  axes: ['opsz', 'SOFT', 'WONK'],
+  axes: ['wdth'],
   display: 'swap',
 })
 const plexMono = IBM_Plex_Mono({
@@ -21,8 +19,8 @@ const plexMono = IBM_Plex_Mono({
   weight: ['400', '500', '600'],
   display: 'swap',
 })
-const newsreader = Newsreader({
-  variable: '--font-newsreader',
+const sourceSerif = Source_Serif_4({
+  variable: '--font-source-serif',
   subsets: ['latin'],
   style: ['normal', 'italic'],
   display: 'swap',
@@ -51,6 +49,11 @@ export const metadata: Metadata = {
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
   },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: SITE_NAME,
+  },
   robots: {
     index: true,
     follow: true,
@@ -65,7 +68,7 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: '#f7f3ea',
+  themeColor: '#ffffff',
   viewportFit: 'cover',
 }
 
@@ -74,7 +77,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${archivo.variable} ${fraunces.variable} ${plexMono.variable} ${newsreader.variable}`}
+      className={`${archivo.variable} ${plexMono.variable} ${sourceSerif.variable}`}
     >
       <body suppressHydrationWarning className="font-sans antialiased">
         <TooltipProvider>{children}</TooltipProvider>

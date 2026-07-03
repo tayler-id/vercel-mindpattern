@@ -1,8 +1,10 @@
 import type { Metadata } from 'next'
+import type { CSSProperties } from 'react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { JsonLd } from '@/components/json-ld'
 import { getEntity } from '@/lib/api'
+import { topicVars } from '@/lib/topic-color'
 import { absoluteUrl, SITE_NAME } from '@/lib/site'
 
 export const revalidate = 60
@@ -60,7 +62,7 @@ export default async function EntityPage({ params }: Params) {
   const sourceCount = entity.counts?.sources ?? sourceTrail.length
 
   return (
-    <div className="h-full overflow-y-auto">
+    <div className="h-full overflow-y-auto" style={topicVars(entity.slug) as CSSProperties}>
       <JsonLd
         data={{
           '@context': 'https://schema.org',
@@ -81,41 +83,41 @@ export default async function EntityPage({ params }: Params) {
         }}
       />
 
-      <main className="mx-auto max-w-[760px] px-8 pb-24 pt-9 max-sm:px-5">
-        <Link
-          href="/"
-          className="type-kicker text-primary hover:underline"
-        >
-          The Wire
+      <main className="mx-auto max-w-[720px] px-8 pb-24 pt-9 max-sm:px-5">
+        <Link href="/" className="rise-in type-kicker inline-block text-ink-soft transition-colors hover:text-ink" style={{ '--i': 0 } as CSSProperties}>
+          ← The Wire
         </Link>
 
         <header className="mt-8">
-          <div className="type-kicker text-primary">
+          <div className="rise-in type-kicker text-[color:var(--tc-text)]" style={{ '--i': 1 } as CSSProperties}>
             Entity trail
           </div>
-          <h1 className="type-display mt-3 text-[2.75rem] font-[620] text-ink max-sm:text-[2rem]">
+          <h1
+            className="rise-in type-display mt-2 text-[clamp(2.25rem,5vw,3.5rem)] uppercase leading-[0.98] tracking-[-0.02em] text-ink"
+            style={{ '--i': 2, fontVariationSettings: '"wdth" 114', fontWeight: 850 } as CSSProperties}
+          >
             {entity.name}
           </h1>
-          <p className="mt-4 max-w-[38rem] font-serif text-[1.125rem] italic leading-[1.6] text-ink-soft">
+          <p className="rise-in mt-2 max-w-[52ch] font-serif text-[1.125rem] leading-[1.55] text-ink-soft" style={{ '--i': 3 } as CSSProperties}>
             Source-backed findings, relationship evidence, citations, and briefing history from the public MindPattern archive.
           </p>
 
-          <div className="mt-6 grid grid-cols-2 gap-x-4 gap-y-3 border-y border-line py-3 sm:grid-cols-4">
+          <div className="rise-in mt-8 flex flex-wrap gap-x-9 gap-y-3 border-t-[3px] border-ink py-3" style={{ '--i': 4 } as CSSProperties}>
             <div>
               <div className="type-kicker text-ink-faint">Briefing refs</div>
-              <div className="mt-0.5 font-mono text-[0.75rem] text-ink">{briefingCount}</div>
+              <div className="mt-0.5 font-mono text-[0.75rem] font-semibold text-ink">{briefingCount}</div>
             </div>
             <div>
               <div className="type-kicker text-ink-faint">Findings</div>
-              <div className="mt-0.5 font-mono text-[0.75rem] text-ink">{findingCount}</div>
+              <div className="mt-0.5 font-mono text-[0.75rem] font-semibold text-ink">{findingCount}</div>
             </div>
             <div>
               <div className="type-kicker text-ink-faint">Edges</div>
-              <div className="mt-0.5 font-mono text-[0.75rem] text-ink">{relationshipCount}</div>
+              <div className="mt-0.5 font-mono text-[0.75rem] font-semibold text-ink">{relationshipCount}</div>
             </div>
             <div>
               <div className="type-kicker text-ink-faint">Sources</div>
-              <div className="mt-0.5 font-mono text-[0.75rem] text-ink">{sourceCount}</div>
+              <div className="mt-0.5 font-mono text-[0.75rem] font-semibold text-ink">{sourceCount}</div>
             </div>
           </div>
           {entity.pagination?.has_more && (
@@ -126,31 +128,30 @@ export default async function EntityPage({ params }: Params) {
         </header>
 
         {dossier && (
-          <section className="mt-7">
-            <h2 className="type-kicker text-ink">
-              Dossier
-            </h2>
+          <section className="scroll-rise mt-10">
+            <h2 className="type-display text-[25px] uppercase leading-[1.04] text-ink">Dossier</h2>
             <p className="type-kicker mt-1 text-ink-faint">
               Compiled {dossier.date} · {dossier.confidence}
             </p>
             {dossier.take && (
-              <div className="mt-4 border border-ink bg-accent-wash px-5 py-4">
-                <div className="type-kicker text-primary">
+              <aside className="mt-4 rounded-[20px] p-7 max-sm:px-5" style={{ background: 'var(--tc)' }}>
+                <span className="type-kicker inline-block rounded-full bg-paper px-4 py-1 text-[color:var(--tc-text)]">
                   The take
-                </div>
-                <p className="mt-2 font-serif text-[1.0625rem] leading-[1.62] text-ink-prose">
+                </span>
+                <p
+                  className="mt-3 text-[1.1875rem] leading-[1.3]"
+                  style={{ color: 'var(--tc-on)', fontVariationSettings: '"wdth" 106', fontWeight: 680 }}
+                >
                   {dossier.take}
                 </p>
-              </div>
+              </aside>
             )}
             {dossier.timeline.length > 0 && (
-              <ol className="mt-3 divide-y divide-line">
+              <ol className="mt-4">
                 {dossier.timeline.slice(0, 10).map((entry) => (
-                  <li key={entry.date} className="py-3">
-                    <div className="type-kicker text-primary">
-                      {entry.date}
-                    </div>
-                    <ul className="mt-1.5 space-y-1">
+                  <li key={entry.date} className="rule-row px-1 py-3">
+                    <div className="type-kicker text-[color:var(--tc-text)]">{entry.date}</div>
+                    <ul className="mt-2 space-y-1">
                       {entry.items.slice(0, 3).map((item) => (
                         <li key={item.finding_id}>
                           <Link
@@ -167,12 +168,12 @@ export default async function EntityPage({ params }: Params) {
               </ol>
             )}
             {dossier.top_sources.length > 0 && (
-              <div className="mt-3 flex flex-wrap gap-2">
+              <div className="mt-4 flex flex-wrap gap-3">
                 {dossier.top_sources.slice(0, 8).map((source) => (
                   <Link
                     key={source.domain}
                     href={source.target_url}
-                    className="rounded-sm border border-line bg-surface px-2 py-1 font-mono text-[0.6875rem] uppercase tracking-[0.08em] text-ink transition-colors hover:bg-panel hover:text-primary"
+                    className="inline-block rounded-full bg-panel px-4 py-2 font-mono text-[0.65625rem] font-semibold uppercase tracking-[0.1em] text-ink transition-all duration-[var(--dur-fast)] ease-[var(--ease-swift)] hover:-translate-y-0.5 hover:bg-ink hover:text-white focus-visible:outline-2 focus-visible:outline-ink focus-visible:outline-offset-2"
                   >
                     {source.domain} · {source.finding_count}
                   </Link>
@@ -183,26 +184,30 @@ export default async function EntityPage({ params }: Params) {
         )}
 
         {findings.length > 0 && (
-          <section className="mt-7">
-            <h2 className="type-kicker text-ink">
-              Corpus findings
-            </h2>
-            <ol className="mt-3 divide-y divide-line">
+          <section className="scroll-rise mt-10">
+            <h2 className="type-display text-[25px] uppercase leading-[1.04] text-ink">Corpus findings</h2>
+            <ol className="mt-3">
               {findings.slice(0, 12).map((finding) => (
-                <li key={finding.id}>
+                <li key={finding.id} className="flood-row rule-row group">
                   <Link
                     href={finding.target_url || `/f/${finding.id}`}
-                    className="block py-4 transition-colors hover:bg-spine"
+                    className="grid grid-cols-[1fr_auto] gap-4 px-4 py-4"
                   >
-                    <div className="type-kicker text-primary">
-                      {finding.run_date} / {finding.relationship || finding.agent}
-                    </div>
-                    <h3 className="type-display mt-1.5 text-[1.125rem] font-[560] leading-snug text-ink">
-                      {finding.title}
-                    </h3>
-                    <p className="mt-2 line-clamp-2 font-serif text-[0.9375rem] leading-[1.58] text-ink-prose">
-                      {finding.summary}
-                    </p>
+                    <span className="block min-w-0">
+                      <span className="type-kicker block text-[color:var(--tc-text)]">
+                        {finding.run_date} / {finding.relationship || finding.agent}
+                      </span>
+                      <span className="type-display mt-2 block text-[1.1875rem] leading-[1.1] text-ink">
+                        {finding.title}
+                      </span>
+                      <span className="mt-2 line-clamp-2 block font-serif text-[0.9375rem] leading-[1.58] text-ink-prose">
+                        {finding.summary}
+                      </span>
+                    </span>
+                    <span
+                      aria-hidden
+                      className="h-3 w-3 shrink-0 self-center rounded-full bg-[var(--tc)] transition-colors group-hover:bg-[var(--tc-on)] group-focus-within:bg-[var(--tc-on)]"
+                    />
                   </Link>
                 </li>
               ))}
@@ -211,21 +216,19 @@ export default async function EntityPage({ params }: Params) {
         )}
 
         {relationships.length > 0 && (
-          <section className="mt-8 border-t border-line pt-5">
-            <h2 className="type-kicker text-ink">
-              Graph relationships
-            </h2>
-            <ol className="mt-3 divide-y divide-line">
+          <section className="scroll-rise mt-10 border-t-[3px] border-ink pt-4">
+            <h2 className="type-display text-[25px] uppercase leading-[1.04] text-ink">Graph relationships</h2>
+            <ol className="mt-3">
               {relationships.slice(0, 12).map((relationship, index) => (
-                <li key={`${relationship.source}-${relationship.relationship}-${index}`} className="py-3">
-                  <div className="type-kicker text-primary">
+                <li key={`${relationship.source}-${relationship.relationship}-${index}`} className="rule-row px-1 py-3">
+                  <div className="type-kicker text-[color:var(--tc-text)]">
                     {relationshipLabel(relationship.source, relationship.relationship)}
                   </div>
-                  <div className="mt-1.5 font-serif text-[1rem] leading-snug text-ink">
+                  <div className="mt-2 font-serif text-[1rem] leading-snug text-ink">
                     {relationship.related_entity && relationship.related_entity_slug !== 'unknown' ? (
                       <Link
                         href={`/e/${encodeURIComponent(relationship.related_entity_slug || '')}`}
-                        className="text-primary hover:underline"
+                        className="underline decoration-[var(--tc)] decoration-2 underline-offset-[3px] hover:text-[color:var(--tc-text)]"
                       >
                         {relationship.related_entity}
                       </Link>
@@ -245,7 +248,7 @@ export default async function EntityPage({ params }: Params) {
                   {relationship.target_url && (
                     <Link
                       href={relationship.target_url}
-                      className="type-kicker mt-2 inline-block text-primary hover:underline"
+                      className="type-kicker mt-2 inline-block text-[color:var(--tc-text)] hover:underline"
                     >
                       Source finding
                     </Link>
@@ -257,16 +260,14 @@ export default async function EntityPage({ params }: Params) {
         )}
 
         {sourceTrail.length > 0 && (
-          <section className="mt-8 border-t border-line pt-5">
-            <h2 className="type-kicker text-ink">
-              Source trail
-            </h2>
-            <div className="mt-3 flex flex-wrap gap-2">
+          <section className="scroll-rise mt-10 border-t-[3px] border-ink pt-4">
+            <h2 className="type-display text-[25px] uppercase leading-[1.04] text-ink">Source trail</h2>
+            <div className="mt-3 flex flex-wrap gap-3">
               {sourceTrail.slice(0, 12).map((source) => (
                 <Link
                   key={source.url}
                   href={`/source/${encodeURIComponent(source.domain)}`}
-                  className="inline-block rounded-sm border border-line bg-surface px-2.5 py-1.5 font-mono text-[0.6875rem] uppercase tracking-[0.08em] text-ink transition-colors hover:bg-panel hover:text-primary"
+                  className="inline-block rounded-full bg-panel px-4 py-2 font-mono text-[0.65625rem] font-semibold uppercase tracking-[0.1em] text-ink transition-all duration-[var(--dur-fast)] ease-[var(--ease-swift)] hover:-translate-y-0.5 hover:bg-ink hover:text-white focus-visible:outline-2 focus-visible:outline-ink focus-visible:outline-offset-2"
                 >
                   {source.title || source.domain}
                 </Link>
@@ -276,15 +277,13 @@ export default async function EntityPage({ params }: Params) {
         )}
 
         {graphSources.length > 0 && (
-          <section className="mt-8 border-t border-line pt-5">
-            <h2 className="type-kicker text-ink">
-              Graph sources
-            </h2>
-            <div className="mt-3 flex flex-wrap gap-2">
+          <section className="scroll-rise mt-10 border-t-[3px] border-ink pt-4">
+            <h2 className="type-display text-[25px] uppercase leading-[1.04] text-ink">Graph sources</h2>
+            <div className="mt-3 flex flex-wrap gap-3">
               {graphSources.map((source) => (
                 <span
                   key={source}
-                  className="inline-block rounded-sm border border-line bg-surface px-2.5 py-1.5 font-mono text-[0.6875rem] uppercase tracking-[0.08em] text-ink-soft"
+                  className="inline-block rounded-full bg-panel px-4 py-2 font-mono text-[0.65625rem] font-semibold uppercase tracking-[0.1em] text-ink-soft"
                 >
                   {source.replaceAll('_', ' ')}
                 </span>

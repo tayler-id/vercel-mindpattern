@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import type { CSSProperties } from 'react'
 
 const TABS = [
   { key: 'trending', label: 'Trending', href: '/' },
@@ -7,9 +8,13 @@ const TABS = [
   { key: 'topics', label: 'Topics', href: '/?view=topics' },
 ]
 
+/** Wire view tabs — mono caps with a 3px ink underline that slides in. */
 export function WireTabs({ active }: { active: string }) {
   return (
-    <div className="mt-[18px] flex gap-1 border-b border-line">
+    <div
+      className="mt-6 flex gap-6 border-b border-line max-sm:gap-4"
+      style={{ '--tc': 'var(--ink)' } as CSSProperties}
+    >
       {TABS.map((t) => {
         const on = t.key === active
         return (
@@ -17,9 +22,10 @@ export function WireTabs({ active }: { active: string }) {
             key={t.key}
             href={t.href}
             aria-current={on ? 'page' : undefined}
-            className={`type-kicker -mb-px border-b-2 px-3 py-2.5 transition-colors ${
-              on ? 'border-ink text-ink' : 'border-transparent text-ink-soft hover:text-ink'
-            }`}
+            data-active={on || undefined}
+            className={`sweep-link type-kicker px-1 pt-2 pb-2.5 transition-colors duration-(--dur-fast) ${
+              on ? 'font-semibold text-ink' : 'font-medium text-ink-soft hover:text-ink'
+            } focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink`}
           >
             {t.label}
           </Link>

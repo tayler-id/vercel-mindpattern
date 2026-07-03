@@ -21,12 +21,21 @@ function MetricCard({ label, value, sub, color }: { label: string; value: string
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="border border-line bg-surface px-4 py-3 flex-1 min-w-[100px]"
+      className="rounded-[3px] border border-line bg-paper px-4 py-3 flex-1 min-w-[100px]"
     >
       <p className="type-kicker text-ink-faint">{label}</p>
-      <p className={`type-display text-[22px] font-[560] ${color}`}>{value}</p>
-      {sub && <p className="type-kicker text-ink-faint mt-0.5">{sub}</p>}
+      <p className={`type-display text-[30px] leading-[1.05] mt-1 ${color}`}>{value}</p>
+      {sub && <p className="type-kicker text-ink-faint mt-1">{sub}</p>}
     </motion.div>
+  )
+}
+
+/* Flat white chart tooltip — 1px ink border, 3px radius (design-system chart rule). */
+function ChartTip({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="rounded-[3px] border border-ink bg-paper px-3 py-2 font-mono text-[11px] leading-[1.5]">
+      {children}
+    </div>
   )
 }
 
@@ -79,10 +88,10 @@ export function HealthDashboard({ data }: { data: unknown }) {
           label="Quality Score"
           value={`${latestScore}%`}
           sub={trend > 0 ? `+${trend}% from prev` : trend < 0 ? `${trend}% from prev` : 'stable'}
-          color="text-ok"
+          color="text-(--chart-2)"
         />
         <MetricCard label="Avg Score" value={`${avgScore}%`} color="text-ink" />
-        <MetricCard label="Pending" value={health.approval_summary?.pending ?? 0} color="text-chart-3" />
+        <MetricCard label="Pending" value={health.approval_summary?.pending ?? 0} color="text-(--chart-3)" />
         <MetricCard label="Decided" value={health.approval_summary?.decided ?? 0} color="text-ink" />
       </div>
 
@@ -91,9 +100,9 @@ export function HealthDashboard({ data }: { data: unknown }) {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="border border-line bg-surface p-4"
+          className="border-t border-line pt-4"
         >
-          <p className="type-kicker text-ink mb-3">
+          <p className="type-display text-[19px] leading-[1.1] text-ink mb-3">
             Pipeline quality trend
           </p>
           <ResponsiveContainer width="100%" height={160}>
@@ -120,11 +129,11 @@ export function HealthDashboard({ data }: { data: unknown }) {
                   if (!active || !payload?.length) return null
                   const d = payload[0].payload
                   return (
-                    <div className="bg-surface border border-line px-3 py-2 font-mono text-xs">
+                    <ChartTip>
                       <p className="text-ink-soft">{label}</p>
-                      <p className="text-chart-2 font-semibold">{d.score}% quality</p>
+                      <p className="text-ink font-semibold">{d.score}% quality</p>
                       <p className="text-ink-soft">{d.findings} findings / {d.sources} sources</p>
-                    </div>
+                    </ChartTip>
                   )
                 }}
               />
@@ -146,9 +155,9 @@ export function HealthDashboard({ data }: { data: unknown }) {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
-          className="border border-line bg-surface p-4"
+          className="border-t border-line pt-4"
         >
-          <p className="type-kicker text-ink mb-3">
+          <p className="type-display text-[19px] leading-[1.1] text-ink mb-3">
             Daily findings volume
           </p>
           <ResponsiveContainer width="100%" height={120}>
@@ -165,21 +174,21 @@ export function HealthDashboard({ data }: { data: unknown }) {
                 content={({ active, payload, label }) => {
                   if (!active || !payload?.length) return null
                   return (
-                    <div className="bg-surface border border-line px-3 py-2 font-mono text-xs">
+                    <ChartTip>
                       <p className="text-ink-soft">{label}</p>
-                      <p className="text-chart-4 font-semibold">{payload[0]?.value} total</p>
-                      <p className="text-chart-3">{payload[1]?.value} high-value</p>
-                    </div>
+                      <p className="text-(--spectrum-4-text) font-semibold">{payload[0]?.value} total</p>
+                      <p className="text-(--chart-3)">{payload[1]?.value} high-value</p>
+                    </ChartTip>
                   )
                 }}
               />
-              <Area type="monotone" dataKey="findings" stroke="var(--chart-4)" strokeWidth={1.5} fill="var(--chart-4)" fillOpacity={0.12} dot={false} />
-              <Area type="monotone" dataKey="highValue" stroke="var(--chart-3)" strokeWidth={1.5} fill="var(--chart-3)" fillOpacity={0.12} dot={false} />
+              <Area type="monotone" dataKey="findings" stroke="var(--chart-4)" strokeWidth={2} fill="var(--chart-4)" fillOpacity={0.15} dot={false} />
+              <Area type="monotone" dataKey="highValue" stroke="var(--chart-3)" strokeWidth={2} fill="var(--chart-3)" fillOpacity={0.15} dot={false} />
             </AreaChart>
           </ResponsiveContainer>
           <div className="type-kicker flex gap-4 mt-2 text-ink-faint">
-            <span className="flex items-center gap-1"><span className="inline-block size-2 bg-chart-4" /> Total</span>
-            <span className="flex items-center gap-1"><span className="inline-block size-2 bg-chart-3" /> High-value</span>
+            <span className="flex items-center gap-1.5"><span className="inline-block size-2 rounded-full bg-chart-4" /> Total</span>
+            <span className="flex items-center gap-1.5"><span className="inline-block size-2 rounded-full bg-chart-3" /> High-value</span>
           </div>
         </motion.div>
       )}
@@ -189,9 +198,9 @@ export function HealthDashboard({ data }: { data: unknown }) {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="border border-line bg-surface p-4"
+          className="border-t border-line pt-4"
         >
-          <p className="type-kicker text-ink mb-3">
+          <p className="type-display text-[19px] leading-[1.1] text-ink mb-3">
             Agent activity
           </p>
           <ResponsiveContainer width="100%" height={agentData.length * 26 + 8}>
@@ -210,23 +219,23 @@ export function HealthDashboard({ data }: { data: unknown }) {
                   if (!active || !payload?.length) return null
                   const d = payload[0]?.payload
                   return (
-                    <div className="bg-surface border border-line px-3 py-2 font-mono text-xs">
-                      <p className="text-chart-2">{d.success} success</p>
-                      {d.warning > 0 && <p className="text-chart-3">{d.warning} warnings</p>}
-                      {d.error > 0 && <p className="text-chart-1">{d.error} errors</p>}
-                    </div>
+                    <ChartTip>
+                      <p className="text-ink font-semibold">{d.success} success</p>
+                      {d.warning > 0 && <p className="text-(--chart-3)">{d.warning} warnings</p>}
+                      {d.error > 0 && <p className="text-(--chart-1)">{d.error} errors</p>}
+                    </ChartTip>
                   )
                 }}
               />
-              <Bar dataKey="success" stackId="a" fill="var(--chart-2)" fillOpacity={0.7} barSize={14} />
-              <Bar dataKey="warning" stackId="a" fill="var(--chart-3)" fillOpacity={0.7} barSize={14} />
-              <Bar dataKey="error" stackId="a" fill="var(--chart-1)" fillOpacity={0.7} barSize={14} />
+              <Bar dataKey="success" stackId="a" fill="var(--chart-2)" barSize={14} />
+              <Bar dataKey="warning" stackId="a" fill="var(--chart-3)" barSize={14} />
+              <Bar dataKey="error" stackId="a" fill="var(--chart-1)" barSize={14} />
             </BarChart>
           </ResponsiveContainer>
           <div className="type-kicker flex gap-4 mt-2 text-ink-faint">
-            <span className="flex items-center gap-1"><span className="inline-block size-2 bg-chart-2" /> Success</span>
-            <span className="flex items-center gap-1"><span className="inline-block size-2 bg-chart-3" /> Warning</span>
-            <span className="flex items-center gap-1"><span className="inline-block size-2 bg-chart-1" /> Error</span>
+            <span className="flex items-center gap-1.5"><span className="inline-block size-2 rounded-full bg-chart-2" /> Success</span>
+            <span className="flex items-center gap-1.5"><span className="inline-block size-2 rounded-full bg-chart-3" /> Warning</span>
+            <span className="flex items-center gap-1.5"><span className="inline-block size-2 rounded-full bg-chart-1" /> Error</span>
           </div>
         </motion.div>
       )}
@@ -236,9 +245,9 @@ export function HealthDashboard({ data }: { data: unknown }) {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.25 }}
-          className="border border-line bg-surface p-4"
+          className="border-t border-line pt-4"
         >
-          <p className="type-kicker text-ink mb-3">
+          <p className="type-display text-[19px] leading-[1.1] text-ink mb-3">
             Recent errors &amp; warnings
           </p>
           <div className="flex flex-col">
@@ -251,7 +260,7 @@ export function HealthDashboard({ data }: { data: unknown }) {
                 className="rule-row text-xs py-2"
               >
                 <div className="type-kicker flex items-center gap-2 text-ink-faint mb-0.5">
-                  <span className="font-semibold" style={{ color: e.note_type === 'error' ? 'var(--chart-1)' : e.note_type === 'warning' ? 'var(--chart-3)' : 'var(--chart-4)' }}>
+                  <span className="font-semibold" style={{ color: e.note_type === 'error' ? 'var(--chart-1)' : e.note_type === 'warning' ? 'var(--chart-3)' : 'var(--spectrum-4-text)' }}>
                     [{e.note_type}]
                   </span>
                   <span>{e.agent?.replace('-researcher', '')}</span>

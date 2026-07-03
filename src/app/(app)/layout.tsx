@@ -9,26 +9,31 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         Skip to content
       </a>
 
-      <header className="pt-safe sticky top-0 z-30 bg-paper">
-        <div className="flex h-[54px] items-center gap-4 px-5">
+      <header className="pt-safe sticky top-0 z-10 border-b border-ink bg-paper">
+        <div className="shrink-header flex items-center gap-8 px-8 py-3 max-sm:px-5">
           <Link
             href="/"
-            className="type-display text-lg font-[640] text-ink"
+            aria-label="MindPattern home"
+            className="text-[20px] uppercase leading-none text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+            style={{ fontVariationSettings: '"wdth" 122', fontWeight: 880, letterSpacing: '-0.01em' }}
           >
-            <span className="text-primary">MIND</span>PATTERN
+            MindPattern
           </Link>
           <HeaderNav />
           <Link
             href="/#subscribe"
-            className="type-kicker ml-auto hidden bg-primary px-4 py-2 text-primary-foreground transition-transform hover:brightness-105 active:scale-95 sm:inline-block"
+            className="ml-auto hidden rounded-full bg-primary px-5 py-2.5 font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-white transition-[transform,filter] duration-(--dur-fast) hover:brightness-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink active:scale-95 sm:inline-block"
           >
             Subscribe
           </Link>
         </div>
-        <div className="rule-scotch" aria-hidden />
       </header>
 
-      <main id="main-content" tabIndex={-1} className="min-h-0 flex-1 pb-[calc(58px+env(safe-area-inset-bottom))] sm:pb-0">
+      <main
+        id="main-content"
+        tabIndex={-1}
+        className="min-h-0 flex-1 pb-[calc(64px+env(safe-area-inset-bottom))] sm:pb-0"
+      >
         {children}
       </main>
 

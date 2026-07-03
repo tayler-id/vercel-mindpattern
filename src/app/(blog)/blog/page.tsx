@@ -36,7 +36,7 @@ export default async function BlogPage() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8 flex flex-col gap-8">
+    <div className="max-w-[720px] mx-auto px-5 py-8 md:px-8 flex flex-col gap-8">
       <JsonLd
         data={{
           '@context': 'https://schema.org',
@@ -54,28 +54,31 @@ export default async function BlogPage() {
         }}
       />
 
-      <div className="rule-scotch pt-3">
+      <div className="border-t-[3px] border-ink pt-3">
         <p className="type-kicker text-primary">
           Daily AI research intelligence reports
         </p>
-        <h1 className="type-display text-[32px] font-[560] text-ink mt-1 sm:text-[40px]">
+        <h1
+          className="type-display uppercase text-[clamp(40px,6vw,68px)] leading-[0.95] text-ink mt-2"
+          style={{ fontVariationSettings: '"wdth" 118', fontWeight: 850 }}
+        >
           AI Research Briefing Archive
         </h1>
       </div>
 
-      <div className="border border-ink bg-surface p-4">
-        <p className="type-kicker text-ink mb-1">
+      <div className="rounded-[20px] bg-primary p-5 text-white sm:p-6">
+        <p className="type-kicker text-white">
           Get the briefing delivered
         </p>
-        <p className="font-serif text-[13px] text-ink-soft mb-3">
+        <p className="text-[14px] text-white/90 mt-1 mb-4">
           Daily AI research intelligence. 13 agents, 8 sources, one briefing.
         </p>
-        <NewsletterSignup />
+        <NewsletterSignup variant="onAccent" />
       </div>
 
       {error || reports.length === 0 ? (
         <div className="rule-row flex flex-col items-center justify-center py-16 text-center">
-          <span className="numeral-ghost text-[44px] mb-4" aria-hidden>?</span>
+          <span className="num-outline text-[44px] text-ink-faint mb-4" aria-hidden>?</span>
           <p className="type-kicker text-ink-soft">
             [NO BRIEFINGS ON FILE]
           </p>

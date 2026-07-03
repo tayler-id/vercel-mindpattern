@@ -40,13 +40,14 @@ function SidebarNav() {
   return (
     <Sidebar>
       <SidebarHeader className="px-3 py-4">
-        <Link href="/" onClick={handleNewCase} className="flex items-center gap-2.5">
-          <div className="flex items-center justify-center size-7 border border-primary bg-accent-wash">
-            <span className="type-display text-primary text-sm font-[640]">MP</span>
-          </div>
-          <span className="type-display text-[17px] font-[600] text-ink">
+        <Link href="/" onClick={handleNewCase} className="flex items-baseline gap-1">
+          <span
+            className="type-display text-[17px] uppercase text-ink"
+            style={{ fontVariationSettings: '"wdth" 122', fontWeight: 880 }}
+          >
             MindPattern
           </span>
+          <span className="inline-block size-1.5 rounded-full bg-primary" aria-hidden />
         </Link>
       </SidebarHeader>
 

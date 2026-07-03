@@ -1,10 +1,12 @@
 import type { Metadata } from 'next'
+import type { CSSProperties } from 'react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { JsonLd } from '@/components/json-ld'
 import { SourceFavicon } from '@/components/wire/source-favicon'
 import { getSourceByDomain } from '@/lib/api'
 import { sectionLabel, sourceLabel } from '@/lib/sections'
+import { topicVars } from '@/lib/topic-color'
 import { absoluteUrl, SITE_NAME } from '@/lib/site'
 
 export const revalidate = 60
@@ -44,7 +46,7 @@ export default async function SourcePage({ params }: Params) {
   const firstFinding = findings[0]
 
   return (
-    <div className="h-full overflow-y-auto">
+    <div className="h-full overflow-y-auto" style={topicVars(domain) as CSSProperties}>
       <JsonLd
         data={{
           '@context': 'https://schema.org',
@@ -65,44 +67,48 @@ export default async function SourcePage({ params }: Params) {
         }}
       />
 
-      <main className="mx-auto max-w-[760px] px-8 pb-24 pt-9 max-sm:px-5">
+      <main className="mx-auto max-w-[720px] px-8 pb-24 pt-9 max-sm:px-5">
         <Link
           href="/"
-          className="type-kicker text-primary hover:underline"
+          className="rise-in type-kicker inline-block text-ink-soft transition-colors duration-[var(--dur-fast)] hover:text-ink focus-visible:outline-2 focus-visible:outline-ink focus-visible:outline-offset-2"
+          style={{ '--i': 0 } as CSSProperties}
         >
-          The Wire
+          ← The Wire
         </Link>
 
         <header className="mt-8">
-          <div className="type-kicker flex items-center gap-2 text-primary">
+          <div className="rise-in type-kicker flex items-center gap-2 text-[color:var(--tc-text)]" style={{ '--i': 1 } as CSSProperties}>
             <SourceFavicon url={`https://${domain}`} name={displayName} />
             Source trail
           </div>
-          <h1 className="type-display mt-3 text-[2.75rem] font-[620] text-ink max-sm:text-[2rem]">
+          <h1
+            className="rise-in type-display mt-2 text-[clamp(2.25rem,5vw,3.5rem)] uppercase leading-[0.98] tracking-[-0.02em] text-ink"
+            style={{ '--i': 2, fontVariationSettings: '"wdth" 114', fontWeight: 850 } as CSSProperties}
+          >
             {displayName}
           </h1>
-          <p className="mt-4 max-w-[36rem] font-serif text-[1.125rem] italic leading-[1.6] text-ink-soft">
+          <p className="rise-in mt-2 max-w-[52ch] font-serif text-[1.125rem] leading-[1.55] text-ink-soft" style={{ '--i': 3 } as CSSProperties}>
             Public MindPattern findings, entities, and graph evidence that cite this source.
           </p>
 
-          <div className="mt-6 grid grid-cols-2 gap-x-4 gap-y-3 border-y border-line py-3 sm:grid-cols-4">
+          <div className="rise-in mt-8 flex flex-wrap gap-x-9 gap-y-3 border-t-[3px] border-ink py-3" style={{ '--i': 4 } as CSSProperties}>
             <div>
               <div className="type-kicker text-ink-faint">Findings</div>
-              <div className="mt-0.5 font-mono text-[0.75rem] text-ink">{source?.counts?.findings ?? findings.length}</div>
+              <div className="mt-0.5 font-mono text-[0.75rem] font-semibold text-ink">{source?.counts?.findings ?? findings.length}</div>
             </div>
             {source && (
               <>
                 <div>
                   <div className="type-kicker text-ink-faint">All-time hits</div>
-                  <div className="mt-0.5 font-mono text-[0.75rem] text-ink">{source.hit_count.toLocaleString()}</div>
+                  <div className="mt-0.5 font-mono text-[0.75rem] font-semibold text-ink">{source.hit_count.toLocaleString()}</div>
                 </div>
                 <div>
                   <div className="type-kicker text-ink-faint">High value</div>
-                  <div className="mt-0.5 font-mono text-[0.75rem] text-ink">{source.high_value_count.toLocaleString()}</div>
+                  <div className="mt-0.5 font-mono text-[0.75rem] font-semibold text-ink">{source.high_value_count.toLocaleString()}</div>
                 </div>
                 <div>
                   <div className="type-kicker text-ink-faint">Last seen</div>
-                  <div className="mt-0.5 font-mono text-[0.75rem] text-ink">{source.last_seen}</div>
+                  <div className="mt-0.5 font-mono text-[0.75rem] font-semibold text-ink">{source.last_seen}</div>
                 </div>
               </>
             )}
@@ -110,16 +116,14 @@ export default async function SourcePage({ params }: Params) {
         </header>
 
         {entities.length > 0 && (
-          <section className="mt-7">
-            <h2 className="type-kicker text-ink">
-              Connected entities
-            </h2>
-            <div className="mt-3 flex flex-wrap gap-2">
+          <section className="scroll-rise mt-10">
+            <h2 className="type-display text-[25px] uppercase leading-[1.04] text-ink">Connected entities</h2>
+            <div className="mt-3 flex flex-wrap gap-3">
               {entities.slice(0, 16).map((entity) => (
                 <Link
                   key={entity.slug}
                   href={`/e/${encodeURIComponent(entity.slug)}`}
-                  className="inline-block rounded-sm border border-line bg-surface px-2.5 py-1.5 font-mono text-[0.6875rem] uppercase tracking-[0.08em] text-ink transition-colors hover:bg-panel hover:text-primary"
+                  className="inline-block rounded-full bg-panel px-4 py-2 font-mono text-[0.65625rem] font-semibold uppercase tracking-[0.1em] text-ink transition-all duration-[var(--dur-fast)] ease-[var(--ease-swift)] hover:-translate-y-0.5 hover:bg-ink hover:text-white focus-visible:outline-2 focus-visible:outline-ink focus-visible:outline-offset-2"
                 >
                   {entity.name}
                 </Link>
@@ -128,26 +132,27 @@ export default async function SourcePage({ params }: Params) {
           </section>
         )}
 
-        <section className="mt-7">
-          <h2 className="type-kicker text-ink">
-            Related findings
-          </h2>
-          <ol className="mt-3 divide-y divide-line">
+        <section className="scroll-rise mt-10">
+          <h2 className="type-display text-[25px] uppercase leading-[1.04] text-ink">Related findings</h2>
+          <ol className="mt-3">
             {findings.map((finding) => (
-              <li key={finding.id}>
-                <Link
-                  href={`/f/${finding.id}`}
-                  className="block py-4 transition-colors hover:bg-spine"
-                >
-                  <div className="type-kicker text-primary">
-                    {finding.run_date} / {sectionLabel(finding.agent)}
-                  </div>
-                  <h3 className="type-display mt-1.5 text-[1.125rem] font-[560] leading-snug text-ink">
-                    {finding.title}
-                  </h3>
-                  <p className="mt-2 line-clamp-3 font-serif text-[0.9375rem] leading-[1.58] text-ink-prose">
-                    {finding.summary}
-                  </p>
+              <li key={finding.id} className="flood-row rule-row group">
+                <Link href={`/f/${finding.id}`} className="grid grid-cols-[1fr_auto] gap-4 px-4 py-4">
+                  <span className="block min-w-0">
+                    <span className="type-kicker block text-[color:var(--tc-text)]">
+                      {finding.run_date} / {sectionLabel(finding.agent)}
+                    </span>
+                    <span className="type-display mt-2 block text-[1.1875rem] leading-[1.1] text-ink">
+                      {finding.title}
+                    </span>
+                    <span className="mt-2 line-clamp-3 block font-serif text-[0.9375rem] leading-[1.58] text-ink-prose">
+                      {finding.summary}
+                    </span>
+                  </span>
+                  <span
+                    aria-hidden
+                    className="h-3 w-3 shrink-0 self-center rounded-full bg-[var(--tc)] transition-colors group-hover:bg-[var(--tc-on)] group-focus-within:bg-[var(--tc-on)]"
+                  />
                 </Link>
               </li>
             ))}
@@ -159,7 +164,7 @@ export default async function SourcePage({ params }: Params) {
             href={firstFinding.source_url}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-8 inline-block rounded-sm border border-ink px-3.5 py-2 font-mono text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-ink transition-colors hover:bg-panel"
+            className="mt-10 inline-flex min-h-[44px] items-center rounded-full bg-ink px-6 py-3 font-mono text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-white transition-all duration-[var(--dur-fast)] ease-[var(--ease-swift)] hover:-translate-y-0.5 hover:bg-primary active:scale-95 focus-visible:outline-2 focus-visible:outline-ink focus-visible:outline-offset-2"
           >
             Open latest cited source
           </a>

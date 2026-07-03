@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>B — Signal Editorial</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root { --paper: #ffffff; --ink: #0c0c0c; --sig: #ff4d00; --gray: #6f6f6f; --hair: #e2e2e2; }
+  * { margin: 0; box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font-family: "Archivo", sans-serif; overflow-x: hidden; }
+
+  header {
+    display: flex; align-items: center; gap: 2.5rem; padding: 1.2rem 2.4rem;
+    border-bottom: 4px solid var(--ink);
+  }
+  .mark {
+    font-variation-settings: "wdth" 120, "wght" 900;
+    font-size: 22px; letter-spacing: -0.01em; text-transform: uppercase;
+  }
+  .mark b { color: var(--sig); }
+  nav { margin-left: auto; display: flex; gap: 1.8rem; font-family: "IBM Plex Mono", monospace; }
+  nav a { color: var(--ink); text-decoration: none; font-size: 11px; letter-spacing: .18em; position: relative; }
+  nav a::after {
+    content: ""; position: absolute; left: 0; bottom: -6px; height: 3px; width: 0;
+    background: var(--sig); transition: width .25s cubic-bezier(.7,0,.2,1);
+  }
+  nav a:hover::after, nav a.on::after { width: 100%; }
+
+  /* live ticker — actually moves */
+  .ticker {
+    border-bottom: 1px solid var(--ink); overflow: hidden; white-space: nowrap;
+    font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: .14em;
+    padding: .55rem 0; color: var(--ink);
+  }
+  .ticker span { display: inline-block; padding-left: 100%; animation: tick 28s linear infinite; }
+  @keyframes tick { to { transform: translateX(-100%); } }
+  .ticker b { color: var(--sig); font-weight: 600; }
+
+  main { max-width: 1080px; margin: 0 auto; padding: 3rem 2.4rem 5rem; }
+  h1 {
+    font-variation-settings: "wdth" 115, "wght" 850;
+    font-size: clamp(48px, 8vw, 92px); line-height: .92; text-transform: uppercase;
+    letter-spacing: -0.02em; margin-bottom: .6rem;
+    clip-path: inset(0 0 100% 0); animation: reveal .7s cubic-bezier(.2,.8,.2,1) .1s forwards;
+  }
+  @keyframes reveal { to { clip-path: inset(0 0 -10% 0); } }
+  .dek { font-family: "IBM Plex Mono", monospace; font-size: 12px; letter-spacing: .16em; color: var(--gray); margin-bottom: 3rem; text-transform: uppercase; }
+
+  .row {
+    display: grid; grid-template-columns: 110px 1fr; gap: 1.6rem; align-items: start;
+    padding: 1.6rem 0; border-top: 1px solid var(--ink); cursor: pointer;
+    opacity: 0; transform: translateY(16px); animation: rise .5s cubic-bezier(.2,.7,.2,1) forwards;
+  }
+  .row:nth-child(1){animation-delay:.15s} .row:nth-child(2){animation-delay:.25s}
+  .row:nth-child(3){animation-delay:.35s} .row:nth-child(4){animation-delay:.45s}
+  .row:nth-child(5){animation-delay:.55s}
+  @keyframes rise { to { opacity: 1; transform: none; } }
+
+  .num {
+    font-variation-settings: "wdth" 125, "wght" 900;
+    font-size: 64px; line-height: .8;
+    color: transparent; -webkit-text-stroke: 1.5px var(--ink);
+    transition: color .18s, -webkit-text-stroke-color .18s;
+  }
+  .row:hover .num { color: var(--sig); -webkit-text-stroke-color: var(--sig); }
+  .kick { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .18em; color: var(--sig); margin-bottom: .5rem; text-transform: uppercase; }
+  .row h3 {
+    font-variation-settings: "wdth" 110, "wght" 780;
+    font-size: 30px; line-height: 1.02; text-transform: uppercase; letter-spacing: -0.01em;
+    background-image: linear-gradient(var(--sig), var(--sig));
+    background-repeat: no-repeat; background-size: 0% 5px; background-position: 0 100%;
+    transition: background-size .3s cubic-bezier(.7,0,.2,1);
+    display: inline; padding-bottom: 3px;
+  }
+  .row:hover h3 { background-size: 100% 5px; }
+  .sum { font-size: 15px; line-height: 1.55; color: #333; margin-top: .7rem; max-width: 62ch; font-weight: 400; }
+  .meta { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .16em; color: var(--gray); margin-top: .7rem; text-transform: uppercase; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, ::before, ::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+    .row, h1 { opacity: 1; transform: none; clip-path: none; }
+    .ticker span { animation: none; padding-left: 0; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <span class="mark">Mind<b>Pattern</b></span>
+  <nav><a class="on" href="#">Wire</a><a href="#">Briefings</a><a href="#">Search</a></nav>
+</header>
+<div class="ticker"><span>
+  ● LIVE — WED JULY 2, 2026 &nbsp;/&nbsp; <b>15,513</b> FINDINGS INDEXED &nbsp;/&nbsp; <b>2,002</b> SOURCES &nbsp;/&nbsp; +85 PER DAY &nbsp;/&nbsp; READER SIGNAL + SOURCE RECURRENCE &nbsp;/&nbsp; ● LIVE — WED JULY 2, 2026 &nbsp;/&nbsp; <b>15,513</b> FINDINGS INDEXED &nbsp;/&nbsp; <b>2,002</b> SOURCES &nbsp;/&nbsp; +85 PER DAY
+</span></div>
+<main>
+  <h1>Trending Now</h1>
+  <p class="dek">The wire — ranked by reader signal and source recurrence</p>
+  <div>
+    <article class="row"><div class="num">01</div><div>
+      <div class="kick">2026-07-02 / High / AI-Safety</div>
+      <h3>Meituan open-sources 1.6T coding model built on Chinese chips</h3>
+      <p class="sum">MIT-licensed LongCat-2.0 activates only ~33B-56B params per token via a 'Zero-Compute Experts' router and supports a 1M-token context.</p>
+      <div class="meta">Venturebeat · 1 source</div>
+    </div></article>
+    <article class="row"><div class="num">02</div><div>
+      <div class="kick">2026-06-26 / Source-backed / Coding</div>
+      <h3>The bottleneck stopped being code generation. It's verification.</h3>
+      <p class="sum">The binding constraint in AI-assisted coding is no longer how fast you can generate code — it's how fast you can verify it.</p>
+      <div class="meta">HN consensus · 5 sources · 14 entities</div>
+    </div></article>
+    <article class="row"><div class="num">03</div><div>
+      <div class="kick">2026-06-30 / High / Tooling</div>
+      <h3>Cursor puts coding agent controls on your phone</h3>
+      <p class="sum">A native iOS app lets you kick off, monitor, and steer background coding agents from your pocket.</p>
+      <div class="meta">TechCrunch · 3 sources · 21 entities</div>
+    </div></article>
+    <article class="row"><div class="num">04</div><div>
+      <div class="kick">2026-07-02 / High / Research</div>
+      <h3>Researchers explain why models forget their plan mid-generation</h3>
+      <p class="sum">Transformers overload one forward stream to both predict the next token and store state for future tokens.</p>
+      <div class="meta">arXiv · 2 sources</div>
+    </div></article>
+    <article class="row"><div class="num">05</div><div>
+      <div class="kick">2026-06-27 / Source-backed / Industry</div>
+      <h3>Shopify's Thawar: "AI writes the code, AI reviews the code."</h3>
+      <p class="sum">The VP of Engineering puts the orchestration thesis on record: your job is to write the loops around it.</p>
+      <div class="meta">X/Twitter · 2 sources · 14 entities</div>
+    </div></article>
+  </div>
+</main>
+</body>
+</html>

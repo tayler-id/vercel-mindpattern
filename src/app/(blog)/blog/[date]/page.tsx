@@ -74,7 +74,7 @@ export default async function BlogPostPage({
 
   if (!report) {
     return (
-      <div className="max-w-3xl mx-auto px-4 py-8">
+      <div className="max-w-[720px] mx-auto px-5 py-8 md:px-8">
         <Link
           href="/blog"
           className="type-kicker inline-flex items-center gap-1.5 text-ink-faint hover:text-primary transition-colors mb-8"
@@ -108,7 +108,7 @@ export default async function BlogPostPage({
       : null
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8">
+    <div className="max-w-[720px] mx-auto px-5 py-8 md:px-8">
       <JsonLd
         data={{
           '@context': 'https://schema.org',
@@ -145,8 +145,13 @@ export default async function BlogPostPage({
         Back to archive
       </Link>
 
-      <header className="rule-scotch mt-6 mb-8 pt-3">
-        <h1 className="type-display text-[30px] font-[560] text-ink sm:text-[38px]">{report.title}</h1>
+      <header className="mt-6 mb-8 border-t-[3px] border-ink pt-3">
+        <h1
+          className="type-display uppercase text-[clamp(36px,5vw,56px)] leading-[0.98] text-ink"
+          style={{ fontVariationSettings: '"wdth" 114', fontWeight: 850 }}
+        >
+          {report.title}
+        </h1>
         <p className="type-kicker text-ink-faint mt-3">
           [{date}] -- {wordCount.toLocaleString()} words -- {readTime} min read
         </p>
@@ -199,16 +204,16 @@ function ReportMarkdown({ content }: { content: string }) {
       remarkPlugins={[remarkGfm]}
       components={{
         h1: ({ children }) => (
-          <h2 className="rule-scotch type-display text-[26px] font-[560] text-ink pt-3 mb-6">{children}</h2>
+          <h2 className="type-display text-[30px] leading-[1.08] text-ink border-t-[3px] border-ink pt-3 mb-6">{children}</h2>
         ),
         h2: ({ children }) => (
-          <h3 className="type-display text-[21px] font-[560] text-ink mt-10 mb-4 border-t border-ink pt-3">{children}</h3>
+          <h3 className="type-display text-[23px] leading-[1.12] text-ink mt-10 mb-4 border-t border-ink pt-3">{children}</h3>
         ),
         h3: ({ children }) => (
-          <h4 className="type-display text-[17px] font-[560] text-ink mt-8 mb-3">{children}</h4>
+          <h4 className="type-display text-[19px] leading-[1.2] text-ink mt-8 mb-3">{children}</h4>
         ),
         p: ({ children }) => (
-          <p className="font-serif text-[17px] leading-[1.72] text-ink-prose mb-5">{children}</p>
+          <p className="font-serif text-[17.5px] leading-[1.7] text-ink-prose mb-5">{children}</p>
         ),
         strong: ({ children }) => (
           <strong className="text-ink font-semibold">{children}</strong>
@@ -223,16 +228,16 @@ function ReportMarkdown({ content }: { content: string }) {
           <ol className="flex flex-col gap-2 mb-5 ml-4 list-decimal marker:text-ink-faint">{children}</ol>
         ),
         li: ({ children }) => (
-          <li className="font-serif text-[17px] leading-[1.72] text-ink-prose">{children}</li>
+          <li className="font-serif text-[17.5px] leading-[1.7] text-ink-prose">{children}</li>
         ),
         hr: () => (
           <hr className="my-8 mx-auto w-32 border-t border-ink" />
         ),
         blockquote: ({ children }) => (
-          <blockquote className="border-t border-b border-ink px-6 py-4 my-6 text-center font-serif italic text-[19px] text-ink-prose [&_p]:mb-0 [&_p]:text-[19px]">{children}</blockquote>
+          <blockquote className="type-display border-t-[3px] border-t-primary border-b border-b-ink px-1 py-4 my-6 text-[21px] leading-[1.3] text-ink [&_p]:mb-0 [&_p]:font-sans [&_p]:font-bold [&_p]:not-italic [&_p]:text-[21px] [&_p]:leading-[1.3] [&_p]:text-ink">{children}</blockquote>
         ),
         code: ({ children }) => (
-          <code className="font-mono text-primary bg-accent-wash px-1.5 py-0.5 text-[13px]">{children}</code>
+          <code className="font-mono text-primary bg-accent-wash rounded-[3px] px-1.5 py-0.5 text-[13px]">{children}</code>
         ),
         table: ({ children }) => (
           <div className="overflow-x-auto my-6">

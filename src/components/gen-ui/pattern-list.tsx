@@ -30,29 +30,29 @@ export function PatternList({ data, limit }: { data: unknown; limit?: number }) 
             initial={{ opacity: 0, x: -8 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: i * 0.04 }}
-            className="rule-row py-4 transition-colors hover:bg-spine"
+            className="rule-row px-4 py-5 transition-colors hover:bg-spine"
           >
-            <div className="flex items-start justify-between gap-3 mb-2">
-              <h4 className="type-display text-[17px] font-[560] text-ink">{p.theme}</h4>
+            <div className="flex items-start justify-between gap-5 mb-2">
+              <h4 className="type-display text-[19px] leading-[1.1] text-ink">{p.theme}</h4>
               <div className="flex items-center gap-1.5 shrink-0">
-                <span className="font-mono text-[10px] px-2 py-0.5 border border-primary/20 bg-accent-wash text-primary font-semibold uppercase tracking-wider">
+                <span className="tag-chip">
                   {p.recurrence_count}x
                 </span>
-                <span className="font-mono text-[10px] px-2 py-0.5 border border-line bg-panel text-ink-soft uppercase tracking-wider">
+                <span className="inline-flex items-center rounded-full bg-panel px-3 py-1 font-mono text-[10.5px] leading-none font-semibold uppercase tracking-[0.12em] text-ink">
                   {daySpan}d
                 </span>
               </div>
             </div>
             {p.description && (
-              <p className="font-serif text-[14px] text-ink-soft leading-relaxed mb-3">{p.description}</p>
+              <p className="text-[14px] text-ink-soft leading-[1.55] mb-3">{p.description}</p>
             )}
             <div className="flex items-center gap-2">
-              <div className="flex-1 h-1 bg-panel overflow-hidden">
+              <div className="flex-1 h-1 rounded-full bg-panel overflow-hidden">
                 <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${strength * 100}%` }}
+                  initial={{ scaleX: 0 }}
+                  animate={{ scaleX: strength }}
                   transition={{ delay: 0.2 + i * 0.04, duration: 0.5 }}
-                  className="h-full bg-chart-2"
+                  className="h-full w-full origin-left rounded-full bg-chart-2"
                 />
               </div>
               <span className="type-kicker text-ink-faint shrink-0">

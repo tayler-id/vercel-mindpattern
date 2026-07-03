@@ -38,84 +38,48 @@ export function boldStoryLeads(content: string): string {
   return out.join('\n')
 }
 
-/** Newsreader-serif briefing renderer, Broadsheet-toned. No left-border callouts. */
+/**
+ * Spectrum long-form renderer. Emits the same `data-streamdown` hooks the
+ * `.streamdown-wire-room` stylesheet in globals.css already targets, so the
+ * static react-markdown path and the streaming path share one visual system:
+ * Archivo headings on ink top rules, Source Serif body, 2px topic-color link
+ * underlines, and Archivo-bold blockquotes ruled top (topic) and bottom (ink).
+ * Set --tc on an ancestor to tint links/quotes; defaults to the accent.
+ */
 export function ReportMarkdown({ content }: { content: string }) {
   return (
-    <Markdown
-      remarkPlugins={[remarkGfm]}
-      components={{
-        h1: ({ children }) => (
-          <h2 className="rule-scotch mb-5 pt-3 font-display text-[1.75rem] font-[560] leading-[1.15] tracking-[-0.01em] text-ink">
-            {children}
-          </h2>
-        ),
-        h2: ({ children }) => (
-          <h3 className="mb-3 mt-10 border-t border-ink pt-2.5 font-display text-[1.375rem] font-[560] leading-[1.2] tracking-[-0.01em] text-ink">
-            {children}
-          </h3>
-        ),
-        h3: ({ children }) => (
-          <h4 className="mb-2 mt-7 font-display text-[1.125rem] font-[560] leading-[1.25] text-ink">
-            {children}
-          </h4>
-        ),
-        p: ({ children }) => (
-          <p className="mb-[1.125rem] font-serif text-[1.0625rem] leading-[1.72] text-ink-prose">
-            {children}
-          </p>
-        ),
-        strong: ({ children }) => <strong className="font-semibold text-ink">{children}</strong>,
-        a: ({ href, children }) => (
-          <a
-            href={href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-primary underline underline-offset-2"
-          >
-            {children}
-          </a>
-        ),
-        ul: ({ children }) => (
-          <ul className="mb-[1.125rem] ml-4 flex list-disc flex-col gap-1.5 font-serif text-[1.0625rem] leading-[1.72] text-ink-prose marker:text-ink-soft">
-            {children}
-          </ul>
-        ),
-        ol: ({ children }) => (
-          <ol className="mb-[1.125rem] ml-4 flex list-decimal flex-col gap-1.5 font-serif text-[1.0625rem] leading-[1.72] text-ink-prose marker:text-ink-soft">
-            {children}
-          </ol>
-        ),
-        blockquote: ({ children }) => (
-          <blockquote className="my-6 border-y border-ink px-6 py-4 text-center font-serif text-[1.1875rem] italic leading-[1.6] text-ink-prose">
-            {children}
-          </blockquote>
-        ),
-        hr: () => (
-          <div className="my-8 flex justify-center" role="separator">
-            <span className="w-32 border-t border-ink" />
-          </div>
-        ),
-        code: ({ children }) => (
-          <code className="rounded-sm bg-accent-wash px-1.5 py-0.5 font-mono text-[0.8125rem] text-primary">
-            {children}
-          </code>
-        ),
-        table: ({ children }) => (
-          <div className="my-5 overflow-x-auto">
-            <table className="w-full border-collapse font-sans text-[0.8125rem]">{children}</table>
-          </div>
-        ),
-        th: ({ children }) => (
-          <th className="border-b-2 border-ink px-3 py-2 text-left font-mono text-[0.625rem] font-semibold uppercase tracking-[0.14em] text-ink">
-            {children}
-          </th>
-        ),
-        td: ({ children }) => (
-          <td className="border-b border-line-soft px-3 py-2">{children}</td>
-        ),
-      }}
-    >
-      {boldStoryLeads(content)}
-    </Markdown>
+    <div className="streamdown-wire-room">
+      <Markdown
+        remarkPlugins={[remarkGfm]}
+        components={{
+          h1: ({ children }) => <h2 data-streamdown="heading-1">{children}</h2>,
+          h2: ({ children }) => <h3 data-streamdown="heading-2">{children}</h3>,
+          h3: ({ children }) => <h4 data-streamdown="heading-3">{children}</h4>,
+          a: ({ href, children }) => (
+            <a href={href} target="_blank" rel="noopener noreferrer" data-streamdown="link">
+              {children}
+            </a>
+          ),
+          ul: ({ children }) => <ul className="list-disc marker:text-ink-soft">{children}</ul>,
+          ol: ({ children }) => <ol className="list-decimal marker:text-ink-soft">{children}</ol>,
+          blockquote: ({ children }) => (
+            <blockquote data-streamdown="blockquote">{children}</blockquote>
+          ),
+          code: ({ children }) => <code data-streamdown="code-inline">{children}</code>,
+          pre: ({ children }) => (
+            <pre data-streamdown="code-block" className="my-5 overflow-x-auto p-4">
+              {children}
+            </pre>
+          ),
+          table: ({ children }) => (
+            <div className="overflow-x-auto">
+              <table data-streamdown="table">{children}</table>
+            </div>
+          ),
+        }}
+      >
+        {boldStoryLeads(content)}
+      </Markdown>
+    </div>
   )
 }

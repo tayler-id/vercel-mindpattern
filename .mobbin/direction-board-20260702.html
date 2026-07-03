@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rabbit Hole — pick a visual world</title>
+<style>
+  * { margin: 0; box-sizing: border-box; }
+  body { background: #fafafa; color: #111; font: 15px/1.5 -apple-system, "Segoe UI", sans-serif; padding: 3rem clamp(1rem, 4vw, 4rem) 9rem; }
+  h1 { font-size: 26px; margin-bottom: .4rem; }
+  .sub { color: #666; margin-bottom: 3rem; max-width: 70ch; }
+  section { margin-bottom: 4rem; }
+  h2 { font-size: 15px; text-transform: uppercase; letter-spacing: .08em; padding-bottom: .6rem; margin-bottom: .4rem; border-bottom: 1px solid #ddd; }
+  .note { color: #777; font-size: 13.5px; margin-bottom: 1.2rem; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 1.4rem; }
+
+  figure {
+    background: #fff; border: 2px solid #e4e4e4; border-radius: 8px; overflow: hidden;
+    cursor: pointer; position: relative; transition: border-color .15s, transform .15s, box-shadow .15s;
+    user-select: none;
+  }
+  figure:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.08); }
+  figure img { width: 100%; display: block; aspect-ratio: 768/523; object-fit: cover; pointer-events: none; }
+  figcaption { display: flex; align-items: baseline; gap: .6rem; padding: .65rem .9rem; font-size: 13px; }
+  .n { font-weight: 700; font-size: 15px; }
+  .app { font-weight: 600; }
+  .why { color: #777; }
+  figcaption a { margin-left: auto; color: #999; text-decoration: none; font-size: 12px; white-space: nowrap; }
+  figcaption a:hover { color: #111; }
+
+  /* selection states */
+  figure.like { border-color: #0a7d3f; }
+  figure.hate { border-color: #c92a1a; opacity: .75; }
+  figure .badge {
+    position: absolute; top: 10px; left: 10px; z-index: 2;
+    min-width: 34px; height: 34px; border-radius: 17px; padding: 0 10px;
+    display: none; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 13px; color: #fff;
+  }
+  figure.like .badge { display: flex; background: #0a7d3f; }
+  figure.hate .badge { display: flex; background: #c92a1a; }
+  figure.like .badge::after { content: "LIKE"; }
+  figure.hate .badge::after { content: "NOPE"; }
+
+  .hint {
+    position: absolute; top: 10px; right: 10px; z-index: 2;
+    background: rgba(0,0,0,.55); color: #fff; font-size: 11px; border-radius: 4px;
+    padding: 3px 8px; opacity: 0; transition: opacity .15s; pointer-events: none;
+  }
+  figure:hover .hint { opacity: 1; }
+
+  /* sticky results bar */
+  .bar {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
+    background: #111; color: #fff; padding: 1rem clamp(1rem, 4vw, 4rem);
+    display: flex; align-items: center; gap: 1.5rem; font-size: 14px;
+  }
+  .bar .likes b { color: #6ee7a0; }
+  .bar .hates b { color: #ff8a7a; }
+  .bar button {
+    margin-left: auto; background: #fff; color: #111; border: 0; border-radius: 6px;
+    padding: .6rem 1.2rem; font-weight: 700; font-size: 14px; cursor: pointer;
+  }
+  .bar button:hover { background: #e8e8e8; }
+  .bar .copied { color: #6ee7a0; font-weight: 600; display: none; }
+</style>
+</head>
+<body>
+<h1>Pick a visual world for Rabbit Hole</h1>
+<p class="sub"><b>Click a card once = LIKE (green). Click again = NOPE (red). Third click clears it.</b> Ignore the products — react to the feel: color, type, energy. When done, hit "Copy my picks" in the bottom bar and paste it back to me. The small "Mobbin ↗" link opens the source if you want a closer look.</p>
+
+<section>
+  <h2>Family 1 — Type IS the interface</h2>
+  <p class="note">Huge confident type carries everything. High energy without needing color everywhere.</p>
+  <div class="grid">
+    <figure data-n="1" data-app="Twitch"><span class="badge"></span><span class="hint">click to rate</span><img src="https://mobbin.com/api/mcp/short/p5Sue08c" alt="Twitch">
+      <figcaption><span class="n">1</span><span class="app">Twitch</span><span class="why">black + electric purple, giant statement type</span><a href="https://mobbin.com/screens/694e12bb-80e7-427e-a81c-ca94726ec882" target="_blank">Mobbin ↗</a></figcaption></figure>
+    <figure data-n="2" data-app="Spotify Fan Study"><span class="badge"></span><span class="hint">click to rate</span><img src="https://mobbin.com/api/mcp/short/UkLdEWib" alt="Spotify Fan Study">
+      <figcaption><span class="n">2</span><span class="app">Spotify Fan Study</span><span class="why">dusk gradient, coral display caps, data-as-story</span><a href="https://mobbin.com/screens/2da42756-e37e-43bb-902e-fcc3f24c6183" target="_blank">Mobbin ↗</a></figcaption></figure>
+    <figure data-n="3" data-app="SeatGeek"><span class="badge"></span><span class="hint">click to rate</span><img src="https://mobbin.com/api/mcp/short/gOWmOsIg" alt="SeatGeek">
+      <figcaption><span class="n">3</span><span class="app">SeatGeek</span><span class="why">kinetic collage type over duotone photo</span><a href="https://mobbin.com/screens/072904e5-b602-40d3-a70a-30adbd771029" target="_blank">Mobbin ↗</a></figcaption></figure>
+  </div>
+</section>
+
+<section>
+  <h2>Family 2 — Color-block editorial</h2>
+  <p class="note">Flat saturated color panels + clean black type. Feels alive without gradients or glow.</p>
+  <div class="grid">
+    <figure data-n="4" data-app="Medium"><span class="badge"></span><span class="hint">click to rate</span><img src="https://mobbin.com/api/mcp/short/uHRZCHvj" alt="Medium">
+      <figcaption><span class="n">4</span><span class="app">Medium</span><span class="why">yellow hero panel, serif, numbered trending list</span><a href="https://mobbin.com/screens/8c541139-4d19-490c-9b94-67eb14f15d9f" target="_blank">Mobbin ↗</a></figcaption></figure>
+    <figure data-n="5" data-app="Instagram blog"><span class="badge"></span><span class="hint">click to rate</span><img src="https://mobbin.com/api/mcp/short/ORkq5qt3" alt="Instagram blog">
+      <figcaption><span class="n">5</span><span class="app">Instagram blog</span><span class="why">article rows where the active one becomes a color block</span><a href="https://mobbin.com/screens/bac22b6a-e382-4f05-8c7f-73c6b8438caf" target="_blank">Mobbin ↗</a></figcaption></figure>
+    <figure data-n="6" data-app="Codecademy"><span class="badge"></span><span class="hint">click to rate</span><img src="https://mobbin.com/api/mcp/short/VwKZKaB9" alt="Codecademy">
+      <figcaption><span class="n">6</span><span class="app">Codecademy</span><span class="why">cream + yellow banding, outlined info cards</span><a href="https://mobbin.com/screens/dcee6edb-0b01-45cc-882c-62b1bd5d4feb" target="_blank">Mobbin ↗</a></figcaption></figure>
+    <figure data-n="7" data-app="SuperHi"><span class="badge"></span><span class="hint">click to rate</span><img src="https://mobbin.com/api/mcp/short/7E5qOB2y" alt="SuperHi">
+      <figcaption><span class="n">7</span><span class="app">SuperHi</span><span class="why">playful geometry, primary shapes floating</span><a href="https://mobbin.com/screens/52ceb253-fefd-4d3c-8dc2-3e48ea85803a" target="_blank">Mobbin ↗</a></figcaption></figure>
+  </div>
+</section>
+
+<section>
+  <h2>Family 3 — Ink editorial (print energy)</h2>
+  <p class="note">Typography + rules + numerals, no cards. (The direction I tried — compare fairly or kill it for good.)</p>
+  <div class="grid">
+    <figure data-n="8" data-app="The Athletic"><span class="badge"></span><span class="hint">click to rate</span><img src="https://mobbin.com/api/mcp/short/J87ZhYTW" alt="The Athletic">
+      <figcaption><span class="n">8</span><span class="app">The Athletic</span><span class="why">ghost numerals, duotone thumbnails</span><a href="https://mobbin.com/screens/f3b53a79-b29b-470e-a098-9f54e1f5e8a6" target="_blank">Mobbin ↗</a></figcaption></figure>
+    <figure data-n="9" data-app="The Athletic (section)"><span class="badge"></span><span class="hint">click to rate</span><img src="https://mobbin.com/api/mcp/short/C9PxRsYE" alt="The Athletic MLB">
+      <figcaption><span class="n">9</span><span class="app">The Athletic (section)</span><span class="why">black masthead + scoreboard ticker + duotone feature</span><a href="https://mobbin.com/screens/bc5c60f5-b0c1-4b97-a96a-34debc1c4c0f" target="_blank">Mobbin ↗</a></figcaption></figure>
+    <figure data-n="10" data-app="Quartz"><span class="badge"></span><span class="hint">click to rate</span><img src="https://mobbin.com/api/mcp/short/yO8KwMNt" alt="Quartz">
+      <figcaption><span class="n">10</span><span class="app">Quartz</span><span class="why">bold grotesque headlines, colored kickers</span><a href="https://mobbin.com/screens/009cfabd-36cc-4166-9be5-95c4112c0a21" target="_blank">Mobbin ↗</a></figcaption></figure>
+  </div>
+</section>
+
+<section>
+  <h2>Family 4 — Playful / illustrated</h2>
+  <p class="note">Illustration and pattern do the branding; UI stays simple underneath.</p>
+  <div class="grid">
+    <figure data-n="11" data-app="Buy Me a Coffee"><span class="badge"></span><span class="hint">click to rate</span><img src="https://mobbin.com/api/mcp/short/g1MGjefB" alt="Buy Me a Coffee">
+      <figcaption><span class="n">11</span><span class="app">Buy Me a Coffee</span><span class="why">riotous illustrated banner over plain feed</span><a href="https://mobbin.com/screens/40786304-e267-4e16-b468-91c0a3896d88" target="_blank">Mobbin ↗</a></figcaption></figure>
+    <figure data-n="12" data-app="Spotify Engineering"><span class="badge"></span><span class="hint">click to rate</span><img src="https://mobbin.com/api/mcp/short/hpdfSmsg" alt="Spotify Engineering">
+      <figcaption><span class="n">12</span><span class="app">Spotify Engineering</span><span class="why">every post gets bold custom art, tag chips</span><a href="https://mobbin.com/screens/77ebf2fe-a7f9-4f89-b9c2-0f2a2d179c1a" target="_blank">Mobbin ↗</a></figcaption></figure>
+  </div>
+</section>
+
+<section>
+  <h2>Family 5 — Rich dark (not a terminal)</h2>
+  <p class="note">Dark done as atmosphere, not console: imagery, color, and depth on near-black.</p>
+  <div class="grid">
+    <figure data-n="13" data-app="Savee"><span class="badge"></span><span class="hint">click to rate</span><img src="https://mobbin.com/api/mcp/short/rPDdrbul" alt="Savee">
+      <figcaption><span class="n">13</span><span class="app">Savee</span><span class="why">near-black gallery, clean type over a rich content grid</span><a href="https://mobbin.com/screens/44bdfe02-4135-4e3b-a4ed-4c2b6be17335" target="_blank">Mobbin ↗</a></figcaption></figure>
+    <figure data-n="14" data-app="Vapi"><span class="badge"></span><span class="hint">click to rate</span><img src="https://mobbin.com/api/mcp/short/R8gAOHWG" alt="Vapi">
+      <figcaption><span class="n">14</span><span class="app">Vapi</span><span class="why">black + cream type + multicolor dot-matrix data as decoration</span><a href="https://mobbin.com/screens/c960e4d4-12cc-4211-ac97-83136a5c152f" target="_blank">Mobbin ↗</a></figcaption></figure>
+    <figure data-n="15" data-app="Contra"><span class="badge"></span><span class="hint">click to rate</span><img src="https://mobbin.com/api/mcp/short/jlvT0mJF" alt="Contra">
+      <figcaption><span class="n">15</span><span class="app">Contra</span><span class="why">dark + sans/serif mix + one lush 3D bloom</span><a href="https://mobbin.com/screens/043a1c85-4841-4b8d-b4c2-ce59b119e246" target="_blank">Mobbin ↗</a></figcaption></figure>
+    <figure data-n="16" data-app="Leonardo AI"><span class="badge"></span><span class="hint">click to rate</span><img src="https://mobbin.com/api/mcp/short/DW44TZ6y" alt="Leonardo AI">
+      <figcaption><span class="n">16</span><span class="app">Leonardo AI</span><span class="why">cinematic imagery bleeding through a dark shell</span><a href="https://mobbin.com/screens/9a9d4fb3-79ff-48b4-a211-05821ea15fda" target="_blank">Mobbin ↗</a></figcaption></figure>
+  </div>
+</section>
+
+<section>
+  <h2>Family 6 — Art-led editorial</h2>
+  <p class="note">Clean white shell where bold commissioned art carries all the personality.</p>
+  <div class="grid">
+    <figure data-n="17" data-app="Quartz Field Guides"><span class="badge"></span><span class="hint">click to rate</span><img src="https://mobbin.com/api/mcp/short/uLIht8H8" alt="Quartz Field Guides">
+      <figcaption><span class="n">17</span><span class="app">Quartz Field Guides</span><span class="why">vivid illustration grid on white, simple tabs</span><a href="https://mobbin.com/screens/01331ae3-05fe-4d0f-b4a7-e43f09536dd6" target="_blank">Mobbin ↗</a></figcaption></figure>
+    <figure data-n="18" data-app="Quartz Featured"><span class="badge"></span><span class="hint">click to rate</span><img src="https://mobbin.com/api/mcp/short/gO5FYhOu" alt="Quartz Featured">
+      <figcaption><span class="n">18</span><span class="app">Quartz Featured</span><span class="why">giant art circles with type set inside them</span><a href="https://mobbin.com/screens/a078d88e-07c6-46a5-853e-fd3cf000a38f" target="_blank">Mobbin ↗</a></figcaption></figure>
+    <figure data-n="19" data-app="Ghost (News Wave)"><span class="badge"></span><span class="hint">click to rate</span><img src="https://mobbin.com/api/mcp/short/XFqv2EuL" alt="Ghost News Wave">
+      <figcaption><span class="n">19</span><span class="app">Ghost (News Wave)</span><span class="why">modern newspaper with collage art, clean grid</span><a href="https://mobbin.com/screens/756cbee5-cff7-4fe2-9b56-0c6d4e5a6baf" target="_blank">Mobbin ↗</a></figcaption></figure>
+  </div>
+</section>
+
+<section>
+  <h2>Family 7 — Weird &amp; experimental</h2>
+  <p class="note">Sites that commit to a strange idea and let it be the brand.</p>
+  <div class="grid">
+    <figure data-n="20" data-app="Open"><span class="badge"></span><span class="hint">click to rate</span><img src="https://mobbin.com/api/mcp/short/W7AgVb8g" alt="Open">
+      <figcaption><span class="n">20</span><span class="app">Open</span><span class="why">letters scattered across the viewport, giant menu-as-page</span><a href="https://mobbin.com/screens/a1869a59-77fb-4ff5-8149-527f1fb06747" target="_blank">Mobbin ↗</a></figcaption></figure>
+    <figure data-n="21" data-app="Kickstarter"><span class="badge"></span><span class="hint">click to rate</span><img src="https://mobbin.com/api/mcp/short/6XnjtK3X" alt="Kickstarter">
+      <figcaption><span class="n">21</span><span class="app">Kickstarter</span><span class="why">chalkboard dark with hand-drawn marks and one green squiggle</span><a href="https://mobbin.com/screens/f44df9c6-bf87-41e3-9cc5-907c191afca2" target="_blank">Mobbin ↗</a></figcaption></figure>
+    <figure data-n="22" data-app="Sana AI"><span class="badge"></span><span class="hint">click to rate</span><img src="https://mobbin.com/api/mcp/short/vVZJbsVv" alt="Sana AI">
+      <figcaption><span class="n">22</span><span class="app">Sana AI</span><span class="why">archival film footage as the whole aesthetic</span><a href="https://mobbin.com/screens/375953e8-4fb8-4416-89a5-cfd6269a08b6" target="_blank">Mobbin ↗</a></figcaption></figure>
+    <figure data-n="23" data-app="SeatGeek (film)"><span class="badge"></span><span class="hint">click to rate</span><img src="https://mobbin.com/api/mcp/short/3vsCO2G3" alt="SeatGeek film">
+      <figcaption><span class="n">23</span><span class="app">SeatGeek (film)</span><span class="why">retro CRT footage framed in a modern page</span><a href="https://mobbin.com/screens/bfd89eb4-fa09-4c6f-8629-b6f37728e1de" target="_blank">Mobbin ↗</a></figcaption></figure>
+  </div>
+</section>
+
+<div class="bar">
+  <span class="likes">LIKE: <b id="likes">none yet</b></span>
+  <span class="hates">NOPE: <b id="hates">none yet</b></span>
+  <span class="copied" id="copied">Copied — paste it to Claude</span>
+  <button id="copy">Copy my picks</button>
+</div>
+
+<script>
+  const state = {}; // n -> 'like' | 'hate'
+  const figs = document.querySelectorAll('figure[data-n]');
+
+  figs.forEach(f => {
+    f.addEventListener('click', e => {
+      if (e.target.closest('a')) return; // let Mobbin links work
+      const n = f.dataset.n;
+      const cur = state[n];
+      const next = cur === 'like' ? 'hate' : cur === 'hate' ? null : 'like';
+      if (next) state[n] = next; else delete state[n];
+      f.classList.toggle('like', next === 'like');
+      f.classList.toggle('hate', next === 'hate');
+      render();
+    });
+  });
+
+  function names(kind) {
+    return Object.keys(state).filter(n => state[n] === kind)
+      .sort((a, b) => a - b)
+      .map(n => `#${n} ${document.querySelector(`figure[data-n="${n}"]`).dataset.app}`);
+  }
+  function render() {
+    const l = names('like'), h = names('hate');
+    document.getElementById('likes').textContent = l.length ? l.join(', ') : 'none yet';
+    document.getElementById('hates').textContent = h.length ? h.join(', ') : 'none yet';
+  }
+  document.getElementById('copy').addEventListener('click', async () => {
+    const l = names('like'), h = names('hate');
+    const text = `Board picks — LIKE: ${l.join(', ') || 'none'} | NOPE: ${h.join(', ') || 'none'}`;
+    try { await navigator.clipboard.writeText(text); } catch {
+      const ta = document.createElement('textarea');
+      ta.value = text; document.body.appendChild(ta); ta.select();
+      document.execCommand('copy'); ta.remove();
+    }
+    const c = document.getElementById('copied');
+    c.style.display = 'inline'; setTimeout(() => c.style.display = 'none', 2500);
+  });
+</script>
+</body>
+</html>

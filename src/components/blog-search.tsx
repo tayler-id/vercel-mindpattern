@@ -2,9 +2,9 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { motion } from 'motion/react'
 import { Search, ChevronRight } from 'lucide-react'
 import { Input } from '@/components/ui/input'
+import { topicVars } from '@/lib/topic-color'
 import type { ReportListItem } from '@/lib/types'
 
 export function BlogSearch({ reports }: { reports: ReportListItem[] }) {
@@ -19,13 +19,13 @@ export function BlogSearch({ reports }: { reports: ReportListItem[] }) {
   return (
     <div className="flex flex-col gap-6">
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-ink-faint" />
+        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-ink-faint" />
         <Input
           type="text"
           placeholder="SEARCH BRIEFINGS..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="pl-10 h-10 font-mono uppercase tracking-[0.08em] text-xs placeholder:text-ink-faint"
+          className="pl-10 h-10 font-mono uppercase tracking-[0.08em] md:text-xs"
         />
       </div>
 
@@ -38,27 +38,22 @@ export function BlogSearch({ reports }: { reports: ReportListItem[] }) {
       ) : (
         <div className="flex flex-col">
           {filtered.map((report, i) => (
-            <motion.div
+            <Link
               key={report.date}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.03, duration: 0.3 }}
+              href={`/blog/${report.date}`}
+              className="flood-row rule-row rise-in group flex items-center justify-between gap-5 px-4 py-5"
+              style={{ ...topicVars(report.date), '--i': i } as React.CSSProperties}
             >
-              <Link
-                href={`/blog/${report.date}`}
-                className="rule-row group flex items-center justify-between gap-4 py-4 transition-colors hover:bg-spine"
-              >
-                <div className="min-w-0 flex-1">
-                  <p className="type-display text-[19px] font-[560] text-ink truncate group-hover:underline">
-                    {report.title}
-                  </p>
-                  <p className="type-kicker text-ink-faint mt-1">
-                    [{report.date}] -- ~{estimateReadTime(report.size)} min read
-                  </p>
-                </div>
-                <ChevronRight className="size-4 text-ink-faint group-hover:text-primary shrink-0" />
-              </Link>
-            </motion.div>
+              <div className="min-w-0 flex-1">
+                <p className="type-kicker text-(--tc-text)">
+                  {report.date} · ~{estimateReadTime(report.size)} min read
+                </p>
+                <h2 className="type-display text-[25px] leading-[1.04] text-ink mt-2 truncate">
+                  {report.title}
+                </h2>
+              </div>
+              <ChevronRight className="size-4 shrink-0 text-ink-faint transition-colors group-hover:text-current group-focus-within:text-current" />
+            </Link>
           ))}
         </div>
       )}
