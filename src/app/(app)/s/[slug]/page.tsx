@@ -30,10 +30,19 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const story = await getStory(slug)
   if (!story) return { title: 'Story not found' }
 
+  const description = (story.summary || story.dek || story.take || '').slice(0, 160)
+  const ogImage = `/og/story/${encodeURIComponent(story.slug)}`
   return {
     title: story.title,
-    description: (story.summary || story.dek || story.take || '').slice(0, 160),
+    description,
     alternates: { canonical: `/s/${story.slug}` },
+    openGraph: {
+      title: story.title,
+      description,
+      type: 'article',
+      images: [{ url: ogImage, width: 1200, height: 630 }],
+    },
+    twitter: { card: 'summary_large_image', title: story.title, description, images: [ogImage] },
   }
 }
 
