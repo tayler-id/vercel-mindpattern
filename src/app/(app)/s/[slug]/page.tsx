@@ -8,7 +8,7 @@ import { JsonLd } from '@/components/json-ld'
 import { ReportMarkdown } from '@/components/briefing/report-markdown'
 import { ShareButton } from '@/components/story/share-button'
 import { getStory } from '@/lib/api'
-import { accentVars, topicVars } from '@/lib/topic-color'
+import { isTop5, kickerLabel, topicFor, topicStyleVars } from '@/lib/topics'
 import { absoluteUrl, SITE_NAME } from '@/lib/site'
 
 export const revalidate = 60
@@ -47,11 +47,13 @@ export default async function StoryPage({ params }: Params) {
   const bodyMarkdown = story.body_markdown || story.body_excerpt || story.summary
   const issueHref = story.issue_url || `/briefings/${story.issue_date}`
   const summary = story.summary || story.dek || story.take || ''
-  const topicKey = story.section_id || story.slug
-  const sectionName = story.section_id ? story.section_id.replace(/[-_]/g, ' ') : 'Public story'
+  const topic = topicFor(story.section_id)
+  const sectionName = isTop5(story.section_id)
+    ? 'Top 5'
+    : kickerLabel(story.section_id) || 'Public story'
 
   return (
-    <div className="h-full overflow-y-auto" style={topicVars(topicKey) as CSSProperties}>
+    <div className="h-full overflow-y-auto" style={topicStyleVars(topic) as CSSProperties}>
       <div className="progress-rail" aria-hidden />
       <JsonLd
         data={{
@@ -181,7 +183,7 @@ export default async function StoryPage({ params }: Params) {
             </p>
             <ol>
               {story.related_paths.slice(0, 8).map((related, index) => {
-                const vars = accentVars() as CSSProperties
+                const vars = topicStyleVars(null) as CSSProperties
                 const labels = (related.connector_labels || ['Connected']).join(' / ')
                 const prevLabels =
                   index > 0

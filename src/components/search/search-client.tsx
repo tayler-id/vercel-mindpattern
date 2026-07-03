@@ -142,10 +142,6 @@ export function SearchClient() {
                     <span className="type-display mt-2 block text-[1.1875rem] leading-[1.1] text-ink">{s.title}</span>
                     <span className="mt-2 line-clamp-2 block font-serif text-[0.875rem] leading-[1.5] text-ink-soft">{s.summary}</span>
                   </span>
-                  <span
-                    aria-hidden
-                    className="h-3 w-3 shrink-0 self-center rounded-full bg-[var(--tc)] transition-colors group-hover:bg-[var(--tc-on)] group-focus-within:bg-[var(--tc-on)]"
-                  />
                 </Link>
               </li>
             ))}
@@ -168,10 +164,6 @@ export function SearchClient() {
                     <span className="type-kicker block text-[color:var(--tc-text)]">{f.run_date}</span>
                     <span className="type-display mt-2 block text-[1.1875rem] leading-[1.1] text-ink">{f.title}</span>
                   </span>
-                  <span
-                    aria-hidden
-                    className="h-3 w-3 shrink-0 self-center rounded-full bg-[var(--tc)] transition-colors group-hover:bg-[var(--tc-on)] group-focus-within:bg-[var(--tc-on)]"
-                  />
                 </Link>
               </li>
             ))}

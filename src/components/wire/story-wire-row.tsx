@@ -1,8 +1,8 @@
 import Link from 'next/link'
 import type { CSSProperties } from 'react'
 import type { PublicStory } from '@/lib/types'
-import { sectionLabel, sourceLabel } from '@/lib/sections'
-import { accentVars, isCanonicalTopic, topicVars } from '@/lib/topic-color'
+import { sourceLabel } from '@/lib/sections'
+import { isTop5, kickerLabel, topicFor, topicStyleVars } from '@/lib/topics'
 import { SourceFavicon } from './source-favicon'
 import { TrendIndicator } from './trend-indicator'
 
@@ -16,11 +16,10 @@ export function StoryWireRow({
   const primarySource = story.source_refs[0] ?? null
   const sourceCount = story.source_refs.length || story.source_count || 0
   const entityCount = story.entity_refs.length || story.entity_count || 0
-  const section = sectionLabel(story.section_id || '')
-  const style = {
-    ...(isCanonicalTopic(section) ? topicVars(section) : accentVars()),
-    '--i': String(rank - 1),
-  } as CSSProperties
+  const topic = topicFor(story.section_id)
+  const label = kickerLabel(story.section_id)
+  const top5 = isTop5(story.section_id)
+  const style = { ...topicStyleVars(topic), '--i': String(rank - 1) } as CSSProperties
 
   return (
     <Link
@@ -35,7 +34,7 @@ export function StoryWireRow({
       <div className="min-w-0">
         <p className="type-kicker mb-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-(--tc-text) transition-colors group-hover:text-(--tc-on) group-focus-within:text-(--tc-on)">
           <span>
-            {[section, story.issue_date, story.confidence].filter(Boolean).join(' · ')}
+            {[top5 ? 'Top 5' : label, story.issue_date, story.confidence].filter(Boolean).join(' · ')}
           </span>
           <TrendIndicator trend={story.trend} />
           {typeof story.views === 'number' && (
@@ -70,7 +69,7 @@ export function StoryWireRow({
         </p>
       </div>
 
-      {isCanonicalTopic(section) ? <span className="tag-chip self-center max-sm:hidden">{section}</span> : null}
+      {topic ? <span className="tag-chip self-center max-sm:hidden">{topic.label}</span> : null}
     </Link>
   )
 }

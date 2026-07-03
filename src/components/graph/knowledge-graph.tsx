@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import * as THREE from 'three'
-import { identityColor, isCanonicalTopic, topicColor } from '@/lib/topic-color'
+import { topicFor } from '@/lib/topics'
 
 export interface GraphNode {
   slug: string
@@ -144,10 +144,8 @@ export function KnowledgeGraph({
       px[i] = (0.08 + 0.84 * rand()) * w
       py[i] = (0.18 + 0.64 * rand()) * h
       radius[i] = 4 + nodes[i].weight * 8
-      const c = isCanonicalTopic(nodes[i].section)
-        ? topicColor(nodes[i].section)
-        : identityColor(nodes[i].slug)
-      const hex = VAR_HEX[c.base] ?? INK
+      const t = topicFor(nodes[i].section)
+      const hex = t ? parseInt(t.fill.slice(1), 16) : INK
       const mesh = new THREE.Mesh(circleGeo, matFor(hex))
       mesh.renderOrder = 2
       scene.add(mesh)

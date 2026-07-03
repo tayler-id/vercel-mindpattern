@@ -1,18 +1,16 @@
 import Link from 'next/link'
 import type { CSSProperties } from 'react'
 import type { Finding } from '@/lib/types'
-import { sectionLabel, leaderFrom, sourceLabel } from '@/lib/sections'
-import { accentVars, isCanonicalTopic, topicVars } from '@/lib/topic-color'
+import { leaderFrom, sourceLabel } from '@/lib/sections'
+import { kickerLabel, topicForAgent, topicStyleVars } from '@/lib/topics'
 import { SourceFavicon } from './source-favicon'
 import { ViaAvatar } from './via-avatar'
 
 export function WireRow({ finding, rank }: { finding: Finding; rank: number }) {
   const leader = leaderFrom(finding.source_url)
-  const section = sectionLabel(finding.agent)
-  const style = {
-    ...(isCanonicalTopic(section) ? topicVars(section) : accentVars()),
-    '--i': String(rank - 1),
-  } as CSSProperties
+  const topic = topicForAgent(finding.agent)
+  const label = kickerLabel(finding.agent)
+  const style = { ...topicStyleVars(topic), '--i': String(rank - 1) } as CSSProperties
 
   return (
     <Link
@@ -26,7 +24,7 @@ export function WireRow({ finding, rank }: { finding: Finding; rank: number }) {
 
       <div className="min-w-0">
         <p className="type-kicker mb-2 text-(--tc-text) transition-colors group-hover:text-(--tc-on) group-focus-within:text-(--tc-on)">
-          {[section, finding.run_date].filter(Boolean).join(' · ')}
+          {[label, finding.run_date].filter(Boolean).join(' · ')}
         </p>
         <h3
           className="type-display text-[25px] leading-[1.04] max-sm:text-[19px]"
@@ -48,7 +46,7 @@ export function WireRow({ finding, rank }: { finding: Finding; rank: number }) {
         </p>
       </div>
 
-      {isCanonicalTopic(section) ? <span className="tag-chip self-center max-sm:hidden">{section}</span> : null}
+      {topic ? <span className="tag-chip self-center max-sm:hidden">{topic.label}</span> : null}
     </Link>
   )
 }

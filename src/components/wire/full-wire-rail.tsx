@@ -17,10 +17,12 @@ export function FullWireRail({ stories, total }: { stories: PublicStory[]; total
           className="type-display text-[15px] uppercase tracking-[0.02em]"
           style={{ fontVariationSettings: '"wdth" 115', fontWeight: 850 }}
         >
-          The full wire
+          The wire
         </h2>
         <span className="font-mono text-[10.5px] uppercase tracking-[0.12em] text-ink-soft">
-          {total.toLocaleString('en-US')} stories
+          {stories.length < total
+            ? `latest ${stories.length.toLocaleString('en-US')} of ${total.toLocaleString('en-US')}`
+            : `${total.toLocaleString('en-US')} stories`}
         </span>
       </div>
       <ol>

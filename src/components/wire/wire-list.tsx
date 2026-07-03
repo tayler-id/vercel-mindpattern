@@ -3,7 +3,7 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import type { PublicStory } from '@/lib/types'
 import { StoryWireRow } from './story-wire-row'
-import { sectionLabel } from '@/lib/sections'
+import { TOPICS } from '@/lib/topics'
 
 type WireStory = PublicStory & { trend?: string; views?: number }
 
@@ -80,18 +80,14 @@ export function WireList({
     return [...stories, ...extra.filter((s) => !seen.has(s.slug))]
   }, [stories, extra])
 
-  const sections = useMemo(() => {
-    const seen = new Map<string, string>()
-    for (const story of baseStories) {
-      const id = story.section_id || ''
-      if (id && !seen.has(id)) seen.set(id, sectionLabel(id) || id)
-    }
-    return [...seen.entries()].sort((a, b) => a[1].localeCompare(b[1]))
-  }, [baseStories])
+  const sections = useMemo(
+    () => TOPICS.map((t) => [t.id, t.label] as [string, string]),
+    [],
+  )
 
   // Server-side archive search whenever a query or the take filter is active.
   useEffect(() => {
-    if (!query.trim() && !takeOnly) {
+    if (!query.trim() && !takeOnly && !section) {
       setArchiveHits(null)
       return
     }
@@ -152,7 +148,7 @@ export function WireList({
     }
   }
 
-  const searchMode = query.trim().length > 0 || takeOnly
+  const searchMode = query.trim().length > 0 || takeOnly || Boolean(section)
   const localPreview = useMemo(() => {
     const terms = query.toLowerCase().split(/\s+/).filter(Boolean)
     return baseStories.filter((story) => {
@@ -197,7 +193,8 @@ export function WireList({
             setSection(e.target.value)
           }}
           aria-label="Filter by section"
-          className="h-10 w-full min-w-0 truncate rounded-full border-[1.5px] border-ink bg-paper px-4 font-mono text-[16px] font-semibold uppercase tracking-[0.1em] text-ink outline-none transition-colors duration-(--dur-fast) hover:bg-spine focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink sm:w-auto sm:max-w-[230px] sm:text-[10.5px]"
+          style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%230e0e0f' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 16px center" }}
+          className="h-10 w-full min-w-0 appearance-none truncate rounded-full border-[1.5px] border-ink bg-paper py-0 pl-4 pr-10 font-mono text-[16px] font-semibold uppercase tracking-[0.1em] text-ink outline-none transition-colors duration-(--dur-fast) hover:bg-spine focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink sm:w-auto sm:max-w-[230px] sm:text-[10.5px]"
         >
           <option value="">All sections</option>
           {sections.map(([id, label]) => (
