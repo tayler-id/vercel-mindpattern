@@ -182,7 +182,7 @@ export function KnowledgeGraph({
           let dy = py[i] - py[j]
           let d2 = dx * dx + dy * dy
           if (d2 < 1) d2 = 1
-          const f = 2600 / d2
+          const f = 1300 / d2
           const d = Math.sqrt(d2)
           dx /= d
           dy /= d
@@ -205,8 +205,8 @@ export function KnowledgeGraph({
       }
       // gentle pull toward the band + idle breathing
       for (let i = 0; i < n; i++) {
-        vx[i] += (w * 0.5 - px[i]) * 0.0008
-        vy[i] += (h * 0.52 - py[i]) * 0.002
+        vx[i] += (w * 0.5 - px[i]) * 0.0012
+        vy[i] += (h * 0.52 - py[i]) * 0.0045
         if (idle > 0) {
           vx[i] += (rand() - 0.5) * idle
           vy[i] += (rand() - 0.5) * idle
@@ -220,9 +220,14 @@ export function KnowledgeGraph({
         vy[i] *= 0.86
         px[i] += vx[i]
         py[i] += vy[i]
-        const pad = radius[i] + 10
-        px[i] = Math.min(w - pad, Math.max(pad, px[i]))
-        py[i] = Math.min(h - pad, Math.max(pad, py[i]))
+        // soft walls: steer back instead of pinning dots to the frame
+        const pad = radius[i] + 14
+        if (px[i] < pad) vx[i] += (pad - px[i]) * 0.1
+        if (px[i] > w - pad) vx[i] -= (px[i] - (w - pad)) * 0.1
+        if (py[i] < pad) vy[i] += (pad - py[i]) * 0.12
+        if (py[i] > h - pad) vy[i] -= (py[i] - (h - pad)) * 0.12
+        px[i] = Math.min(w + 20, Math.max(-20, px[i]))
+        py[i] = Math.min(h + 12, Math.max(-12, py[i]))
       }
     }
 
@@ -332,13 +337,23 @@ export function KnowledgeGraph({
     host.addEventListener('pointerleave', onLeave)
 
     const applySize = () => {
-      w = host.clientWidth || 1
-      h = host.clientHeight || 1
+      const nw = host.clientWidth || 1
+      const nh = host.clientHeight || 1
+      if (nw !== w || nh !== h) {
+        for (let i = 0; i < n; i++) {
+          px[i] = (px[i] / w) * nw
+          py[i] = (py[i] / h) * nh
+          vx[i] = 0
+          vy[i] = 0
+        }
+        w = nw
+        h = nh
+      }
       camera.right = w
       camera.top = h
       camera.updateProjectionMatrix()
       renderer.setSize(w, h)
-      for (let k = 0; k < 30; k++) step(0)
+      for (let k = 0; k < 12; k++) step(0)
       draw()
     }
     applySize()
