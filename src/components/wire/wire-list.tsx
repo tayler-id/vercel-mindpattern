@@ -174,22 +174,22 @@ export function WireList({
 
   return (
     <div>
-      <div className="flex flex-wrap items-end gap-3 px-4 pt-4 max-sm:px-3">
-        <div className="flex w-full flex-col gap-2 sm:w-64">
-          <label htmlFor={searchId} className="type-kicker text-ink-faint">
-            Search the wire
-          </label>
-          <input
-            id={searchId}
-            value={query}
-            onChange={(e) => {
-              setArchiveOffset(0)
-              setQuery(e.target.value)
-            }}
-            placeholder="Search all stories…"
-            className="w-full rounded-[3px] border-[1.5px] border-ink bg-paper px-4 py-2.5 text-[16px] text-ink outline-none transition-colors duration-(--dur-fast) placeholder:font-mono placeholder:text-ink-faint focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-ink sm:text-[14px]"
-          />
-        </div>
+      {/* Toolbar (system §1.7): one 40px height, one pill silhouette.
+          Desktop: one flex row. Narrow: a deliberate 2-row grid — search
+          spans, then select+toggle share a row. Select is clamped so its
+          longest option can never blow out the container. */}
+      <div className="mt-4 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 max-sm:px-3 sm:flex sm:flex-wrap">
+        <input
+          id={searchId}
+          aria-label="Search the wire"
+          value={query}
+          onChange={(e) => {
+            setArchiveOffset(0)
+            setQuery(e.target.value)
+          }}
+          placeholder="Search all stories…"
+          className="col-span-2 h-10 min-w-0 rounded-full border-[1.5px] border-ink bg-paper px-4 text-[16px] text-ink outline-none transition-colors duration-(--dur-fast) placeholder:font-mono placeholder:text-[12px] placeholder:tracking-[0.06em] placeholder:text-ink-faint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink sm:col-span-1 sm:flex-1 sm:max-w-[360px] sm:text-[14px]"
+        />
         <select
           value={section}
           onChange={(e) => {
@@ -197,7 +197,7 @@ export function WireList({
             setSection(e.target.value)
           }}
           aria-label="Filter by section"
-          className="rounded-full border-[1.5px] border-ink bg-paper px-4 py-2 font-mono text-[16px] font-semibold uppercase tracking-[0.1em] text-ink outline-none transition-colors duration-(--dur-fast) hover:bg-spine focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink sm:text-[10.5px]"
+          className="h-10 w-full min-w-0 truncate rounded-full border-[1.5px] border-ink bg-paper px-4 font-mono text-[16px] font-semibold uppercase tracking-[0.1em] text-ink outline-none transition-colors duration-(--dur-fast) hover:bg-spine focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink sm:w-auto sm:max-w-[230px] sm:text-[10.5px]"
         >
           <option value="">All sections</option>
           {sections.map(([id, label]) => (
@@ -210,23 +210,23 @@ export function WireList({
             setTakeOnly(!takeOnly)
           }}
           aria-pressed={takeOnly}
-          className={`rounded-full px-4 py-2 font-mono text-[10.5px] uppercase tracking-[0.1em] transition-colors duration-(--dur-fast) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink active:scale-95 ${
+          className={`h-10 shrink-0 rounded-full border-[1.5px] border-ink px-4 font-mono text-[10.5px] uppercase tracking-[0.1em] transition-colors duration-(--dur-fast) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink active:scale-95 ${
             takeOnly
               ? 'bg-ink font-semibold text-white'
-              : 'bg-panel font-medium text-ink hover:bg-spine'
+              : 'bg-paper font-medium text-ink hover:bg-spine'
           }`}
         >
           With take
         </button>
         {searchMode && (
-          <span className="py-2 font-mono text-[0.6875rem] text-ink-faint">
+          <span className="col-span-2 font-mono text-[0.6875rem] text-ink-faint sm:col-span-1 sm:leading-10">
             {searching
               ? `${filtered.length} on screen · searching all stories…`
               : `${archiveTotal.toLocaleString()}${takeOnly ? ' with takes' : ' matches'} in ${corpusTotal.toLocaleString()} stories${archiveTotal > filtered.length ? ` · top ${filtered.length}` : ''}`}
           </span>
         )}
       </div>
-      <ol>
+      <ol className="mt-5">
         {filtered.map((story, i) => (
           <li key={story.slug}>
             <StoryWireRow story={story} rank={i + 1} />

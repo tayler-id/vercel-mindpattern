@@ -37,16 +37,10 @@ export function FullWireRail({ stories, total }: { stories: PublicStory[]; total
                   {String(i + 1).padStart(2, '0')}
                 </span>
                 <span
-                  className="text-[13.5px] leading-[1.25] text-ink"
+                  className="text-[13.5px] leading-[1.25] text-ink decoration-ink decoration-2 underline-offset-[3px] group-hover:underline group-active:underline"
                   style={{ fontVariationSettings: '"wdth" 105', fontWeight: 640 }}
                 >
-                  <span
-                    className="mr-1.5 inline-block size-2 rounded-full bg-(--tc) align-baseline"
-                    aria-hidden
-                  />
-                  <span className="decoration-(--tc) decoration-2 underline-offset-[3px] group-hover:underline">
-                    {story.title}
-                  </span>
+                  {story.title}
                 </span>
               </Link>
             </li>

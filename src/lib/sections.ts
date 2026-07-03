@@ -13,9 +13,15 @@ const SECTION: Record<string, string> = {
   'sources-researcher': 'SOURCES',
   'projects-researcher': 'PROJECTS',
   'rss-researcher': 'DISPATCH',
+  // story section_ids seen in the live data
+  'saas-disruption': 'MARKETS',
+  'vibe-coding': 'TOOLS',
+  'skills-of-the-day': 'SKILLS',
+  'infrastructure-architecture': 'TOOLS',
 }
 
 export function sectionLabel(agent: string): string {
+  if (!agent) return ''
   return (
     SECTION[agent] ??
     agent.replace(/-(researcher|finder|pulse)$/, '').replace(/[-_]/g, ' ').toUpperCase()

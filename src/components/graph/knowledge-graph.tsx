@@ -1,9 +1,9 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import * as THREE from 'three'
-import { topicColor } from '@/lib/topic-color'
+import { identityColor, isCanonicalTopic, topicColor } from '@/lib/topic-color'
 
 export interface GraphNode {
   slug: string
@@ -15,19 +15,19 @@ export interface GraphNode {
   href: string
 }
 
-/** Resolve topicColor()'s CSS var slots to the real Spectrum hexes for WebGL. */
+/** topicColor() slots resolved to real hexes for WebGL; neutral = ink. */
 const VAR_HEX: Record<string, number> = {
   'var(--spectrum-1)': 0xe63b12,
   'var(--spectrum-2)': 0x0797a6,
   'var(--spectrum-3)': 0xcf2d7b,
   'var(--spectrum-4)': 0xf5c518,
+  'var(--ink)': 0x0e0e0f,
 }
 
 const INK = 0x0e0e0f
 const MAX_EDGES = 90
 const EDGES_PER_NODE = 3
 
-/** Deterministic PRNG so the scatter is stable across renders. */
 function mulberry32(seed: number) {
   let a = seed
   return () => {
@@ -39,20 +39,7 @@ function mulberry32(seed: number) {
   }
 }
 
-interface SimNode {
-  fx: number
-  fy: number
-  bx: number
-  by: number
-  radius: number
-  phase: number
-  speed: number
-  ampX: number
-  ampY: number
-  mesh: THREE.Mesh
-}
-
-/** Build edges from real relations: shared entity first, then shared section. */
+/** Real relations: shared entity first, then shared section. */
 function buildEdges(nodes: GraphNode[]): Array<[number, number]> {
   const edges: Array<[number, number]> = []
   const seen = new Set<string>()
@@ -67,7 +54,6 @@ function buildEdges(nodes: GraphNode[]): Array<[number, number]> {
     degree[b]++
     edges.push([a, b])
   }
-
   const byEntity = new Map<string, number[]>()
   nodes.forEach((n, i) => {
     for (const e of n.entities) {
@@ -79,7 +65,6 @@ function buildEdges(nodes: GraphNode[]): Array<[number, number]> {
   for (const members of byEntity.values()) {
     for (let k = 0; k + 1 < members.length; k++) add(members[k], members[k + 1])
   }
-
   const bySection = new Map<string, number[]>()
   nodes.forEach((n, i) => {
     const list = bySection.get(n.section) ?? []
@@ -89,15 +74,16 @@ function buildEdges(nodes: GraphNode[]): Array<[number, number]> {
   for (const members of bySection.values()) {
     for (let k = 0; k + 1 < members.length; k++) add(members[k], members[k + 1])
   }
-
   return edges
 }
 
 /**
- * Full-bleed three.js band: the wire's top stories as topic-colored nodes,
- * thin ink edges between stories sharing a section or entity. Gentle drift,
- * subtle pointer parallax, staggered scale-in. Static frame under reduced
- * motion. Clicking a node navigates to its story.
+ * A real force-directed graph of the wire (three.js): nodes repel, edges
+ * spring, and you can grab a node, drag it around, and fling it — the rest
+ * of the graph reacts. Hover grows a node, lights up its edges, and shows
+ * the story title; a clean click (not a drag) opens the story. The layout
+ * pre-settles synchronously so the first paint is complete even where rAF
+ * never runs. Reduced motion: no idle drift, but hover/drag still respond.
  */
 export function KnowledgeGraph({
   nodes,
@@ -107,6 +93,7 @@ export function KnowledgeGraph({
   findingCount: number
 }) {
   const hostRef = useRef<HTMLDivElement>(null)
+  const [tip, setTip] = useState<{ x: number; y: number; title: string } | null>(null)
   const router = useRouter()
 
   useEffect(() => {
@@ -118,32 +105,29 @@ export function KnowledgeGraph({
     try {
       renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
     } catch {
-      return // no WebGL — the band stays a quiet white strip with its label
+      return
     }
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2))
     renderer.setClearColor(0xffffff, 0)
     renderer.domElement.style.display = 'block'
+    renderer.domElement.style.touchAction = 'pan-y' // vertical page scroll stays native
     host.appendChild(renderer.domElement)
 
     let w = host.clientWidth || 1
     let h = host.clientHeight || 1
     const scene = new THREE.Scene()
-    const group = new THREE.Group()
-    scene.add(group)
     const camera = new THREE.OrthographicCamera(0, w, h, 0, -100, 100)
 
-    // ── layout: cluster nodes loosely by section across the band ──
     const rand = mulberry32(nodes.length * 2654435761 + 7)
-    const sections = [...new Set(nodes.map((n) => n.section))]
-    const centers = new Map<string, { fx: number; fy: number }>()
-    sections.forEach((s, k) => {
-      centers.set(s, {
-        fx: (k + 0.55) / sections.length,
-        fy: k % 2 === 0 ? 0.38 : 0.62,
-      })
-    })
+    const n = nodes.length
+    const px = new Float32Array(n)
+    const py = new Float32Array(n)
+    const vx = new Float32Array(n)
+    const vy = new Float32Array(n)
+    const radius = new Float32Array(n)
 
-    const circleGeo = new THREE.CircleGeometry(1, 28)
+    const circleGeo = new THREE.CircleGeometry(1, 32)
+    const ringGeo = new THREE.RingGeometry(1, 1.18, 32)
     const materials = new Map<number, THREE.MeshBasicMaterial>()
     const matFor = (hex: number) => {
       let m = materials.get(hex)
@@ -154,27 +138,27 @@ export function KnowledgeGraph({
       return m
     }
 
-    const sim: SimNode[] = nodes.map((n) => {
-      const c = centers.get(n.section) ?? { fx: 0.5, fy: 0.5 }
-      const fx = Math.min(0.96, Math.max(0.04, c.fx + (rand() - 0.5) * 0.42))
-      const fy = Math.min(0.86, Math.max(0.14, c.fy + (rand() - 0.5) * 0.52))
-      const hex = VAR_HEX[topicColor(n.section).base] ?? 0xe63b12
+    const meshes: THREE.Mesh[] = []
+    const rings: THREE.Mesh[] = []
+    for (let i = 0; i < n; i++) {
+      px[i] = (0.08 + 0.84 * rand()) * w
+      py[i] = (0.18 + 0.64 * rand()) * h
+      radius[i] = 4 + nodes[i].weight * 8
+      const c = isCanonicalTopic(nodes[i].section)
+        ? topicColor(nodes[i].section)
+        : identityColor(nodes[i].slug)
+      const hex = VAR_HEX[c.base] ?? INK
       const mesh = new THREE.Mesh(circleGeo, matFor(hex))
-      mesh.renderOrder = 1
-      group.add(mesh)
-      return {
-        fx,
-        fy,
-        bx: fx * w,
-        by: (1 - fy) * h,
-        radius: 3 + n.weight * 7,
-        phase: rand() * Math.PI * 2,
-        speed: 0.25 + rand() * 0.3,
-        ampX: 5 + rand() * 8,
-        ampY: 4 + rand() * 6,
-        mesh,
-      }
-    })
+      mesh.renderOrder = 2
+      scene.add(mesh)
+      meshes.push(mesh)
+      // hover ring, hidden until needed
+      const ring = new THREE.Mesh(ringGeo, matFor(INK))
+      ring.visible = false
+      ring.renderOrder = 3
+      scene.add(ring)
+      rings.push(ring)
+    }
 
     const edges = buildEdges(nodes)
     const linePos = new Float32Array(edges.length * 6)
@@ -182,77 +166,180 @@ export function KnowledgeGraph({
     const lineAttr = new THREE.BufferAttribute(linePos, 3)
     lineAttr.setUsage(THREE.DynamicDrawUsage)
     lineGeo.setAttribute('position', lineAttr)
-    const lineMat = new THREE.LineBasicMaterial({ color: INK, transparent: true, opacity: 0.15 })
-    const lines = new THREE.LineSegments(lineGeo, lineMat)
-    lines.renderOrder = 0
-    group.add(lines)
+    const dimMat = new THREE.LineBasicMaterial({ color: INK, transparent: true, opacity: 0.12 })
+    scene.add(new THREE.LineSegments(lineGeo, dimMat))
+    // highlighted edges of the hovered/dragged node
+    const hiPos = new Float32Array(edges.length * 6)
+    const hiGeo = new THREE.BufferGeometry()
+    const hiAttr = new THREE.BufferAttribute(hiPos, 3)
+    hiAttr.setUsage(THREE.DynamicDrawUsage)
+    hiGeo.setAttribute('position', hiAttr)
+    hiGeo.setDrawRange(0, 0)
+    const hiMat = new THREE.LineBasicMaterial({ color: INK, transparent: true, opacity: 0.55 })
+    const hiLines = new THREE.LineSegments(hiGeo, hiMat)
+    hiLines.renderOrder = 1
+    scene.add(hiLines)
 
-    // ── pointer parallax + click-to-open ──
-    let targetPx = 0
-    let targetPy = 0
-    const nodeAt = (clientX: number, clientY: number): number => {
+    let hovered = -1
+    let dragged = -1
+
+    const REST = 92
+    const step = (idle: number) => {
+      // pairwise repulsion
+      for (let i = 0; i < n; i++) {
+        for (let j = i + 1; j < n; j++) {
+          let dx = px[i] - px[j]
+          let dy = py[i] - py[j]
+          let d2 = dx * dx + dy * dy
+          if (d2 < 1) d2 = 1
+          const f = 2600 / d2
+          const d = Math.sqrt(d2)
+          dx /= d
+          dy /= d
+          vx[i] += dx * f
+          vy[i] += dy * f
+          vx[j] -= dx * f
+          vy[j] -= dy * f
+        }
+      }
+      // springs along real relations
+      for (const [a, b] of edges) {
+        const dx = px[b] - px[a]
+        const dy = py[b] - py[a]
+        const d = Math.max(Math.hypot(dx, dy), 1)
+        const f = (d - REST) * 0.02
+        vx[a] += (dx / d) * f
+        vy[a] += (dy / d) * f
+        vx[b] -= (dx / d) * f
+        vy[b] -= (dy / d) * f
+      }
+      // gentle pull toward the band + idle breathing
+      for (let i = 0; i < n; i++) {
+        vx[i] += (w * 0.5 - px[i]) * 0.0008
+        vy[i] += (h * 0.52 - py[i]) * 0.002
+        if (idle > 0) {
+          vx[i] += (rand() - 0.5) * idle
+          vy[i] += (rand() - 0.5) * idle
+        }
+        if (i === dragged) {
+          vx[i] = 0
+          vy[i] = 0
+          continue
+        }
+        vx[i] *= 0.86
+        vy[i] *= 0.86
+        px[i] += vx[i]
+        py[i] += vy[i]
+        const pad = radius[i] + 10
+        px[i] = Math.min(w - pad, Math.max(pad, px[i]))
+        py[i] = Math.min(h - pad, Math.max(pad, py[i]))
+      }
+    }
+
+    const draw = () => {
+      for (let i = 0; i < n; i++) {
+        const grow = i === hovered || i === dragged ? 1.35 : 1
+        meshes[i].scale.setScalar(radius[i] * grow)
+        meshes[i].position.set(px[i], h - py[i], 0)
+        rings[i].visible = i === hovered || i === dragged
+        if (rings[i].visible) {
+          rings[i].scale.setScalar(radius[i] * grow + 3.5)
+          rings[i].position.set(px[i], h - py[i], 1)
+        }
+      }
+      let hi = 0
+      for (let e = 0; e < edges.length; e++) {
+        const [a, b] = edges[e]
+        linePos[e * 6] = px[a]
+        linePos[e * 6 + 1] = h - py[a]
+        linePos[e * 6 + 2] = -1
+        linePos[e * 6 + 3] = px[b]
+        linePos[e * 6 + 4] = h - py[b]
+        linePos[e * 6 + 5] = -1
+        if (a === hovered || b === hovered || a === dragged || b === dragged) {
+          hiPos.set(linePos.subarray(e * 6, e * 6 + 6), hi * 6)
+          hi++
+        }
+      }
+      hiGeo.setDrawRange(0, hi * 2)
+      lineAttr.needsUpdate = true
+      hiAttr.needsUpdate = true
+      renderer.render(scene, camera)
+    }
+
+    // pre-settle synchronously: the first paint is a finished layout
+    for (let k = 0; k < 160; k++) step(0)
+
+    const nodeAt = (cx: number, cy: number) => {
       const rect = host.getBoundingClientRect()
-      const wx = clientX - rect.left - group.position.x
-      const wy = h - (clientY - rect.top) - group.position.y
-      for (let i = 0; i < sim.length; i++) {
-        const s = sim[i]
-        const dx = s.mesh.position.x - wx
-        const dy = s.mesh.position.y - wy
-        if (dx * dx + dy * dy <= (s.radius + 5) * (s.radius + 5)) return i
+      const x = cx - rect.left
+      const y = cy - rect.top
+      for (let i = 0; i < n; i++) {
+        const dx = px[i] - x
+        const dy = py[i] - y
+        const hit = radius[i] + 6
+        if (dx * dx + dy * dy <= hit * hit) return i
       }
       return -1
     }
-    const onMove = (ev: PointerEvent) => {
+
+    let downAt: { x: number; y: number; t: number } | null = null
+    let lastMove = { x: 0, y: 0 }
+    const toLocal = (ev: PointerEvent) => {
       const rect = host.getBoundingClientRect()
-      targetPx = ((ev.clientX - rect.left) / Math.max(rect.width, 1) - 0.5) * -14
-      targetPy = ((ev.clientY - rect.top) / Math.max(rect.height, 1) - 0.5) * 8
-      host.style.cursor = nodeAt(ev.clientX, ev.clientY) >= 0 ? 'pointer' : 'default'
+      return { x: ev.clientX - rect.left, y: ev.clientY - rect.top }
+    }
+    const onDown = (ev: PointerEvent) => {
+      const i = nodeAt(ev.clientX, ev.clientY)
+      if (i < 0) return
+      dragged = i
+      downAt = { x: ev.clientX, y: ev.clientY, t: performance.now() }
+      lastMove = toLocal(ev)
+      host.setPointerCapture?.(ev.pointerId)
+      host.style.cursor = 'grabbing'
+      ev.preventDefault()
+    }
+    const onMove = (ev: PointerEvent) => {
+      const p = toLocal(ev)
+      if (dragged >= 0) {
+        vx[dragged] = (p.x - lastMove.x) * 0.6
+        vy[dragged] = (p.y - lastMove.y) * 0.6
+        px[dragged] = p.x
+        py[dragged] = p.y
+        lastMove = p
+        setTip({ x: p.x, y: p.y, title: nodes[dragged].title })
+        return
+      }
+      const i = nodeAt(ev.clientX, ev.clientY)
+      if (i !== hovered) {
+        hovered = i
+        host.style.cursor = i >= 0 ? 'grab' : 'default'
+        setTip(i >= 0 ? { x: p.x, y: p.y, title: nodes[i].title } : null)
+      } else if (i >= 0) {
+        setTip({ x: p.x, y: p.y, title: nodes[i].title })
+      }
+    }
+    const onUp = (ev: PointerEvent) => {
+      if (dragged >= 0 && downAt) {
+        const dist = Math.hypot(ev.clientX - downAt.x, ev.clientY - downAt.y)
+        const dt = performance.now() - downAt.t
+        const i = dragged
+        dragged = -1
+        host.style.cursor = 'grab'
+        if (dist < 5 && dt < 350) router.push(nodes[i].href) // a click, not a drag
+      }
+      downAt = null
     }
     const onLeave = () => {
-      targetPx = 0
-      targetPy = 0
+      hovered = -1
+      dragged = -1
+      setTip(null)
       host.style.cursor = 'default'
     }
-    const onClick = (ev: MouseEvent) => {
-      const i = nodeAt(ev.clientX, ev.clientY)
-      if (i >= 0) router.push(nodes[i].href)
-    }
+    host.addEventListener('pointerdown', onDown)
     host.addEventListener('pointermove', onMove)
+    host.addEventListener('pointerup', onUp)
     host.addEventListener('pointerleave', onLeave)
-    host.addEventListener('click', onClick)
-
-    const update = (t: number) => {
-      for (let i = 0; i < sim.length; i++) {
-        const s = sim[i]
-        // Nodes render settled at full size from the very first frame — the
-        // graph must be complete even if rAF never runs (occluded windows,
-        // screenshots, prerender). Drift is pure enhancement.
-        s.mesh.scale.setScalar(s.radius)
-        const drift = reduced ? 0 : 1
-        s.mesh.position.set(
-          s.bx + Math.sin(t * s.speed + s.phase) * s.ampX * drift,
-          s.by + Math.cos(t * s.speed * 0.85 + s.phase * 1.7) * s.ampY * drift,
-          0,
-        )
-      }
-      for (let e = 0; e < edges.length; e++) {
-        const [a, b] = edges[e]
-        const pa = sim[a].mesh.position
-        const pb = sim[b].mesh.position
-        linePos[e * 6] = pa.x
-        linePos[e * 6 + 1] = pa.y
-        linePos[e * 6 + 2] = -1
-        linePos[e * 6 + 3] = pb.x
-        linePos[e * 6 + 4] = pb.y
-        linePos[e * 6 + 5] = -1
-      }
-      lineAttr.needsUpdate = true
-      if (!reduced) {
-        group.position.x += (targetPx - group.position.x) * 0.06
-        group.position.y += (targetPy - group.position.y) * 0.06
-      }
-      renderer.render(scene, camera)
-    }
 
     const applySize = () => {
       w = host.clientWidth || 1
@@ -261,37 +348,34 @@ export function KnowledgeGraph({
       camera.top = h
       camera.updateProjectionMatrix()
       renderer.setSize(w, h)
-      for (const s of sim) {
-        s.bx = s.fx * w
-        s.by = (1 - s.fy) * h
-      }
-      update(0) // re-render after any resize, even with the loop paused
+      for (let k = 0; k < 30; k++) step(0)
+      draw()
     }
     applySize()
-
     const ro = new ResizeObserver(applySize)
     ro.observe(host)
 
     let raf = 0
-    const clock = new THREE.Clock()
-    update(0) // settled first frame, synchronously — never a blank band
-    if (!reduced) {
-      const loop = () => {
-        update(clock.getElapsedTime())
-        raf = requestAnimationFrame(loop)
-      }
+    const loop = () => {
+      step(reduced ? 0 : 0.16)
+      draw()
       raf = requestAnimationFrame(loop)
     }
+    raf = requestAnimationFrame(loop)
 
     return () => {
       cancelAnimationFrame(raf)
       ro.disconnect()
+      host.removeEventListener('pointerdown', onDown)
       host.removeEventListener('pointermove', onMove)
+      host.removeEventListener('pointerup', onUp)
       host.removeEventListener('pointerleave', onLeave)
-      host.removeEventListener('click', onClick)
       circleGeo.dispose()
+      ringGeo.dispose()
       lineGeo.dispose()
-      lineMat.dispose()
+      hiGeo.dispose()
+      dimMat.dispose()
+      hiMat.dispose()
       for (const m of materials.values()) m.dispose()
       renderer.dispose()
       if (renderer.domElement.parentNode === host) host.removeChild(renderer.domElement)
@@ -301,7 +385,7 @@ export function KnowledgeGraph({
   return (
     <div
       role="img"
-      aria-label={`Knowledge graph of the wire's top stories — ${findingCount.toLocaleString('en-US')} findings connected`}
+      aria-label={`Knowledge graph of the wire's top stories — ${findingCount.toLocaleString('en-US')} findings connected. Drag nodes to explore; click one to open its story.`}
       className="relative h-[200px] overflow-hidden border-b border-ink bg-paper sm:h-[260px]"
     >
       <div className="pointer-events-none absolute left-8 top-5 z-10 max-sm:left-5 max-sm:top-4">
@@ -312,9 +396,17 @@ export function KnowledgeGraph({
           The graph
         </p>
         <p className="mt-1 font-mono text-[10.5px] uppercase tracking-[0.12em] text-ink-soft">
-          {findingCount.toLocaleString('en-US')} findings connected
+          {findingCount.toLocaleString('en-US')} findings connected · drag the dots
         </p>
       </div>
+      {tip && (
+        <div
+          className="pointer-events-none absolute z-10 max-w-[280px] -translate-x-1/2 rounded-full bg-ink px-3.5 py-1.5 font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-white"
+          style={{ left: tip.x, top: Math.max(tip.y - 34, 6) }}
+        >
+          <span className="block truncate">{tip.title}</span>
+        </div>
+      )}
       <div ref={hostRef} className="absolute inset-0" aria-hidden="true" />
     </div>
   )

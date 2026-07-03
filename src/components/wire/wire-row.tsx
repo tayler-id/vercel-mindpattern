@@ -2,14 +2,17 @@ import Link from 'next/link'
 import type { CSSProperties } from 'react'
 import type { Finding } from '@/lib/types'
 import { sectionLabel, leaderFrom, sourceLabel } from '@/lib/sections'
-import { topicVars } from '@/lib/topic-color'
+import { accentVars, isCanonicalTopic, topicVars } from '@/lib/topic-color'
 import { SourceFavicon } from './source-favicon'
 import { ViaAvatar } from './via-avatar'
 
 export function WireRow({ finding, rank }: { finding: Finding; rank: number }) {
   const leader = leaderFrom(finding.source_url)
   const section = sectionLabel(finding.agent)
-  const style = { ...topicVars(section), '--i': String(rank - 1) } as CSSProperties
+  const style = {
+    ...(isCanonicalTopic(section) ? topicVars(section) : accentVars()),
+    '--i': String(rank - 1),
+  } as CSSProperties
 
   return (
     <Link
@@ -45,7 +48,7 @@ export function WireRow({ finding, rank }: { finding: Finding; rank: number }) {
         </p>
       </div>
 
-      {section ? <span className="tag-chip self-center max-sm:hidden">{section}</span> : null}
+      {isCanonicalTopic(section) ? <span className="tag-chip self-center max-sm:hidden">{section}</span> : null}
     </Link>
   )
 }

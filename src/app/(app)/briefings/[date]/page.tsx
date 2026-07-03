@@ -7,6 +7,17 @@ import type { AudioBriefing, IssueStoryUnit, PublicIssue, Report, ReportListItem
 import { JsonLd } from '@/components/json-ld'
 import { AudioBriefingPlayer } from '@/components/briefing/audio-briefing-player'
 import { ReportMarkdown } from '@/components/briefing/report-markdown'
+
+/** Briefing bodies open with an h1 repeating the title — the page header
+    already carries it, so showing both doubles the title and stacks rules. */
+function stripLeadingTitle(content: string, title: string): string {
+  const m = content.match(/^\s*#\s+(.+?)\s*\n+/)
+  if (!m) return content
+  const h1 = m[1].trim().toLowerCase()
+  const t = title.trim().toLowerCase()
+  if (h1 === t || h1.includes(t) || t.includes(h1)) return content.slice(m[0].length)
+  return content
+}
 import { absoluteUrl, shortReportDescription, SITE_NAME } from '@/lib/site'
 import { shortDate } from '@/lib/format'
 import { topicVars } from '@/lib/topic-color'
@@ -106,7 +117,7 @@ export default async function BriefingPage({ params }: Params) {
             {shortDate(date)}
           </p>
           <h1
-            className="rise-in type-display mt-2 text-[clamp(2.25rem,5vw,3.5rem)] uppercase leading-[0.98] tracking-[-0.02em] text-ink"
+            className="rise-in type-display mt-2 max-w-[24ch] text-[clamp(1.875rem,4vw,2.75rem)] leading-[1.05] tracking-[-0.015em] text-ink"
             style={{ '--i': 2, fontVariationSettings: '"wdth" 114', fontWeight: 850 } as CSSProperties}
           >
             {report.title}
@@ -118,7 +129,7 @@ export default async function BriefingPage({ params }: Params) {
 
         {audio && <AudioBriefingPlayer audio={audio} />}
 
-        <ReportMarkdown content={report.content} />
+        <ReportMarkdown content={stripLeadingTitle(report.content, report.title)} />
 
         {issue && <BriefingGraphTrail issue={issue} />}
 

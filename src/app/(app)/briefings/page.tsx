@@ -5,7 +5,7 @@ import { AudioBriefingPlayer } from '@/components/briefing/audio-briefing-player
 import { getAudioBriefings, getReports } from '@/lib/api'
 import type { AudioBriefing, ReportListItem } from '@/lib/types'
 import { shortDate } from '@/lib/format'
-import { topicVars } from '@/lib/topic-color'
+import { accentVars } from '@/lib/topic-color'
 
 export const revalidate = 60
 export const dynamic = 'force-dynamic'
@@ -56,7 +56,7 @@ export default async function BriefingsPage() {
             <li
               key={r.date}
               className="rule-row"
-              style={{ ...topicVars(r.date), '--i': index } as CSSProperties}
+              style={{ ...accentVars(), '--i': index } as CSSProperties}
             >
               <div className={index < 8 ? 'rise-in' : 'scroll-rise'}>
                 <Link href={`/briefings/${r.date}`} className="flood-row block px-4 py-5">

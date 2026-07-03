@@ -101,7 +101,35 @@ Reduced motion: global CSS kill + JS checks. Never animate layout properties
 `10` sticky header · `20` rail/floating UI · `40` bottom tab bar ·
 `50` overlays/sheets · `60` progress rail · `100` skip link. Nothing else.
 
-### 1.7 Iconography
+### 1.7 Composition — how things sit together (violations here are defects)
+
+1. **One toolbar, one row, one height.** Controls that operate on the same
+   content (search + filters + toggles) form a single horizontal toolbar:
+   every control is exactly **40px tall**, same silhouette, aligned on one
+   baseline, `gap-3` (12px) between controls, wrapping only when forced.
+   Never stack full-width controls vertically on desktop.
+2. **One silhouette per toolbar.** All controls in a toolbar share the same
+   shape: pill (999px), 1.5px ink border, white bg. A text input may flex
+   (`flex-1 max-w-[360px]`); selects and toggles hug their content. Active
+   toggle = solid ink, white text. No control is ever wider than its job.
+3. **No floating labels above single controls.** The placeholder or the
+   control's own mono label carries it. A toolbar gets at most ONE kicker
+   label for the whole row, 8px above, only when genuinely ambiguous.
+4. **Width discipline.** A control's width = its content + `px-4`. Only text
+   inputs flex. Anything spanning a full column that isn't content is wrong.
+5. **Vertical rhythm.** Tabs → toolbar: 16px. Toolbar → first row: 20px.
+   Nothing else between them — the row's own ink rule is the divider.
+
+### 1.8 Color budget — restraint is the rule
+
+Per screen: **one pulsing LIVE dot maximum**, and colored dots in **one
+place only** (the full-wire rail index, where the dot IS the topic datum).
+Everywhere else, topic color arrives through exactly three channels: the
+kicker text, the tag pill, and the hover flood. No decorative dots on
+related rows, meta lines, tickers, list markers, or headings. If color
+isn't carrying a datum, it doesn't appear.
+
+### 1.9 Iconography
 
 Lucide only, 1.5px stroke, sized 16/20/24. Icons always paired with a mono
 label in nav; never color-only meaning.

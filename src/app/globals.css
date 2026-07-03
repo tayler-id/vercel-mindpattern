@@ -241,17 +241,40 @@
     transform-origin: left;
     transition: transform 0.28s cubic-bezier(0.7, 0, 0.2, 1);
   }
+  /* Hover on pointer devices; PRESS on touch (`:active`) — the flood is the
+     tap feedback while the navigation starts. Keyboard gets focus-within. */
   .flood-row:hover::before,
+  .flood-row:active::before,
   .flood-row:focus-within::before {
     transform: scaleX(1);
   }
+  .flood-row:active::before {
+    transition-duration: var(--dur-fast);
+  }
   .flood-row:hover,
+  .flood-row:active,
   .flood-row:focus-within {
     color: var(--tc-on, #ffffff);
   }
-  .flood-row:hover :where(.type-kicker, .num-outline, p, h2, h3, time, span),
-  .flood-row:focus-within :where(.type-kicker, .num-outline, p, h2, h3, time, span) {
-    color: inherit;
+  /* On flood, every descendant inherits the on-color — EXCEPT the tag pill,
+     which inverts to white-with-topic-text and styles itself. !important is
+     deliberate: utility classes (text-ink, text-ink-soft…) must never leave
+     ink-on-ink invisible text on a flooded row. */
+  .flood-row:is(:hover, :active, :focus-within) :where(*):not(.tag-chip) {
+    color: inherit !important;
+    text-decoration-color: currentColor;
+  }
+  .flood-row:is(:hover, :active, :focus-within) .tag-chip {
+    background: var(--tc-on, #ffffff);
+    color: var(--tc, var(--accent)) !important;
+  }
+  .flood-row:is(:hover, :active, :focus-within) .num-outline {
+    -webkit-text-stroke-color: var(--tc-on, #ffffff);
+  }
+  /* At rest the numeral carries the row's identity color — the page has a
+     colored pulse without pills or dots. Yellow uses its AA text twin. */
+  .flood-row .num-outline {
+    -webkit-text-stroke-color: var(--tc-text, var(--ink));
   }
 
   /* Topic tag pill — solid, circular ends (no bordered squares). */

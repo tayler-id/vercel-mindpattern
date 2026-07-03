@@ -1,12 +1,10 @@
 'use client'
 
 import Link from 'next/link'
-import type { CSSProperties } from 'react'
 import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import type { Finding, RelatedResponse } from '@/lib/types'
 import { sectionLabel, leaderFrom, sourceDomain, sourceLabel } from '@/lib/sections'
-import { topicVars } from '@/lib/topic-color'
 import { SourceFavicon } from '@/components/wire/source-favicon'
 import { ViaAvatar } from '@/components/wire/via-avatar'
 import { VideoEmbed } from '@/components/video/video-embed'
@@ -121,11 +119,11 @@ export function RabbitHole({
       {/* Breadcrumb trail */}
       <div
         ref={crumbsRef}
-        className="sticky top-0 z-10 flex items-center gap-1.5 overflow-x-auto border-b border-ink bg-paper/85 px-4 py-2.5 backdrop-blur-md [-ms-overflow-style:none] [scrollbar-width:none]"
+        className="sticky top-0 z-10 flex items-center gap-1.5 overflow-x-auto border-b border-line bg-paper/85 px-4 py-2.5 backdrop-blur-md [-ms-overflow-style:none] [scrollbar-width:none]"
       >
         <Link
           href="/"
-          className="shrink-0 font-mono text-[0.6875rem] font-semibold uppercase tracking-[0.08em] text-primary"
+          className="shrink-0 font-mono text-[0.65625rem] font-semibold uppercase tracking-[0.06em] text-primary"
         >
           The Wire
         </Link>
@@ -140,7 +138,7 @@ export function RabbitHole({
                 onClick={() => jumpTo(i)}
                 disabled={last}
                 aria-current={last ? 'page' : undefined}
-                className={`max-w-[150px] truncate font-mono text-[0.6875rem] ${
+                className={`max-w-[150px] truncate font-mono text-[0.65625rem] ${
                   last ? 'font-semibold text-ink' : 'text-ink-faint hover:text-ink'
                 }`}
               >
@@ -193,22 +191,15 @@ function ReadingColumn({
   const domain = sourceDomain(finding.source_url)
 
   return (
-    <article
-      className="mx-auto max-w-[44rem] bg-paper px-12 pb-28 pt-9 max-sm:px-5 sm:border-x sm:border-line"
-      style={topicVars(sectionLabel(finding.agent)) as CSSProperties}
-    >
-      <div className="type-kicker flex items-center gap-2 text-[color:var(--tc-text)]">
-        <span aria-hidden className="h-2 w-2 rounded-full bg-[var(--tc)]" />
+    <article className="mx-auto max-w-[44rem] px-12 pb-28 pt-9 max-sm:px-5">
+      <div className="font-mono text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-primary">
         {sectionLabel(finding.agent)}
       </div>
-      <h1
-        className="type-display mt-2 text-[clamp(1.75rem,4vw,2.25rem)] leading-[1.02] tracking-[-0.02em] text-ink"
-        style={{ fontVariationSettings: '"wdth" 112', fontWeight: 800 }}
-      >
+      <h1 className="mt-3 font-serif text-[2rem] font-semibold leading-[1.15] tracking-[-0.02em] text-ink max-sm:text-[1.6rem]">
         {finding.title}
       </h1>
 
-      <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1.5 border-b border-line pb-4 font-mono text-[0.6875rem] text-ink-faint">
+      <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1.5 border-b border-line pb-4 font-mono text-[0.65625rem] text-ink-faint">
         <span className="inline-flex items-center gap-1.5">
           <SourceFavicon url={finding.source_url} name={finding.source_name} />
           {sourceLabel(finding.source_name, finding.source_url)}
@@ -226,12 +217,12 @@ function ReadingColumn({
 
       {finding.source_url && (
         <div className="mt-7 border-t border-line pt-4">
-          <p className="type-kicker text-ink-faint">Source</p>
+          <p className="font-mono text-[0.625rem] uppercase tracking-[0.12em] text-ink-faint">Source</p>
           <div className="mt-2 flex flex-wrap gap-2">
             {domain && (
               <Link
                 href={`/source/${encodeURIComponent(domain)}`}
-                className="inline-block rounded-full bg-panel px-4 py-2 font-mono text-[0.65625rem] font-semibold uppercase tracking-[0.1em] text-ink transition-all duration-[var(--dur-fast)] ease-[var(--ease-swift)] hover:-translate-y-0.5 hover:bg-ink hover:text-white focus-visible:outline-2 focus-visible:outline-ink focus-visible:outline-offset-2"
+                className="inline-block rounded-lg border border-line px-2.5 py-1.5 font-mono text-[0.71875rem] text-primary hover:border-primary hover:bg-accent-wash"
               >
                 Source page
               </Link>
@@ -240,7 +231,7 @@ function ReadingColumn({
               href={finding.source_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block rounded-full bg-panel px-4 py-2 font-mono text-[0.65625rem] font-semibold uppercase tracking-[0.1em] text-ink transition-all duration-[var(--dur-fast)] ease-[var(--ease-swift)] hover:-translate-y-0.5 hover:bg-ink hover:text-white focus-visible:outline-2 focus-visible:outline-ink focus-visible:outline-offset-2"
+              className="inline-block rounded-lg border border-line px-2.5 py-1.5 font-mono text-[0.71875rem] text-primary hover:border-primary hover:bg-accent-wash"
             >
               {sourceLabel(finding.source_name, finding.source_url)}
             </a>
@@ -248,49 +239,42 @@ function ReadingColumn({
         </div>
       )}
 
-      <div className="mt-9 border-t-[3px] border-ink pt-4">
-        <p className="type-kicker text-ink">
+      <div className="mt-9 border-t border-line pt-5">
+        <p className="font-mono text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-ink">
           <span className="text-primary">↳</span> Follow the thread
         </p>
-        <div className="mt-3 flex flex-col">
+        <div className="mt-3 flex flex-col gap-2">
           {relatedLoading && (
-            <p className="py-2 font-mono text-[0.71875rem] text-ink-faint">Loading related signals...</p>
+            <p className="font-mono text-[0.71875rem] text-ink-faint">Loading related signals...</p>
           )}
           {!relatedLoading && relatedError && (
-            <p className="py-2 font-mono text-[0.71875rem] text-ink-faint">
+            <p className="font-mono text-[0.71875rem] text-ink-faint">
               Related signals are unavailable right now.
             </p>
           )}
           {!relatedLoading && !relatedError && related.length === 0 && (
-            <p className="py-2 font-mono text-[0.71875rem] text-ink-faint">No related signals yet.</p>
+            <p className="font-mono text-[0.71875rem] text-ink-faint">No related signals yet.</p>
           )}
           {related.map((r) => (
             <button
               key={r.id}
               onClick={() => onOpen(r)}
-              className="flood-row rule-row group grid grid-cols-[1fr_auto] gap-4 px-4 py-4 text-left active:scale-[0.99]"
-              style={topicVars(sectionLabel(r.agent)) as CSSProperties}
+              className="group rounded-xl border border-line bg-surface px-4 py-3.5 text-left transition-colors hover:border-primary hover:bg-accent-wash active:scale-[0.99]"
             >
-              <span className="block min-w-0">
-                <span className="type-kicker block text-[color:var(--tc-text)]">
-                  {r.connector_labels?.length ? r.connector_labels.join(' / ') : sectionLabel(r.agent)}
-                </span>
-                <span className="type-display mt-2 block text-[1.1875rem] leading-[1.1] text-ink">
-                  {r.title}
-                </span>
-                <span className="type-kicker mt-2 block text-ink-faint">
-                  {sourceLabel(r.source_name, r.source_url)}
-                </span>
-                {r.reason && (
-                  <span className="mt-2 block font-serif text-[0.875rem] leading-[1.5] text-ink-soft">
-                    {r.reason}
-                  </span>
-                )}
-              </span>
-              <span
-                aria-hidden
-                className="h-3 w-3 shrink-0 self-center rounded-full bg-[var(--tc)] transition-colors group-hover:bg-[var(--tc-on)] group-focus-within:bg-[var(--tc-on)]"
-              />
+              <div className="font-mono text-[0.625rem] font-semibold uppercase tracking-[0.06em] text-primary">
+                {r.connector_labels?.length ? r.connector_labels.join(' / ') : sectionLabel(r.agent)}
+              </div>
+              <div className="mt-1.5 text-[0.9375rem] font-semibold leading-snug tracking-[-0.01em] text-ink">
+                {r.title}
+              </div>
+              <div className="mt-1.5 font-mono text-[0.625rem] text-ink-faint">
+                {sourceLabel(r.source_name, r.source_url)}
+              </div>
+              {r.reason && (
+                <div className="mt-2 font-mono text-[0.625rem] leading-relaxed text-ink-faint">
+                  {r.reason}
+                </div>
+              )}
             </button>
           ))}
         </div>

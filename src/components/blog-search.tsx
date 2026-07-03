@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { Search, ChevronRight } from 'lucide-react'
 import { Input } from '@/components/ui/input'
-import { topicVars } from '@/lib/topic-color'
+import { accentVars } from '@/lib/topic-color'
 import type { ReportListItem } from '@/lib/types'
 
 export function BlogSearch({ reports }: { reports: ReportListItem[] }) {
@@ -42,7 +42,7 @@ export function BlogSearch({ reports }: { reports: ReportListItem[] }) {
               key={report.date}
               href={`/blog/${report.date}`}
               className="flood-row rule-row rise-in group flex items-center justify-between gap-5 px-4 py-5"
-              style={{ ...topicVars(report.date), '--i': i } as React.CSSProperties}
+              style={{ ...accentVars(), '--i': i } as React.CSSProperties}
             >
               <div className="min-w-0 flex-1">
                 <p className="type-kicker text-(--tc-text)">

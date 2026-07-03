@@ -8,7 +8,7 @@ import { JsonLd } from '@/components/json-ld'
 import { ReportMarkdown } from '@/components/briefing/report-markdown'
 import { ShareButton } from '@/components/story/share-button'
 import { getStory } from '@/lib/api'
-import { topicVars } from '@/lib/topic-color'
+import { accentVars, topicVars } from '@/lib/topic-color'
 import { absoluteUrl, SITE_NAME } from '@/lib/site'
 
 export const revalidate = 60
@@ -85,35 +85,8 @@ export default async function StoryPage({ params }: Params) {
       <main className="pb-24">
         <ScrollDepthTracker kind="story" id={story.slug} />
 
-        {/* ── Hero: big topic circle + giant Archivo headline ── */}
+        {/* ── Hero ── */}
         <header className="relative mx-auto max-w-[1080px] px-8 pb-2 pt-10 max-sm:px-5 max-sm:pt-6">
-          <div
-            aria-hidden
-            className="circle-badge animate-in fade-in zoom-in-50 fill-mode-both pointer-events-none z-0 mx-auto mb-6 h-[200px] w-[200px] lg:absolute lg:-right-10 lg:top-8 lg:mx-0 lg:mb-0 lg:h-[300px] lg:w-[300px]"
-            style={{
-              background: 'var(--tc)',
-              color: 'var(--tc-on)',
-              animationDuration: 'var(--dur-slow)',
-              animationDelay: '200ms',
-              animationTimingFunction: 'var(--ease-settle)',
-            }}
-          >
-            <div className="circle-content">
-              <span className="font-mono text-[9px] font-semibold uppercase tracking-[0.2em] lg:text-[10px]">
-                {story.issue_date}
-              </span>
-              <span
-                className="circle-title text-[clamp(1.125rem,2vw,1.625rem)] uppercase"
-                style={{ fontVariationSettings: '"wdth" 112', fontWeight: 820 }}
-              >
-                {sectionName}
-              </span>
-              <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.12em] opacity-85 lg:text-[10.5px]">
-                {story.source_refs.length} sources · {story.entity_refs.length} entities
-              </span>
-            </div>
-          </div>
-
           <Link
             href="/"
             className="rise-in type-kicker inline-block text-ink-soft transition-colors duration-[var(--dur-fast)] hover:text-ink focus-visible:outline-2 focus-visible:outline-ink focus-visible:outline-offset-2"
@@ -126,7 +99,7 @@ export default async function StoryPage({ params }: Params) {
             {sectionName} · {story.issue_date} · {story.confidence}
           </p>
           <h1
-            className="rise-in type-display relative z-[1] mt-2 max-w-[15ch] text-[clamp(2.25rem,5vw,3.5rem)] uppercase leading-[0.98] tracking-[-0.02em] text-ink"
+            className="rise-in type-display relative z-[1] mt-2 max-w-[24ch] text-[clamp(2.25rem,5vw,3.5rem)] leading-[1.05] tracking-[-0.02em] text-ink"
             style={{ '--i': 2, fontVariationSettings: '"wdth" 114', fontWeight: 850 } as CSSProperties}
           >
             {story.title}
@@ -199,7 +172,7 @@ export default async function StoryPage({ params }: Params) {
 
         {/* ── Related: flood rows ── */}
         {story.related_paths.length > 0 && (
-          <section className="scroll-rise mx-auto mt-10 max-w-[1080px] px-8 max-sm:px-5">
+          <section className="scroll-rise mx-auto mt-10 max-w-[720px] px-8 max-sm:px-5">
             <h2 className="type-display border-t-[3px] border-ink pt-2.5 text-[25px] uppercase leading-[1.04] text-ink">
               Related stories
             </h2>
@@ -208,22 +181,23 @@ export default async function StoryPage({ params }: Params) {
             </p>
             <ol>
               {story.related_paths.slice(0, 8).map((related, index) => {
-                const vars = topicVars(String(related.slug || related.id)) as CSSProperties
+                const vars = accentVars() as CSSProperties
+                const labels = (related.connector_labels || ['Connected']).join(' / ')
+                const prevLabels =
+                  index > 0
+                    ? (story.related_paths[index - 1].connector_labels || ['Connected']).join(' / ')
+                    : null
                 const inner = (
                   <>
                     <div className="min-w-0">
-                      <p className="type-kicker text-[color:var(--tc-text)]">
-                        {(related.connector_labels || ['Connected']).join(' / ')}
-                      </p>
+                      {labels !== prevLabels && (
+                        <p className="type-kicker text-ink-faint">{labels}</p>
+                      )}
                       <h3 className="type-display mt-2 text-[1.1875rem] leading-[1.1] text-ink">{related.title}</h3>
                       <p className="mt-2 font-serif text-[0.9375rem] leading-[1.5] text-ink-soft">
                         {related.reason || related.summary}
                       </p>
                     </div>
-                    <span
-                      aria-hidden
-                      className="h-3 w-3 shrink-0 self-center rounded-full bg-[var(--tc)] transition-colors group-hover:bg-[var(--tc-on)] group-focus-within:bg-[var(--tc-on)]"
-                    />
                   </>
                 )
                 return (

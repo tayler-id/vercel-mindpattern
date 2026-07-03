@@ -2,7 +2,7 @@ import Link from 'next/link'
 import type { CSSProperties } from 'react'
 import type { PublicStory } from '@/lib/types'
 import { sectionLabel, sourceLabel } from '@/lib/sections'
-import { topicVars } from '@/lib/topic-color'
+import { accentVars, isCanonicalTopic, topicVars } from '@/lib/topic-color'
 import { SourceFavicon } from './source-favicon'
 import { TrendIndicator } from './trend-indicator'
 
@@ -17,7 +17,10 @@ export function StoryWireRow({
   const sourceCount = story.source_refs.length || story.source_count || 0
   const entityCount = story.entity_refs.length || story.entity_count || 0
   const section = sectionLabel(story.section_id || '')
-  const style = { ...topicVars(section), '--i': String(rank - 1) } as CSSProperties
+  const style = {
+    ...(isCanonicalTopic(section) ? topicVars(section) : accentVars()),
+    '--i': String(rank - 1),
+  } as CSSProperties
 
   return (
     <Link
@@ -67,7 +70,7 @@ export function StoryWireRow({
         </p>
       </div>
 
-      {section ? <span className="tag-chip self-center max-sm:hidden">{section}</span> : null}
+      {isCanonicalTopic(section) ? <span className="tag-chip self-center max-sm:hidden">{section}</span> : null}
     </Link>
   )
 }
