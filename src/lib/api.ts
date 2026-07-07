@@ -15,6 +15,7 @@ import type {
 } from './types'
 
 const BACKEND_URL = process.env.BACKEND_API_URL || 'https://mindpattern.fly.dev'
+const BACKEND_TIMEOUT_MS = Number(process.env.BACKEND_FETCH_TIMEOUT_MS ?? 5000)
 
 export async function backendFetch<T>(
   path: string,
@@ -28,6 +29,7 @@ export async function backendFetch<T>(
   }
   const res = await fetch(url.toString(), {
     next: { revalidate: 60 },
+    signal: AbortSignal.timeout(BACKEND_TIMEOUT_MS),
   })
   if (!res.ok) throw new Error(`Backend ${res.status}: ${path}`)
   return res.json()
