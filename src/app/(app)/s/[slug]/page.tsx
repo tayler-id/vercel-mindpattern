@@ -11,7 +11,7 @@ import { getStory } from '@/lib/api'
 import { isTop5, kickerLabel, topicFor, topicStyleVars } from '@/lib/topics'
 import { absoluteUrl, SITE_NAME } from '@/lib/site'
 
-export const revalidate = 60
+export const revalidate = 3600
 
 type Params = { params: Promise<{ slug: string }> }
 

@@ -7,7 +7,7 @@ import { JsonLd } from '@/components/json-ld'
 import { getEntity } from '@/lib/api'
 import { absoluteUrl, SITE_NAME } from '@/lib/site'
 
-export const revalidate = 60
+export const revalidate = 3600
 
 type Params = { params: Promise<{ slug: string }> }
 

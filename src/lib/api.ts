@@ -16,9 +16,15 @@ import type {
 
 const BACKEND_URL = process.env.BACKEND_API_URL || 'https://mindpattern.fly.dev'
 
+// A slow backend must fail fast, never hang a render: without this signal a
+// wedged Fly box held server renders open until the Vercel function timed out,
+// which read as "links don't work."
+const BACKEND_TIMEOUT_MS = 10_000
+
 export async function backendFetch<T>(
   path: string,
   params?: Record<string, string>,
+  opts?: { revalidate?: number },
 ): Promise<T> {
   const url = new URL(path, BACKEND_URL)
   if (params) {
@@ -27,7 +33,8 @@ export async function backendFetch<T>(
     })
   }
   const res = await fetch(url.toString(), {
-    next: { revalidate: 60 },
+    next: { revalidate: opts?.revalidate ?? 300 },
+    signal: AbortSignal.timeout(BACKEND_TIMEOUT_MS),
   })
   if (!res.ok) throw new Error(`Backend ${res.status}: ${path}`)
   return res.json()

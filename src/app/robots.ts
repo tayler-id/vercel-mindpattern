@@ -4,6 +4,9 @@ import { SITE_URL } from '@/lib/site'
 const crawlRules = {
   allow: '/',
   disallow: ['/api/', '/_next/'],
+  // Uncapped AI-crawler sweeps of the full-archive sitemap were a real
+  // outage vector (thundering herd on the backend). Most bots honor this.
+  crawlDelay: 10,
 }
 
 export default function robots(): MetadataRoute.Robots {

@@ -7,8 +7,7 @@ import { getAudioBriefings, getReports } from '@/lib/api'
 import type { AudioBriefing, ReportListItem } from '@/lib/types'
 import { shortDate } from '@/lib/format'
 
-export const revalidate = 60
-export const dynamic = 'force-dynamic'
+export const revalidate = 300
 
 export const metadata: Metadata = {
   title: 'Briefings',
@@ -16,19 +15,14 @@ export const metadata: Metadata = {
 }
 
 export default async function BriefingsPage() {
-  let reports: ReportListItem[] = []
-  let audioBriefings: AudioBriefing[] = []
   let error = false
-  try {
-    reports = await getReports()
-  } catch {
-    error = true
-  }
-  try {
-    audioBriefings = await getAudioBriefings()
-  } catch {
-    audioBriefings = []
-  }
+  const [reports, audioBriefings] = await Promise.all([
+    getReports().catch(() => {
+      error = true
+      return [] as ReportListItem[]
+    }),
+    getAudioBriefings().catch(() => [] as AudioBriefing[]),
+  ])
 
   const audioByDate = new Map(audioBriefings.map((audio) => [audio.date, audio]))
 

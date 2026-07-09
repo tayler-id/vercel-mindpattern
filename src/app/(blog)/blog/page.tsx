@@ -6,7 +6,7 @@ import { NewsletterSignup } from '@/components/newsletter-signup'
 import { absoluteUrl, SITE_DESCRIPTION, SITE_NAME } from '@/lib/site'
 import type { ReportListItem } from '@/lib/types'
 
-export const revalidate = 60
+export const revalidate = 300
 
 export const metadata: Metadata = {
   title: 'Daily AI Research Briefing Archive',

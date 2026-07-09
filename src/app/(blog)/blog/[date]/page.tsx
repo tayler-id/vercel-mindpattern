@@ -8,7 +8,7 @@ import { JsonLd } from '@/components/json-ld'
 import { absoluteUrl, shortReportDescription, SITE_NAME } from '@/lib/site'
 import type { Report, ReportListItem } from '@/lib/types'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 3600
 
 type BlogPostParams = {
   params: Promise<{ date: string }>

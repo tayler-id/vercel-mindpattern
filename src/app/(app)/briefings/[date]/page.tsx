@@ -22,7 +22,7 @@ function stripLeadingTitle(content: string, title: string): string {
 import { absoluteUrl, shortReportDescription, SITE_NAME } from '@/lib/site'
 import { shortDate } from '@/lib/format'
 
-export const revalidate = 60
+export const revalidate = 3600
 
 type Params = { params: Promise<{ date: string }> }
 

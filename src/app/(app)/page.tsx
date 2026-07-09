@@ -20,7 +20,7 @@ import { CountUp } from '@/components/motion/count-up'
 import { SubscribeBand } from '@/components/subscribe/subscribe-band'
 import { sectionLabel } from '@/lib/sections'
 
-export const revalidate = 60
+export const revalidate = 300
 
 const VIEWS = new Set(['trending', 'most-read', 'latest', 'topics'])
 
@@ -32,20 +32,25 @@ const HEADING: Record<string, { h1: string; sub: string }> = {
 }
 
 /** The complete published-story archive for the rail (bounded for safety).
-    The backend rejects limit > 50, so page in 50s. */
+    The backend rejects limit > 50, so page in 50s — all pages in parallel,
+    not a sequential round-trip chain. */
 async function getAllStories(cap = 300): Promise<{ items: PublicStory[]; total: number }> {
   const first = await getStories({ limit: 50 })
   const items = [...first.items]
-  let total = first.total || items.length
-  let hasMore = first.has_more
-  while (hasMore && items.length < cap) {
-    const page = await getStories({ limit: 50, offset: items.length })
-    if (page.items.length === 0) break
-    items.push(...page.items)
-    hasMore = page.has_more
-    total = page.total || total
-  }
-  return { items, total }
+  const total = first.total || items.length
+  if (!first.has_more || items.length >= cap) return { items, total }
+  const remaining = Math.min(total, cap) - items.length
+  const offsets = Array.from(
+    { length: Math.ceil(Math.max(remaining, 0) / 50) },
+    (_, i) => 50 * (i + 1),
+  )
+  const pages = await Promise.all(
+    offsets.map((offset) =>
+      getStories({ limit: 50, offset }).catch(() => ({ items: [] as PublicStory[] })),
+    ),
+  )
+  for (const page of pages) items.push(...page.items)
+  return { items: items.slice(0, cap), total }
 }
 
 /** Real graph input: the wire's top stories (or findings) + their relations. */

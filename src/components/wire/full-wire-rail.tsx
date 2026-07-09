@@ -32,6 +32,7 @@ export function FullWireRail({ stories, total }: { stories: PublicStory[]; total
             <li key={story.slug}>
               <Link
                 href={`/s/${encodeURIComponent(story.slug)}`}
+                prefetch={false}
                 style={topicStyleVars(topicFor(label)) as React.CSSProperties}
                 className="scroll-rise group grid grid-cols-[32px_1fr] items-baseline gap-3 border-t border-line px-2 py-2.5 transition-[background-color,transform] duration-(--dur-fast) hover:bg-panel active:scale-[0.99]"
               >

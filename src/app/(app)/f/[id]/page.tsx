@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 import { getFinding, getRelated } from '@/lib/api'
 import { RabbitHole } from '@/components/story/rabbit-hole'
 
-export const revalidate = 60
+export const revalidate = 3600
 
 type Params = { params: Promise<{ id: string }> }
 
