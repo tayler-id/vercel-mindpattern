@@ -1,0 +1,46 @@
+name: Warm site cache
+
+# Every deploy resets Vercel's page cache and every nightly publish rotates
+# the content-version cache keys — both used to leave deep clicks re-rendering
+# against Fly. Crawl the entry pages, briefings, and newest stories so real
+# visitors land on warm pages.
+on:
+  push:
+    branches: [main]
+  schedule:
+    # 11:50 UTC = 07:50 ET, right after the nightly pipeline publishes.
+    - cron: '50 11 * * *'
+  workflow_dispatch:
+
+jobs:
+  warm:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for Vercel deploy to finish
+        if: github.event_name == 'push'
+        run: sleep 180
+
+      - name: Crawl entry pages, briefings, and newest stories
+        run: |
+          set -u
+          base="https://mindpattern.ai"
+          entry="$base/ $base/?view=latest $base/?view=most-read $base/?view=topics $base/briefings $base/blog $base/search"
+
+          sitemap=$(curl -s --retry 3 "$base/sitemap.xml" | grep -o "$base/[^<]*")
+          briefings=$(echo "$sitemap" | grep '/briefings/')
+          blog=$(echo "$sitemap" | grep '/blog/' | sort -r | head -30)
+          # Story slugs are date-prefixed, so lexicographic sort is date sort.
+          stories=$(echo "$sitemap" | grep '/s/' | sort -r | head -300)
+
+          total=0; slow=0; failed=0
+          for u in $entry $briefings $blog $stories; do
+            t=$(curl -s -o /dev/null -m 25 -w "%{http_code} %{time_total}" "$u") || t="000 25"
+            code=${t% *}; secs=${t#* }
+            total=$((total + 1))
+            [ "$code" != "200" ] && { failed=$((failed + 1)); echo "FAIL $code $u"; }
+            awk "BEGIN{exit !($secs > 3)}" && { slow=$((slow + 1)); echo "SLOW ${secs}s $u"; }
+            sleep 0.2
+          done
+          echo "warmed $total urls, $slow slow (>3s), $failed failed"
+          # Only hard-fail on a broken site, not a sluggish one.
+          [ "$failed" -lt 20 ]
