@@ -20,6 +20,21 @@ function optedOut(): boolean {
   }
 }
 
+// Process the opt-out flag eagerly on page load — pages that fire no events
+// (like the homepage) must still honor ?mp_optout=1.
+if (typeof window !== 'undefined') {
+  optedOut()
+}
+
+/** Dev traffic (localhost / LAN) never reaches the event store. */
+function devTraffic(): boolean {
+  try {
+    return /^(localhost|127\.|192\.168\.|10\.)|\.local$/.test(window.location.hostname)
+  } catch {
+    return true
+  }
+}
+
 /** Random first-party reader id: resettable, never tied to identity. */
 function anonId(): string {
   try {
@@ -36,6 +51,7 @@ function anonId(): string {
 
 /** First-party beacon to /api/event via the proxy. Fire-and-forget. */
 function beacon(name: string, props?: AnalyticsProps) {
+  if (devTraffic()) return
   try {
     const payload = JSON.stringify({
       type: name,
