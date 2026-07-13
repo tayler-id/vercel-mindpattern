@@ -13,6 +13,12 @@ import { absoluteUrl, SITE_NAME } from '@/lib/site'
 
 export const revalidate = 3600
 
+// Opt into on-demand ISR — without this, Next 16 ignores the revalidate
+// export and re-renders every story click against the Fly backend.
+export function generateStaticParams() {
+  return []
+}
+
 type Params = { params: Promise<{ slug: string }> }
 
 const STORY_SLUG_RE = /^[a-z0-9][a-z0-9-]{0,127}$/i

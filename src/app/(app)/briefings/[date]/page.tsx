@@ -3,7 +3,8 @@ import { topicFor, topicStyleVars } from '@/lib/topics'
 import type { Metadata } from 'next'
 import type { CSSProperties } from 'react'
 import Link from 'next/link'
-import { getAudioBriefing, getReport, getReports, getStructuredIssue } from '@/lib/api'
+import { notFound } from 'next/navigation'
+import { getAudioBriefing, getReport, getReports, getStructuredIssue, isBackendNotFound } from '@/lib/api'
 import type { AudioBriefing, IssueStoryUnit, PublicIssue, Report, ReportListItem } from '@/lib/types'
 import { JsonLd } from '@/components/json-ld'
 import { AudioBriefingPlayer } from '@/components/briefing/audio-briefing-player'
@@ -24,12 +25,22 @@ import { shortDate } from '@/lib/format'
 
 export const revalidate = 3600
 
+// Without generateStaticParams, Next 16 treats a dynamic segment as
+// SSR-on-every-request and the revalidate export above is ignored — every
+// click then re-renders against the Fly backend. An empty list keeps builds
+// hermetic (no backend dependency) while opting every date into on-demand ISR.
+export function generateStaticParams() {
+  return []
+}
+
 type Params = { params: Promise<{ date: string }> }
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { date } = await params
   try {
+    // The backend answers missing dates with a 200 `null` body, not a 404.
     const report = await getReport(date)
+    if (!report) return { title: 'Briefing not found', robots: { index: false, follow: false } }
     const description = shortReportDescription(report.title, date)
     return {
       title: report.title,
@@ -43,41 +54,32 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
         publishedTime: date,
       },
     }
-  } catch {
-    return { title: 'Briefing not found', robots: { index: false, follow: false } }
+  } catch (err) {
+    if (isBackendNotFound(err)) {
+      return { title: 'Briefing not found', robots: { index: false, follow: false } }
+    }
+    throw err
   }
 }
 
 export default async function BriefingPage({ params }: Params) {
   const { date } = await params
 
-  let report: Report | null = null
-  let list: ReportListItem[] = []
-  let audio: AudioBriefing | null = null
-  let issue: PublicIssue | null = null
-  try {
-    ;[report, list, audio, issue] = await Promise.all([
-      getReport(date),
-      getReports(),
-      getAudioBriefing(date),
-      getStructuredIssue(date),
+  // The report is the page; a real 404 becomes a (cacheable) not-found, and
+  // any transient failure throws to error.tsx so it can never be ISR-cached.
+  // The list, audio, and graph trail are best-effort fragments.
+  const [report, list, audio, issue]: [Report | null, ReportListItem[], AudioBriefing | null, PublicIssue | null] =
+    await Promise.all([
+      getReport(date).catch((err) => {
+        if (isBackendNotFound(err)) return null
+        throw err
+      }),
+      getReports().catch(() => [] as ReportListItem[]),
+      getAudioBriefing(date).catch(() => null),
+      getStructuredIssue(date).catch(() => null),
     ])
-  } catch {
-    /* handled below */
-  }
 
-  if (!report) {
-    return (
-      <div className="mx-auto max-w-[44rem] px-8 py-16 text-center max-sm:px-5">
-        <Link href="/briefings" className="type-kicker text-ink-soft transition-colors hover:text-ink">
-          ← Briefings
-        </Link>
-        <p className="mt-10 font-mono text-[0.8125rem] uppercase tracking-[0.12em] text-ink-faint">
-          The briefing for {date} could not be loaded.
-        </p>
-      </div>
-    )
-  }
+  if (!report) notFound()
 
   const wordCount = report.content.split(/\s+/).length
   const readTime = Math.max(1, Math.round(wordCount / 200))

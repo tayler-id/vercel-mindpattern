@@ -5,6 +5,12 @@ import { RabbitHole } from '@/components/story/rabbit-hole'
 
 export const revalidate = 3600
 
+// Opt into on-demand ISR — without this, Next 16 ignores the revalidate
+// export and re-renders every finding click against the Fly backend.
+export function generateStaticParams() {
+  return []
+}
+
 type Params = { params: Promise<{ id: string }> }
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {

@@ -21,6 +21,22 @@ const BACKEND_URL = process.env.BACKEND_API_URL || 'https://mindpattern.fly.dev'
 // which read as "links don't work."
 const BACKEND_TIMEOUT_MS = 10_000
 
+// Detail pages are ISR-cached, so error semantics matter: only a backend 404
+// may become a notFound() (cacheable), while timeouts/5xx must throw so the
+// error boundary renders and the bad response is never cached as real content.
+export class BackendError extends Error {
+  constructor(
+    public readonly status: number,
+    path: string,
+  ) {
+    super(`Backend ${status}: ${path}`)
+  }
+}
+
+export function isBackendNotFound(err: unknown): boolean {
+  return err instanceof BackendError && err.status === 404
+}
+
 export async function backendFetch<T>(
   path: string,
   params?: Record<string, string>,
@@ -36,7 +52,7 @@ export async function backendFetch<T>(
     next: { revalidate: opts?.revalidate ?? 300 },
     signal: AbortSignal.timeout(BACKEND_TIMEOUT_MS),
   })
-  if (!res.ok) throw new Error(`Backend ${res.status}: ${path}`)
+  if (!res.ok) throw new BackendError(res.status, path)
   return res.json()
 }
 
@@ -90,8 +106,9 @@ export async function getStory(slug: string): Promise<PublicStory | null> {
     return await backendFetch<PublicStory>(`/api/stories/${encodeURIComponent(slug)}`, {
       user: 'ramsay',
     })
-  } catch {
-    return null
+  } catch (err) {
+    if (isBackendNotFound(err)) return null
+    throw err
   }
 }
 
@@ -113,8 +130,9 @@ export function getReports() {
   return backendFetch<ReportListItem[]>('/api/reports', { user: 'ramsay' })
 }
 
+// The backend answers a missing date with a 200 `null` body, not a 404.
 export function getReport(date: string) {
-  return backendFetch<Report>(`/api/reports/${date}`, { user: 'ramsay' })
+  return backendFetch<Report | null>(`/api/reports/${date}`, { user: 'ramsay' })
 }
 
 export function getAudioBriefings() {
@@ -143,8 +161,9 @@ export async function getEntity(slug: string): Promise<PublicEntity | null> {
       user: 'ramsay',
       limit: '40',
     })
-  } catch {
-    return null
+  } catch (err) {
+    if (isBackendNotFound(err)) return null
+    throw err
   }
 }
 
@@ -168,7 +187,8 @@ export async function getSourceByDomain(domain: string): Promise<Source | null> 
       last_seen: source.last_seen ?? '',
       display_name: source.display_name || source.domain || domain,
     }
-  } catch {
+  } catch (err) {
+    if (!isBackendNotFound(err)) throw err
     const normalized = domain.toLowerCase().replace(/^www\./, '')
     const sources = await getSources({ limit: 500 })
     return (
@@ -187,11 +207,13 @@ export async function getFindingsForSource(domain: string, opts: { limit?: numbe
 export async function getFinding(id: number): Promise<Finding | null> {
   try {
     return await backendFetch<Finding>(`/api/findings/${id}`, { user: 'ramsay' })
-  } catch {
+  } catch (err) {
+    if (!isBackendNotFound(err)) throw err
     try {
       return await backendFetch<Finding>(`/api/finding/${id}`, { user: 'ramsay' })
-    } catch {
-      return null
+    } catch (fallbackErr) {
+      if (isBackendNotFound(fallbackErr)) return null
+      throw fallbackErr
     }
   }
 }

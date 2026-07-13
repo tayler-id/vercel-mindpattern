@@ -3,12 +3,19 @@ import Link from 'next/link'
 import Markdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { backendFetch } from '@/lib/api'
+import { notFound } from 'next/navigation'
+import { BackendError, backendFetch, isBackendNotFound } from '@/lib/api'
 import { JsonLd } from '@/components/json-ld'
 import { absoluteUrl, shortReportDescription, SITE_NAME } from '@/lib/site'
 import type { Report, ReportListItem } from '@/lib/types'
 
 export const revalidate = 3600
+
+// Opt into on-demand ISR — without this, Next 16 ignores the revalidate
+// export and re-renders every blog click against the Fly backend.
+export function generateStaticParams() {
+  return []
+}
 
 type BlogPostParams = {
   params: Promise<{ date: string }>
@@ -20,9 +27,11 @@ export async function generateMetadata({
   const { date } = await params
 
   try {
-    const report = await backendFetch<Report>(`/api/reports/${date}`, {
+    // The backend answers missing dates with a 200 `null` body, not a 404.
+    const report = await backendFetch<Report | null>(`/api/reports/${date}`, {
       user: 'ramsay',
     })
+    if (!report) throw new BackendError(404, `/api/reports/${date}`)
     const description = shortReportDescription(report.title, date)
 
     return {
@@ -40,7 +49,8 @@ export async function generateMetadata({
         modifiedTime: date,
       },
     }
-  } catch {
+  } catch (err) {
+    if (!isBackendNotFound(err)) throw err
     return {
       title: 'AI Research Briefing Not Found',
       description: `The MindPattern AI research briefing for ${date} could not be loaded.`,
@@ -60,39 +70,19 @@ export default async function BlogPostPage({
 }: BlogPostParams) {
   const { date } = await params
 
-  let report: Report | null = null
-  let reportList: ReportListItem[] = []
+  // The report is required: a backend 404 becomes a cacheable notFound(),
+  // anything transient throws to error.tsx so it is never ISR-cached.
+  const [report, reportList]: [Report | null, ReportListItem[]] = await Promise.all([
+    backendFetch<Report | null>(`/api/reports/${date}`, { user: 'ramsay' }).catch((err) => {
+      if (isBackendNotFound(err)) return null
+      throw err
+    }),
+    backendFetch<ReportListItem[]>('/api/reports', { user: 'ramsay' }).catch(
+      () => [] as ReportListItem[],
+    ),
+  ])
 
-  try {
-    ;[report, reportList] = await Promise.all([
-      backendFetch<Report>(`/api/reports/${date}`, { user: 'ramsay' }),
-      backendFetch<ReportListItem[]>('/api/reports', { user: 'ramsay' }),
-    ])
-  } catch {
-    // Either the report or list fetch failed
-  }
-
-  if (!report) {
-    return (
-      <div className="max-w-[720px] mx-auto px-5 py-8 md:px-8">
-        <Link
-          href="/blog"
-          className="type-kicker inline-flex items-center gap-1.5 text-ink-faint hover:text-primary transition-colors mb-8"
-        >
-          <ChevronLeft data-icon="inline-start" className="size-3.5" />
-          Back to archive
-        </Link>
-        <div className="rule-row flex flex-col items-center justify-center py-16 text-center">
-          <p className="type-kicker text-ink-soft">
-            [REPORT NOT FOUND]
-          </p>
-          <p className="type-kicker text-ink-faint mt-1">
-            The briefing for {date} may not exist or the backend is unavailable.
-          </p>
-        </div>
-      </div>
-    )
-  }
+  if (!report) notFound()
 
   const wordCount = report.content.split(/\s+/).length
   const readTime = Math.max(1, Math.round(wordCount / 200))

@@ -11,6 +11,12 @@ import { absoluteUrl, SITE_NAME } from '@/lib/site'
 
 export const revalidate = 3600
 
+// Opt into on-demand ISR — without this, Next 16 ignores the revalidate
+// export and re-renders every source click against the Fly backend.
+export function generateStaticParams() {
+  return []
+}
+
 type Params = { params: Promise<{ domain: string }> }
 
 const DOMAIN_RE = /^[a-z0-9.-]+\.[a-z]{2,}$/i
@@ -36,7 +42,9 @@ export default async function SourcePage({ params }: Params) {
   const domain = cleanDomain(raw)
   if (!domain) notFound()
 
-  const source = await getSourceByDomain(domain).catch(() => null)
+  // Transient backend failures throw to error.tsx; only a genuine miss (404
+  // plus no match in the source list) may become a cacheable notFound().
+  const source = await getSourceByDomain(domain)
   const findings = source?.findings ?? []
   const entities = source?.entities ?? []
 
