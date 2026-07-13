@@ -3,9 +3,10 @@
 import { useEffect, useRef, useState } from 'react'
 
 /**
- * Count-up numeral (rAF, cubic ease-out, ~900ms). Starts at 0 on first paint
- * (matches the approved mockup) and settles on the real value; reduced-motion
- * users get the final value immediately.
+ * Count-up numeral (rAF, cubic ease-out, ~900ms). Server HTML carries the
+ * real value — starting at 0 meant crawlers and slow connections saw
+ * "0 findings indexed" until hydration. The 0→value sweep only plays once
+ * the browser takes over; reduced-motion users keep the static value.
  */
 export function CountUp({
   value,
@@ -16,17 +17,16 @@ export function CountUp({
   duration?: number
   className?: string
 }) {
-  const [display, setDisplay] = useState(0)
+  const [display, setDisplay] = useState(value)
   const raf = useRef<number | null>(null)
 
   useEffect(() => {
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setDisplay(value)
+      return
+    }
     const t0 = performance.now()
     const tick = (t: number) => {
-      if (reduced) {
-        setDisplay(value)
-        return
-      }
       const p = Math.min((t - t0) / duration, 1)
       const eased = 1 - Math.pow(1 - p, 3)
       setDisplay(Math.round(value * eased))
