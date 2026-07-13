@@ -101,11 +101,17 @@ export function getStories(opts: { limit?: number; offset?: number } = {}) {
   return backendFetch<StoriesResponse>('/api/stories', params)
 }
 
+// Detail payloads are immutable after publish — cache them for the full hour
+// so ISR regenerations don't re-hit the heavy Fly endpoints every 5 minutes.
+const DETAIL_REVALIDATE = 3600
+
 export async function getStory(slug: string): Promise<PublicStory | null> {
   try {
-    return await backendFetch<PublicStory>(`/api/stories/${encodeURIComponent(slug)}`, {
-      user: 'ramsay',
-    })
+    return await backendFetch<PublicStory>(
+      `/api/stories/${encodeURIComponent(slug)}`,
+      { user: 'ramsay' },
+      { revalidate: DETAIL_REVALIDATE },
+    )
   } catch (err) {
     if (isBackendNotFound(err)) return null
     throw err
@@ -132,7 +138,11 @@ export function getReports() {
 
 // The backend answers a missing date with a 200 `null` body, not a 404.
 export function getReport(date: string) {
-  return backendFetch<Report | null>(`/api/reports/${date}`, { user: 'ramsay' })
+  return backendFetch<Report | null>(
+    `/api/reports/${date}`,
+    { user: 'ramsay' },
+    { revalidate: DETAIL_REVALIDATE },
+  )
 }
 
 export function getAudioBriefings() {
@@ -141,7 +151,11 @@ export function getAudioBriefings() {
 
 export async function getAudioBriefing(date: string): Promise<AudioBriefing | null> {
   try {
-    return await backendFetch<AudioBriefing>(`/api/audio-briefings/${date}`, { user: 'ramsay' })
+    return await backendFetch<AudioBriefing>(
+      `/api/audio-briefings/${date}`,
+      { user: 'ramsay' },
+      { revalidate: DETAIL_REVALIDATE },
+    )
   } catch {
     return null
   }
@@ -149,7 +163,11 @@ export async function getAudioBriefing(date: string): Promise<AudioBriefing | nu
 
 export async function getStructuredIssue(date: string): Promise<PublicIssue | null> {
   try {
-    return await backendFetch<PublicIssue>(`/api/issues/${date}/structured`, { user: 'ramsay' })
+    return await backendFetch<PublicIssue>(
+      `/api/issues/${date}/structured`,
+      { user: 'ramsay' },
+      { revalidate: DETAIL_REVALIDATE },
+    )
   } catch {
     return null
   }
@@ -157,10 +175,14 @@ export async function getStructuredIssue(date: string): Promise<PublicIssue | nu
 
 export async function getEntity(slug: string): Promise<PublicEntity | null> {
   try {
-    return await backendFetch<PublicEntity>(`/api/entities/${encodeURIComponent(slug)}`, {
-      user: 'ramsay',
-      limit: '40',
-    })
+    return await backendFetch<PublicEntity>(
+      `/api/entities/${encodeURIComponent(slug)}`,
+      {
+        user: 'ramsay',
+        limit: '40',
+      },
+      { revalidate: DETAIL_REVALIDATE },
+    )
   } catch (err) {
     if (isBackendNotFound(err)) return null
     throw err
@@ -175,10 +197,14 @@ export function getSources(opts: { limit?: number } = {}) {
 
 export async function getSourceByDomain(domain: string): Promise<Source | null> {
   try {
-    const source = await backendFetch<Source>(`/api/sources/${encodeURIComponent(domain)}`, {
-      user: 'ramsay',
-      limit: '40',
-    })
+    const source = await backendFetch<Source>(
+      `/api/sources/${encodeURIComponent(domain)}`,
+      {
+        user: 'ramsay',
+        limit: '40',
+      },
+      { revalidate: DETAIL_REVALIDATE },
+    )
     return {
       ...source,
       url_domain: source.url_domain || source.domain || domain,
@@ -206,11 +232,19 @@ export async function getFindingsForSource(domain: string, opts: { limit?: numbe
 
 export async function getFinding(id: number): Promise<Finding | null> {
   try {
-    return await backendFetch<Finding>(`/api/findings/${id}`, { user: 'ramsay' })
+    return await backendFetch<Finding>(
+      `/api/findings/${id}`,
+      { user: 'ramsay' },
+      { revalidate: DETAIL_REVALIDATE },
+    )
   } catch (err) {
     if (!isBackendNotFound(err)) throw err
     try {
-      return await backendFetch<Finding>(`/api/finding/${id}`, { user: 'ramsay' })
+      return await backendFetch<Finding>(
+        `/api/finding/${id}`,
+        { user: 'ramsay' },
+        { revalidate: DETAIL_REVALIDATE },
+      )
     } catch (fallbackErr) {
       if (isBackendNotFound(fallbackErr)) return null
       throw fallbackErr
@@ -220,11 +254,15 @@ export async function getFinding(id: number): Promise<Finding | null> {
 
 export async function getRelated(id: number, opts: { limit?: number } = {}): Promise<RelatedResponse> {
   try {
-    return await backendFetch<RelatedResponse>(`/api/related/${id}`, {
-      user: 'ramsay',
-      mode: 'blended',
-      limit: String(opts.limit ?? 8),
-    })
+    return await backendFetch<RelatedResponse>(
+      `/api/related/${id}`,
+      {
+        user: 'ramsay',
+        mode: 'blended',
+        limit: String(opts.limit ?? 8),
+      },
+      { revalidate: DETAIL_REVALIDATE },
+    )
   } catch {
     return {
       kind: 'related',

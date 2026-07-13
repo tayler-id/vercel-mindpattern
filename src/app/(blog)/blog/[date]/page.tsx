@@ -28,9 +28,11 @@ export async function generateMetadata({
 
   try {
     // The backend answers missing dates with a 200 `null` body, not a 404.
-    const report = await backendFetch<Report | null>(`/api/reports/${date}`, {
-      user: 'ramsay',
-    })
+    const report = await backendFetch<Report | null>(
+      `/api/reports/${date}`,
+      { user: 'ramsay' },
+      { revalidate: 3600 },
+    )
     if (!report) throw new BackendError(404, `/api/reports/${date}`)
     const description = shortReportDescription(report.title, date)
 
@@ -73,10 +75,12 @@ export default async function BlogPostPage({
   // The report is required: a backend 404 becomes a cacheable notFound(),
   // anything transient throws to error.tsx so it is never ISR-cached.
   const [report, reportList]: [Report | null, ReportListItem[]] = await Promise.all([
-    backendFetch<Report | null>(`/api/reports/${date}`, { user: 'ramsay' }).catch((err) => {
-      if (isBackendNotFound(err)) return null
-      throw err
-    }),
+    backendFetch<Report | null>(`/api/reports/${date}`, { user: 'ramsay' }, { revalidate: 3600 }).catch(
+      (err) => {
+        if (isBackendNotFound(err)) return null
+        throw err
+      },
+    ),
     backendFetch<ReportListItem[]>('/api/reports', { user: 'ramsay' }).catch(
       () => [] as ReportListItem[],
     ),
