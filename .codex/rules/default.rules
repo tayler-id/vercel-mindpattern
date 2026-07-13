@@ -1,0 +1,6 @@
+# Repeatable local verification commands for this frontend.
+prefix_rule(pattern=["pnpm", "lint"], decision="allow")
+prefix_rule(pattern=["pnpm", "build"], decision="allow")
+prefix_rule(pattern=["pnpm", "dev"], decision="allow")
+prefix_rule(pattern=["pnpm", "start"], decision="allow")
+prefix_rule(pattern=["pnpm", "exec", "tsc", "--noEmit", "--incremental", "false"], decision="allow")
