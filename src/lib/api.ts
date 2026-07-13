@@ -136,6 +136,19 @@ export function getReports() {
   return backendFetch<ReportListItem[]>('/api/reports', { user: 'ramsay' })
 }
 
+// The per-date detail endpoints take up to 10s to answer for dates that don't
+// exist yet (e.g. today's briefing before the pipeline runs), so date pages
+// must consult the cached archive list before firing them. Returns null when
+// the list itself is unavailable — callers fall back to the detail fetch.
+export async function reportExists(date: string): Promise<boolean | null> {
+  try {
+    const list = await getReports()
+    return list.some((r) => r.date === date)
+  } catch {
+    return null
+  }
+}
+
 // The backend answers a missing date with a 200 `null` body, not a 404.
 export function getReport(date: string) {
   return backendFetch<Report | null>(

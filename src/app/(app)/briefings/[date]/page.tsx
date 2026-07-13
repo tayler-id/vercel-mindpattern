@@ -4,7 +4,7 @@ import type { Metadata } from 'next'
 import type { CSSProperties } from 'react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { getAudioBriefing, getReport, getReports, getStructuredIssue, isBackendNotFound } from '@/lib/api'
+import { getAudioBriefing, getReport, getReports, getStructuredIssue, isBackendNotFound, reportExists } from '@/lib/api'
 import type { AudioBriefing, IssueStoryUnit, PublicIssue, Report, ReportListItem } from '@/lib/types'
 import { JsonLd } from '@/components/json-ld'
 import { AudioBriefingPlayer } from '@/components/briefing/audio-briefing-player'
@@ -37,6 +37,9 @@ type Params = { params: Promise<{ date: string }> }
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { date } = await params
+  if ((await reportExists(date)) === false) {
+    return { title: 'Briefing not found', robots: { index: false, follow: false } }
+  }
   try {
     // The backend answers missing dates with a 200 `null` body, not a 404.
     const report = await getReport(date)
@@ -64,6 +67,10 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 
 export default async function BriefingPage({ params }: Params) {
   const { date } = await params
+
+  // Dates missing from the archive list 404 immediately — the per-date
+  // endpoints below take up to 10s to answer for unpublished dates.
+  if ((await reportExists(date)) === false) notFound()
 
   // The report is the page; a real 404 becomes a (cacheable) not-found, and
   // any transient failure throws to error.tsx so it can never be ISR-cached.

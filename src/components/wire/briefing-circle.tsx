@@ -8,7 +8,10 @@ import type { ReportListItem } from '@/lib/types'
  * Drift lives on a wrapper so the hover transform composes cleanly.
  */
 export function BriefingCircle({ report }: { report: ReportListItem }) {
-  const isToday = report.date === new Date().toISOString().slice(0, 10)
+  // en-CA yields YYYY-MM-DD; pin to site time so evenings ET don't compare
+  // against tomorrow's UTC date.
+  const isToday =
+    report.date === new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' })
   const dateLabel = new Date(`${report.date}T00:00:00`).toLocaleDateString('en-US', {
     month: 'long',
     day: 'numeric',

@@ -4,7 +4,7 @@ import Markdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { notFound } from 'next/navigation'
-import { BackendError, backendFetch, isBackendNotFound } from '@/lib/api'
+import { BackendError, backendFetch, isBackendNotFound, reportExists } from '@/lib/api'
 import { JsonLd } from '@/components/json-ld'
 import { absoluteUrl, shortReportDescription, SITE_NAME } from '@/lib/site'
 import type { Report, ReportListItem } from '@/lib/types'
@@ -25,6 +25,15 @@ export async function generateMetadata({
   params,
 }: BlogPostParams): Promise<Metadata> {
   const { date } = await params
+
+  if ((await reportExists(date)) === false) {
+    return {
+      title: 'AI Research Briefing Not Found',
+      description: `The MindPattern AI research briefing for ${date} could not be loaded.`,
+      alternates: { canonical: `/blog/${date}` },
+      robots: { index: false, follow: false },
+    }
+  }
 
   try {
     // The backend answers missing dates with a 200 `null` body, not a 404.
@@ -71,6 +80,10 @@ export default async function BlogPostPage({
   params,
 }: BlogPostParams) {
   const { date } = await params
+
+  // Dates missing from the archive list 404 immediately — the per-date
+  // endpoint takes up to 10s to answer for unpublished dates.
+  if ((await reportExists(date)) === false) notFound()
 
   // The report is required: a backend 404 becomes a cacheable notFound(),
   // anything transient throws to error.tsx so it is never ISR-cached.

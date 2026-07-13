@@ -15,12 +15,15 @@ export function WireTicker({ stats, today }: { stats: Stats; today: number }) {
   }
   const sections = [...bySection.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6)
 
+  // Site time is America/New_York — without it Vercel renders UTC, which
+  // shows tomorrow's date every evening ET.
   const date = new Date()
     .toLocaleDateString('en-US', {
       weekday: 'short',
       month: 'long',
       day: 'numeric',
       year: 'numeric',
+      timeZone: 'America/New_York',
     })
     .toUpperCase()
     .replace(',', '')
