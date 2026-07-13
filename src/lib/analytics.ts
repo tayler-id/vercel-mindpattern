@@ -4,6 +4,7 @@ export type AnalyticsProps = Record<string, string | number | boolean>
 
 const ANON_KEY = 'mp_anon'
 const OPTOUT_KEY = 'mp_optout'
+const OWNER_KEY = 'mp_owner'
 
 /**
  * Owner exclusion: visit any page with ?mp_optout=1 and this browser stops
@@ -11,19 +12,41 @@ const OPTOUT_KEY = 'mp_optout'
  */
 function optedOut(): boolean {
   try {
-    const flag = new URLSearchParams(window.location.search).get(OPTOUT_KEY)
-    if (flag === '1') localStorage.setItem(OPTOUT_KEY, '1')
-    if (flag === '0') localStorage.removeItem(OPTOUT_KEY)
     return localStorage.getItem(OPTOUT_KEY) === '1'
   } catch {
     return false
   }
 }
 
-// Process the opt-out flag eagerly on page load — pages that fire no events
-// (like the homepage) must still honor ?mp_optout=1.
+/**
+ * Owner mode: visit any page with ?mp_owner=1 and this browser's events keep
+ * flowing but arrive tagged owner=1, so the dash shows them as "you" instead
+ * of counting them as readers (?mp_owner=0 turns it back off).
+ */
+function isOwner(): boolean {
+  try {
+    return localStorage.getItem(OWNER_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+
+// Process both URL flags eagerly on page load — pages that fire no events
+// (like the homepage) must still honor ?mp_optout=1 / ?mp_owner=1.
+function applyUrlFlags() {
+  try {
+    const params = new URLSearchParams(window.location.search)
+    for (const key of [OPTOUT_KEY, OWNER_KEY]) {
+      const flag = params.get(key)
+      if (flag === '1') localStorage.setItem(key, '1')
+      if (flag === '0') localStorage.removeItem(key)
+    }
+  } catch {
+    // best-effort
+  }
+}
 if (typeof window !== 'undefined') {
-  optedOut()
+  applyUrlFlags()
 }
 
 /** Dev traffic (localhost / LAN) never reaches the event store. */
@@ -60,6 +83,7 @@ function beacon(name: string, props?: AnalyticsProps) {
       ref_domain: document.referrer ? new URL(document.referrer).hostname : '',
       anon_id: anonId(),
       value: typeof props?.depth === 'number' ? props.depth : 0,
+      owner: isOwner() ? 1 : 0,
     })
     if (!navigator.sendBeacon?.('/api/proxy/event', new Blob([payload], { type: 'application/json' }))) {
       fetch('/api/proxy/event', { method: 'POST', body: payload, keepalive: true }).catch(() => {})
