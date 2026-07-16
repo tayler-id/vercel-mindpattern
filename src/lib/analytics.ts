@@ -5,6 +5,81 @@ export type AnalyticsProps = Record<string, string | number | boolean>
 const ANON_KEY = 'mp_anon'
 const OPTOUT_KEY = 'mp_optout'
 const OWNER_KEY = 'mp_owner'
+// Session-scoped campaign attribution (sessionStorage ONLY — dies with the tab).
+const CAMPAIGN_KEY = 'mp_campaign'
+const CHANNEL_KEY = 'mp_channel'
+
+/**
+ * Events that may carry campaign attribution (pilot spec section 11:
+ * story, source-click, subscribe, and share). Everything else — scroll
+ * depth, searches, web vitals — never carries campaign fields.
+ */
+const CAMPAIGN_EVENTS = new Set([
+  'story_view',
+  'source_click',
+  'outbound_source_click',
+  'subscribe_submitted',
+  'subscribe_success',
+  'share',
+])
+
+// Normalized safe IDs — lowercase alnum plus . _ - only, never a raw
+// query-string value. Campaign ids are CampaignOS SHA-256 ids (64 chars).
+const CAMPAIGN_ID_RE = /^[a-z0-9][a-z0-9._-]{0,63}$/
+const CHANNEL_RE = /^[a-z0-9][a-z0-9._-]{0,31}$/
+
+/** Allowlisted landing paths where campaign tags may be captured. */
+function isCampaignLanding(pathname: string): boolean {
+  return pathname === '/' || /^\/s\/[^/]+$/.test(pathname) || /^\/briefings\/[^/]+$/.test(pathname)
+}
+
+function normalizeTag(raw: string | null, pattern: RegExp): string {
+  const value = (raw ?? '').trim().toLowerCase()
+  return pattern.test(value) ? value : ''
+}
+
+/**
+ * Minimal first-party attribution (pilot spec section 11). On an
+ * allowlisted landing URL, `utm_campaign`/`utm_source` are normalized to
+ * safe ids and kept in sessionStorage ONLY — captured at most once per
+ * session, attached to that session's permitted events, never a new
+ * long-lived identifier. The opt-out captures nothing. Captured or not,
+ * every `utm_*` tag is stripped from the address bar afterwards so
+ * internal and share URLs (which read `location.href`) never carry
+ * acquisition tags. `mp_*` control flags are left alone.
+ */
+function captureCampaignTags() {
+  try {
+    const url = new URL(window.location.href)
+    const utmKeys = [...url.searchParams.keys()].filter((k) => k.toLowerCase().startsWith('utm_'))
+    if (utmKeys.length === 0) return
+    if (!optedOut() && isCampaignLanding(url.pathname) && !sessionStorage.getItem(CAMPAIGN_KEY)) {
+      const campaign = normalizeTag(url.searchParams.get('utm_campaign'), CAMPAIGN_ID_RE)
+      if (campaign) {
+        sessionStorage.setItem(CAMPAIGN_KEY, campaign)
+        const channel = normalizeTag(url.searchParams.get('utm_source'), CHANNEL_RE)
+        if (channel) sessionStorage.setItem(CHANNEL_KEY, channel)
+      }
+    }
+    for (const key of utmKeys) url.searchParams.delete(key)
+    window.history.replaceState(window.history.state, '', url.toString())
+  } catch {
+    // best-effort
+  }
+}
+
+/** Campaign fields for one event — only for permitted event types. */
+function campaignFields(name: string): { campaign_id?: string; source_channel?: string } {
+  if (!CAMPAIGN_EVENTS.has(name)) return {}
+  try {
+    const campaign = sessionStorage.getItem(CAMPAIGN_KEY)
+    if (!campaign) return {}
+    const channel = sessionStorage.getItem(CHANNEL_KEY)
+    return channel ? { campaign_id: campaign, source_channel: channel } : { campaign_id: campaign }
+  } catch {
+    return {}
+  }
+}
 
 /**
  * Owner exclusion: visit any page with ?mp_optout=1 and this browser stops
@@ -46,7 +121,8 @@ function applyUrlFlags() {
   }
 }
 if (typeof window !== 'undefined') {
-  applyUrlFlags()
+  applyUrlFlags() // first: ?mp_optout=1 must apply before capture decides
+  captureCampaignTags()
 }
 
 /** Dev traffic (localhost / LAN) never reaches the event store. */
@@ -84,6 +160,7 @@ function beacon(name: string, props?: AnalyticsProps) {
       anon_id: anonId(),
       value: typeof props?.depth === 'number' ? props.depth : 0,
       owner: isOwner() ? 1 : 0,
+      ...campaignFields(name),
     })
     if (!navigator.sendBeacon?.('/api/proxy/event', new Blob([payload], { type: 'application/json' }))) {
       fetch('/api/proxy/event', { method: 'POST', body: payload, keepalive: true }).catch(() => {})
