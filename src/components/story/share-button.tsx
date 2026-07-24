@@ -16,11 +16,20 @@ const PILL =
  * one, plus explicit X / LinkedIn intents and copy-link everywhere — social
  * sharing never depends on navigator.share support.
  */
-export function ShareButton({ title, className = '' }: { title: string; className?: string }) {
+export function ShareButton({
+  title,
+  url: sharePath,
+  className = '',
+}: {
+  title: string
+  url?: string
+  className?: string
+}) {
   const native = useSyncExternalStore(noopSubscribe, clientHasShare, serverHasShare)
   const [copied, setCopied] = useState(false)
 
-  const url = () => window.location.href
+  const url = () =>
+    sharePath ? new URL(sharePath, window.location.origin).toString() : window.location.href
   const shareNative = async () => {
     try {
       await navigator.share({ title, url: url() })

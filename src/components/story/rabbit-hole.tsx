@@ -5,10 +5,11 @@ import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import type { Finding, RelatedResponse } from '@/lib/types'
 import { sectionLabel, leaderFrom, sourceDomain, sourceLabel } from '@/lib/sections'
-import { kickerLabel, topicForAgent, topicStyleVars } from '@/lib/topics'
+import { kickerLabel } from '@/lib/topics'
 import { SourceFavicon } from '@/components/wire/source-favicon'
 import { ViaAvatar } from '@/components/wire/via-avatar'
 import { VideoEmbed } from '@/components/video/video-embed'
+import { ShareButton } from '@/components/story/share-button'
 import { youtubeId } from '@/lib/video'
 
 
@@ -233,6 +234,11 @@ function ReadingColumn({
         {leader && <ViaAvatar name={leader.name} avatar={leader.avatar} />}
         <span aria-hidden>·</span>
         <span className="uppercase">{finding.importance} signal</span>
+        <ShareButton
+          title={finding.title}
+          url={`/f/${finding.id}`}
+          className="ml-auto"
+        />
       </div>
 
       {isVideo && finding.source_url && <VideoEmbed url={finding.source_url} title={finding.title} />}
