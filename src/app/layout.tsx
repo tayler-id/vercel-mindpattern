@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Archivo, IBM_Plex_Mono, Source_Serif_4 } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
+import { PageViewTracker } from '@/components/analytics/page-view'
 import { WebVitalsTracker } from '@/components/analytics/web-vitals'
 import { SearchHotkey } from '@/components/search/search-hotkey'
 import { TooltipProvider } from '@/components/ui/tooltip'
@@ -82,6 +83,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body suppressHydrationWarning className="font-sans antialiased">
         <TooltipProvider>{children}</TooltipProvider>
         <Analytics />
+        <PageViewTracker />
         <WebVitalsTracker />
         <SearchHotkey />
       </body>
