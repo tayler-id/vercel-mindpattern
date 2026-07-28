@@ -19,7 +19,7 @@ const BACKEND_URL = process.env.BACKEND_API_URL || 'https://mindpattern.fly.dev'
 // A slow backend must fail fast, never hang a render: without this signal a
 // wedged Fly box held server renders open until the Vercel function timed out,
 // which read as "links don't work."
-const BACKEND_TIMEOUT_MS = 10_000
+const BACKEND_TIMEOUT_MS = Number(process.env.BACKEND_FETCH_TIMEOUT_MS ?? 10_000)
 
 // Detail pages are ISR-cached, so error semantics matter: only a backend 404
 // may become a notFound() (cacheable), while timeouts/5xx must throw so the
