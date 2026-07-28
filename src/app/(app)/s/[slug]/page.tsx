@@ -37,18 +37,36 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   if (!story) return { title: 'Story not found' }
 
   const description = (story.summary || story.dek || story.take || '').slice(0, 160)
-  const ogImage = `/og/story/${encodeURIComponent(story.slug)}`
+  const canonical = `/s/${story.slug}`
+  const ogImage = `/og/story/${encodeURIComponent(story.slug)}.png`
+  const imageAlt = `${story.title} — ${SITE_NAME}`
   return {
     title: story.title,
     description,
-    alternates: { canonical: `/s/${story.slug}` },
+    alternates: { canonical },
     openGraph: {
       title: story.title,
       description,
       type: 'article',
-      images: [{ url: ogImage, width: 1200, height: 630 }],
+      siteName: SITE_NAME,
+      url: canonical,
+      publishedTime: story.issue_date,
+      images: [
+        {
+          url: ogImage,
+          width: 1200,
+          height: 630,
+          type: 'image/png',
+          alt: imageAlt,
+        },
+      ],
     },
-    twitter: { card: 'summary_large_image', title: story.title, description, images: [ogImage] },
+    twitter: {
+      card: 'summary_large_image',
+      title: story.title,
+      description,
+      images: [{ url: ogImage, alt: imageAlt }],
+    },
   }
 }
 
@@ -158,7 +176,11 @@ export default async function StoryPage({ params }: Params) {
               <div className="type-kicker text-ink-faint">Redaction</div>
               <div className="mt-0.5 font-mono text-[0.75rem] font-semibold uppercase text-ink">{story.provenance.redaction_status}</div>
             </div>
-            <ShareButton title={story.title} className="ml-auto" />
+            <ShareButton
+              title={story.title}
+              url={`/s/${story.slug}`}
+              className="ml-auto"
+            />
           </div>
         </header>
 
