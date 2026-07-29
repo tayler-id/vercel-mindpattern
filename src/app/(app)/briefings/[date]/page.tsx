@@ -9,6 +9,7 @@ import type { AudioBriefing, IssueStoryUnit, PublicIssue, Report, ReportListItem
 import { JsonLd } from '@/components/json-ld'
 import { AudioBriefingPlayer } from '@/components/briefing/audio-briefing-player'
 import { ReportMarkdown } from '@/components/briefing/report-markdown'
+import { ShareButton } from '@/components/story/share-button'
 
 /** Briefing bodies open with an h1 repeating the title — the page header
     already carries it, so showing both doubles the title and stacks rules. */
@@ -45,6 +46,9 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
     const report = await getReport(date)
     if (!report) return { title: 'Briefing not found', robots: { index: false, follow: false } }
     const description = shortReportDescription(report.title, date)
+    const images = [
+      { url: `/og/briefing/${date}`, width: 1200, height: 630, alt: report.title },
+    ]
     return {
       title: report.title,
       description,
@@ -55,7 +59,9 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
         description,
         url: `/briefings/${date}`,
         publishedTime: date,
+        images,
       },
+      twitter: { card: 'summary_large_image', title: report.title, description, images },
     }
   } catch (err) {
     if (isBackendNotFound(err)) {
@@ -131,9 +137,15 @@ export default async function BriefingPage({ params }: Params) {
           >
             {report.title}
           </h1>
-          <p className="rise-in type-kicker mt-5 border-t-[3px] border-ink pt-3 text-ink-faint" style={{ '--i': 3 } as CSSProperties}>
-            {wordCount.toLocaleString()} words · {readTime} min read
-          </p>
+          <div
+            className="rise-in mt-5 flex flex-wrap items-center justify-between gap-x-6 gap-y-3 border-t-[3px] border-ink pt-3"
+            style={{ '--i': 3 } as CSSProperties}
+          >
+            <p className="type-kicker text-ink-faint">
+              {wordCount.toLocaleString()} words · {readTime} min read
+            </p>
+            <ShareButton title={report.title} url={`/briefings/${date}`} className="ml-auto" />
+          </div>
         </header>
 
         {audio && <AudioBriefingPlayer audio={audio} />}
