@@ -48,16 +48,27 @@ export async function generateMetadata({
     return {
       title: report.title,
       description,
+      // /blog/[date] and /briefings/[date] render the same daily report.
+      // /briefings is the shareable one (it carries the share row and the
+      // social card), so both point their canonical there rather than
+      // splitting link equity and engagement across two URLs.
       alternates: {
-        canonical: `/blog/${date}`,
+        canonical: `/briefings/${date}`,
       },
       openGraph: {
         type: 'article',
         title: report.title,
         description,
-        url: `/blog/${date}`,
+        url: `/briefings/${date}`,
         publishedTime: date,
         modifiedTime: date,
+        images: [{ url: `/og/briefing/${date}`, width: 1200, height: 630, alt: report.title }],
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title: report.title,
+        description,
+        images: [{ url: `/og/briefing/${date}`, width: 1200, height: 630, alt: report.title }],
       },
     }
   } catch (err) {

@@ -1,4 +1,5 @@
 import type { CSSProperties } from 'react'
+import type { Metadata } from 'next'
 import {
   getFeed,
   getFindings,
@@ -18,17 +19,37 @@ import { BriefingCircle } from '@/components/wire/briefing-circle'
 import { KnowledgeGraph, type GraphNode } from '@/components/graph/knowledge-graph'
 import { CountUp } from '@/components/motion/count-up'
 import { SubscribeBand } from '@/components/subscribe/subscribe-band'
+import { ShareButton } from '@/components/story/share-button'
 import { sectionLabel } from '@/lib/sections'
+import { SITE_NAME, SITE_TITLE } from '@/lib/site'
+import { resolveWireView, WIRE_HEADING, wireViewPath } from '@/lib/wire-views'
 
 export const revalidate = 300
 
-const VIEWS = new Set(['trending', 'most-read', 'latest', 'topics'])
+const HEADING = WIRE_HEADING
 
-const HEADING: Record<string, { h1: string; sub: string }> = {
-  trending: { h1: 'Trending now', sub: 'reader signal + source recurrence' },
-  'most-read': { h1: 'Most read', sub: 'all-time reader favorites' },
-  latest: { h1: 'Latest signals', sub: 'most recent first' },
-  topics: { h1: 'By topic', sub: 'grouped by section' },
+type WireSearchParams = { searchParams: Promise<{ view?: string }> }
+
+/**
+ * Each tab is a shareable link, so metadata is per view: without this the
+ * whole wire unfurled as the generic site card and `/?view=latest` was
+ * indistinguishable from `/`.
+ */
+export async function generateMetadata({ searchParams }: WireSearchParams): Promise<Metadata> {
+  const view = resolveWireView((await searchParams).view)
+  const heading = HEADING[view]
+  const path = wireViewPath(view)
+  const title = view === 'trending' ? SITE_TITLE : `${heading.h1} — ${heading.sub}`
+  const description = `${heading.h1} on ${SITE_NAME}: ${heading.sub}, from an autonomous AI research pipeline.`
+  const images = [{ url: `/og/view/${view}`, width: 1200, height: 630, alt: heading.share }]
+
+  return {
+    title,
+    description,
+    alternates: { canonical: path },
+    openGraph: { type: 'website', title, description, url: path, images },
+    twitter: { card: 'summary_large_image', title, description, images },
+  }
 }
 
 /** The complete published-story archive for the rail (bounded for safety).
@@ -82,13 +103,9 @@ function toGraphNodes(
   }))
 }
 
-export default async function WirePage({
-  searchParams,
-}: {
-  searchParams: Promise<{ view?: string }>
-}) {
+export default async function WirePage({ searchParams }: WireSearchParams) {
   const sp = await searchParams
-  const view = VIEWS.has(sp.view ?? '') ? (sp.view as string) : 'trending'
+  const view = resolveWireView(sp.view)
 
   const [stats, reports, archive] = await Promise.all([
     getStats().catch(() => null as Stats | null),
@@ -179,14 +196,21 @@ export default async function WirePage({
               {h1Words.join(' ')}{' '}
               <span className="bg-ink px-[0.12em] text-paper">{h1Last}</span>
             </h1>
-            {stats && (
-              <p className="mt-4 font-mono text-[11.5px] uppercase tracking-[0.12em] text-ink-soft">
-                <CountUp value={stats.findings} className="font-semibold text-ink" /> findings
-                indexed · <CountUp value={stats.sources} className="font-semibold text-ink" />{' '}
-                sources · <b className="font-semibold text-ink">+{today}</b>/day ·{' '}
-                {HEADING[view].sub}
-              </p>
-            )}
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
+              {stats && (
+                <p className="font-mono text-[11.5px] uppercase tracking-[0.12em] text-ink-soft">
+                  <CountUp value={stats.findings} className="font-semibold text-ink" /> findings
+                  indexed · <CountUp value={stats.sources} className="font-semibold text-ink" />{' '}
+                  sources · <b className="font-semibold text-ink">+{today}</b>/day ·{' '}
+                  {HEADING[view].sub}
+                </p>
+              )}
+              <ShareButton
+                title={HEADING[view].share}
+                url={wireViewPath(view)}
+                className="ml-auto"
+              />
+            </div>
             <WireTabs active={view} />
           </header>
 

@@ -73,6 +73,21 @@ export function ShareButton({
       </button>
       <button
         type="button"
+        aria-label="Share on Bluesky"
+        onClick={() =>
+          // Bluesky's compose intent has no separate url param — the link
+          // rides in the text and the client unfurls it into a card.
+          open(
+            `https://bsky.app/intent/compose?text=${encodeURIComponent(`${title} ${url()}`)}`,
+            'bluesky',
+          )
+        }
+        className={`${PILL} bg-panel text-ink hover:bg-ink hover:text-white`}
+      >
+        Bluesky
+      </button>
+      <button
+        type="button"
         aria-label="Share on LinkedIn"
         onClick={() =>
           open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url())}`, 'linkedin')
