@@ -1,6 +1,13 @@
+// @vitest-environment-options { "url": "https://mindpattern.ai/" }
 import { track } from '@vercel/analytics'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { trackEvent, trackView } from './analytics'
+import { isDevTraffic, trackEvent, trackView } from './analytics'
+
+/**
+ * The module refuses to send from localhost and the LAN, so these tests run on
+ * the production origin. jsdom's default `http://localhost:3000/` made every
+ * beacon a no-op and the assertions below unfalsifiable.
+ */
 
 const mockedTrack = vi.mocked(track)
 
@@ -14,6 +21,7 @@ function setSendBeacon(sendBeacon: ReturnType<typeof vi.fn>) {
 describe('analytics helpers', () => {
   beforeEach(() => {
     localStorage.clear()
+    sessionStorage.clear()
     history.replaceState(null, '', '/')
     vi.stubGlobal('fetch', vi.fn())
   })
@@ -74,30 +82,42 @@ describe('analytics helpers', () => {
     )
   })
 
-  it('respects opt-out and opt-in query flags', () => {
-    const sendBeacon = vi.fn()
+  it('sends nothing once this browser has opted out', () => {
+    const sendBeacon = vi.fn().mockReturnValue(true)
     setSendBeacon(sendBeacon)
+    localStorage.setItem('mp_optout', '1')
 
-    history.replaceState(null, '', '/?mp_optout=1')
     trackEvent('blocked')
+    trackView('story', 'blocked-story')
+
     expect(sendBeacon).not.toHaveBeenCalled()
+  })
+
+  it('applies ?mp_optout on load, so a page that fires no events still honours it', async () => {
+    // The flags are read once when the module loads, which is what makes the
+    // homepage honour ?mp_optout=1 even though it tracks nothing itself.
+    const sendBeacon = vi.fn().mockReturnValue(true)
+    setSendBeacon(sendBeacon)
+    history.replaceState(null, '', '/?mp_optout=1')
+
+    vi.resetModules()
+    const optedOut = await import('./analytics')
     expect(localStorage.getItem('mp_optout')).toBe('1')
+    optedOut.trackEvent('blocked')
+    expect(sendBeacon).not.toHaveBeenCalled()
 
     history.replaceState(null, '', '/?mp_optout=0')
-    trackEvent('allowed')
-    expect(sendBeacon).toHaveBeenCalled()
+    vi.resetModules()
+    const optedIn = await import('./analytics')
     expect(localStorage.getItem('mp_optout')).toBeNull()
+    optedIn.trackEvent('allowed')
+    expect(sendBeacon).toHaveBeenCalled()
   })
 
   it('only sends story view beacons for story views', () => {
     const sendBeacon = vi.fn().mockReturnValue(true)
     setSendBeacon(sendBeacon)
 
-    history.replaceState(null, '', '/?mp_optout=1')
-    trackView('story', 'blocked-story')
-    expect(sendBeacon).not.toHaveBeenCalled()
-
-    history.replaceState(null, '', '/?mp_optout=0')
     trackView('source', 'example.com')
     expect(sendBeacon).not.toHaveBeenCalled()
 
@@ -126,5 +146,18 @@ describe('analytics helpers', () => {
 
     expect(() => trackEvent('storage-blocked')).not.toThrow()
     expect(sendBeacon).toHaveBeenCalled()
+  })
+
+  it('never sends from localhost or the LAN', () => {
+    // Dev traffic must not reach the event store, which is why this file runs
+    // on the production origin in the first place. jsdom will not let a test
+    // rewrite location.hostname, so drive the check itself.
+    expect(isDevTraffic('localhost')).toBe(true)
+    expect(isDevTraffic('127.0.0.1')).toBe(true)
+    expect(isDevTraffic('192.168.1.24')).toBe(true)
+    expect(isDevTraffic('10.0.0.4')).toBe(true)
+    expect(isDevTraffic('studio.local')).toBe(true)
+    expect(isDevTraffic('mindpattern.ai')).toBe(false)
+    expect(isDevTraffic('mindpattern.fly.dev')).toBe(false)
   })
 })

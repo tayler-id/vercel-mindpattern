@@ -188,9 +188,13 @@ function campaignFields(name: string): { campaign_id?: string; source_channel?: 
 }
 
 /** Dev traffic (localhost / LAN) never reaches the event store. */
+export function isDevTraffic(hostname: string): boolean {
+  return /^(localhost|127\.|192\.168\.|10\.)|\.local$/.test(hostname)
+}
+
 function devTraffic(): boolean {
   try {
-    return /^(localhost|127\.|192\.168\.|10\.)|\.local$/.test(window.location.hostname)
+    return isDevTraffic(window.location.hostname)
   } catch {
     return true
   }

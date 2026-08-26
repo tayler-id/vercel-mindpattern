@@ -21,13 +21,12 @@ export function CountUp({
   const raf = useRef<number | null>(null)
 
   useEffect(() => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      setDisplay(value)
-      return
-    }
+    // Reduced motion jumps to the end on the first frame rather than setting
+    // state straight from the effect body, which cascades a second render.
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const t0 = performance.now()
     const tick = (t: number) => {
-      const p = Math.min((t - t0) / duration, 1)
+      const p = reduced ? 1 : Math.min((t - t0) / duration, 1)
       const eased = 1 - Math.pow(1 - p, 3)
       setDisplay(Math.round(value * eased))
       if (p < 1) raf.current = requestAnimationFrame(tick)

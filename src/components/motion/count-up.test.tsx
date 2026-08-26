@@ -39,7 +39,9 @@ describe('CountUp', () => {
   it('animates toward the target value and cancels pending frames on unmount', () => {
     const { unmount } = render(<CountUp value={100} duration={1000} className="metric" />)
 
-    expect(screen.getByText('0')).toHaveClass('metric')
+    // The first paint carries the real value, not 0: crawlers and slow
+    // connections were reading "0 findings indexed" until hydration.
+    expect(screen.getByText('100')).toHaveClass('metric')
     act(() => frames.shift()?.(500))
     expect(screen.getByText('88')).toBeInTheDocument()
     act(() => frames.shift()?.(1000))
