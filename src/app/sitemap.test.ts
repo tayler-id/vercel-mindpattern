@@ -49,19 +49,16 @@ describe('sitemap metadata', () => {
     expect(entries.find((entry) => entry.url.endsWith('/s/story-two'))?.lastModified).toBeUndefined()
   })
 
-  it('returns static routes when backend lookups fail', async () => {
+  it('throws rather than returning static routes when the backend fails', async () => {
+    // This used to assert the opposite. On 2026-08-26 the graph call was
+    // wrapped in `catch { graph = null }`, a slow backend produced a sitemap of
+    // six static routes while the corpus held 6,806 stories, and
+    // `revalidate = 3600` pinned that version for an hour. Letting the render
+    // throw makes Next keep serving the last good sitemap. The full set of
+    // degradation cases is in sitemap.degradation.test.ts.
     backendFetch.mockRejectedValue(new Error('backend down'))
     const { default: sitemap } = await import('./sitemap')
 
-    const entries = await sitemap()
-
-    expect(entries.map((entry) => entry.url)).toEqual([
-      'https://mindpattern.ai/',
-      'https://mindpattern.ai/briefings',
-      'https://mindpattern.ai/blog',
-      'https://mindpattern.ai/explore',
-      'https://mindpattern.ai/work',
-      'https://mindpattern.ai/research/agentic-evals',
-    ])
+    await expect(sitemap()).rejects.toThrow()
   })
 })

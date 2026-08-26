@@ -17,12 +17,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     reports = []
   }
 
-  try {
-    graph = await backendFetch<SiteSitemap>('/api/site/sitemap', {
-      user: 'ramsay',
-    })
-  } catch {
-    graph = null
+  // No catch. On 2026-08-26 this call was wrapped in `catch { graph = null }`
+  // and a slow backend produced a sitemap of five static routes while the
+  // corpus held 6,806 stories, 84 entities, 18 sources and 184 briefings.
+  // `revalidate = 3600` then pinned that version for an hour, so Google was
+  // repeatedly told the site had 187 pages instead of roughly 7,000.
+  //
+  // Letting the render throw makes Next keep serving the last good sitemap
+  // instead of caching a gutted one. Same rule the story pages follow: a
+  // failure that cannot be reported honestly must not be cached.
+  graph = await backendFetch<SiteSitemap>('/api/site/sitemap', {
+    user: 'ramsay',
+  })
+
+  if (!graph?.stories?.length) {
+    throw new Error(
+      `sitemap: backend returned ${graph?.stories?.length ?? 0} stories; ` +
+        'refusing to publish a sitemap that de-indexes the corpus',
+    )
   }
 
   const staticRoutes: MetadataRoute.Sitemap = [
