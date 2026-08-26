@@ -1,10 +1,12 @@
 import type { Metadata } from 'next'
 import { topicFor, topicStyleVars } from '@/lib/topics'
-import type { CSSProperties } from 'react'
+import { cache, type CSSProperties } from 'react'
 import Link from 'next/link'
+import { connection } from 'next/server'
 import { notFound } from 'next/navigation'
 import { JsonLd } from '@/components/json-ld'
-import { getEntity } from '@/lib/api'
+import { getEntity, isBackendUnreachable } from '@/lib/api'
+import type { PublicEntity } from '@/lib/types'
 import { absoluteUrl, SITE_NAME } from '@/lib/site'
 
 export const revalidate = 3600
@@ -17,11 +19,95 @@ export function generateStaticParams() {
 
 type Params = { params: Promise<{ slug: string }> }
 
+// generateMetadata and the page component are two calls in one render pass.
+// Without this they each fetch, each with its own 10s budget against the same
+// slow endpoint, and they can disagree: a timed-out head paired with a
+// successful body writes a fully correct entity page into the ISR cache
+// carrying robots {index:false} and a slug-derived title, and serves that to
+// every reader and crawler for the next hour. cache() makes them one call and
+// one outcome. Same bug commit 671752c fixed for the og routes.
+const loadEntity = cache((slug: string) => getEntity(slug))
+
 const ENTITY_SLUG_RE = /^[a-z0-9][a-z0-9-]{0,95}$/i
 
 function cleanSlug(raw: string): string | null {
-  const slug = decodeURIComponent(raw).toLowerCase()
+  // Next hands params already decoded, so a request for /e/%25 arrives as the
+  // literal '%' and decodeURIComponent throws URIError on it. Uncaught, that
+  // is a 500 where the route means to answer 404.
+  let decoded: string
+  try {
+    decoded = decodeURIComponent(raw)
+  } catch {
+    return null
+  }
+  const slug = decoded.toLowerCase()
   return ENTITY_SLUG_RE.test(slug) && !slug.includes('..') ? slug : null
+}
+
+const FALLBACK_DESCRIPTION = `An entity trail from the ${SITE_NAME} public AI research archive.`
+
+// The page answers notFound() on the same condition, so this only reaches a
+// crawler that asked for the head. Marking it keeps a dead slug out of the
+// index either way, matching /s/[slug] and /f/[id].
+const ENTITY_NOT_FOUND: Metadata = {
+  title: 'Entity not found',
+  robots: { index: false, follow: false },
+}
+
+/** Sentence-case a slug so a failed fetch still puts real words in the card. */
+function nameFromSlug(slug: string): string {
+  const words = slug.replace(/-+/g, ' ').trim()
+  return words ? words[0].toUpperCase() + words.slice(1) : 'Entity'
+}
+
+// One card shape for both the loaded entity and the backend-is-down fallback.
+// /api/entities/{slug} runs graph LIKE scans over the whole finding corpus and
+// measured 10.5s warm, past the 10s fetch budget, so this page threw on every
+// click and the 500 carried no social tags at all. Both branches emit og:title,
+// og:description, og:type, og:url, og:image with dimensions, and a large
+// twitter card. Entities have no bespoke card route, so they share the static
+// site image the way /work and /explore do.
+function entityCard(opts: {
+  slug: string
+  name: string
+  description: string
+  degraded?: boolean
+}): Metadata {
+  const { slug, name, description, degraded } = opts
+  const title = `${name} intelligence trail`
+  const canonical = `/e/${slug}`
+  const imageAlt = `${name} · ${SITE_NAME}`
+  return {
+    title,
+    description,
+    alternates: { canonical },
+    // The degraded shell is reachable for any slug the regex allows, real or
+    // not, so a crawler that lands on one during an outage must not index a
+    // slug-titled stub. `follow` stays on so the links out still count.
+    ...(degraded ? { robots: { index: false, follow: true } } : {}),
+    openGraph: {
+      title,
+      description,
+      type: 'website',
+      siteName: SITE_NAME,
+      url: canonical,
+      images: [
+        {
+          url: '/opengraph-image',
+          width: 1200,
+          height: 630,
+          type: 'image/png',
+          alt: imageAlt,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [{ url: '/opengraph-image', alt: imageAlt }],
+    },
+  }
 }
 
 function relationshipLabel(source: string, relationship: string): string {
@@ -38,16 +124,81 @@ function relationshipLabel(source: string, relationship: string): string {
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug: raw } = await params
   const slug = cleanSlug(raw)
-  if (!slug) return { title: 'Entity not found' }
+  if (!slug) return ENTITY_NOT_FOUND
 
-  const entity = await getEntity(slug)
-  if (!entity) return { title: 'Entity not found' }
-
-  return {
-    title: `${entity.name} intelligence trail`,
-    description: `MindPattern newsletter stories, sources, and graph evidence connected to ${entity.name}.`,
-    alternates: { canonical: `/e/${entity.slug}` },
+  let entity: PublicEntity | null
+  try {
+    entity = await loadEntity(slug)
+  } catch (err) {
+    // getEntity turns a backend 404 into null and rethrows everything else, so
+    // sort the rethrows: a box that did not answer gets the degraded card, and
+    // anything else (a bug in here, a malformed payload) goes to the error
+    // boundary rather than being reported to readers as a slow minute.
+    if (!isBackendUnreachable(err)) throw err
+    // The body marks its own degraded render dynamic. The head has to as well,
+    // or a noindex stub gets written into the full route cache alongside a
+    // body that rendered fine.
+    await connection()
+    return entityCard({
+      slug,
+      name: nameFromSlug(slug),
+      description: FALLBACK_DESCRIPTION,
+      degraded: true,
+    })
   }
+  if (!entity) return ENTITY_NOT_FOUND
+
+  return entityCard({
+    slug: entity.slug,
+    name: entity.name,
+    description: `MindPattern newsletter stories, sources, and graph evidence connected to ${entity.name}.`,
+  })
+}
+
+/** Shown when the backend times out. A 200 with a way onward beats a 500. */
+function EntityUnavailable({ slug }: { slug: string }) {
+  return (
+    <div className="h-full overflow-y-auto">
+      <main className="mx-auto max-w-[720px] px-8 pb-24 pt-10 max-sm:px-5 max-sm:pt-6">
+        <Link
+          href="/"
+          className="type-kicker inline-block text-ink-soft transition-colors duration-[var(--dur-fast)] hover:text-ink focus-visible:outline-2 focus-visible:outline-ink focus-visible:outline-offset-2"
+        >
+          ← The Wire
+        </Link>
+        <p className="type-kicker mt-6 text-primary">Wire interrupted</p>
+        <h1
+          className="type-display mt-2 text-[clamp(1.75rem,4vw,2.5rem)] leading-[1.05] tracking-[-0.02em] text-ink"
+          style={{ fontVariationSettings: '"wdth" 114', fontWeight: 850 } as CSSProperties}
+        >
+          {nameFromSlug(slug)}
+        </h1>
+        <p className="mt-3 max-w-[56ch] font-serif text-[1.0625rem] leading-[1.5] text-ink-soft">
+          The entity trail did not answer in time. Retry in a minute, or start from the briefing archive.
+        </p>
+        <div className="mt-6 flex flex-wrap gap-3">
+          <a
+            href={`/e/${slug}`}
+            className="inline-block rounded-full bg-panel px-4 py-2 font-mono text-[0.65625rem] font-semibold uppercase tracking-[0.1em] text-ink hover:bg-ink hover:text-white focus-visible:outline-2 focus-visible:outline-ink focus-visible:outline-offset-2"
+          >
+            Retry
+          </a>
+          <Link
+            href="/briefings"
+            className="inline-block rounded-full bg-panel px-4 py-2 font-mono text-[0.65625rem] font-semibold uppercase tracking-[0.1em] text-ink hover:bg-ink hover:text-white focus-visible:outline-2 focus-visible:outline-ink focus-visible:outline-offset-2"
+          >
+            Briefing archive
+          </Link>
+          <Link
+            href="/explore"
+            className="inline-block rounded-full bg-panel px-4 py-2 font-mono text-[0.65625rem] font-semibold uppercase tracking-[0.1em] text-ink hover:bg-ink hover:text-white focus-visible:outline-2 focus-visible:outline-ink focus-visible:outline-offset-2"
+          >
+            Explore
+          </Link>
+        </div>
+      </main>
+    </div>
+  )
 }
 
 export default async function EntityPage({ params }: Params) {
@@ -55,7 +206,21 @@ export default async function EntityPage({ params }: Params) {
   const slug = cleanSlug(raw)
   if (!slug) notFound()
 
-  const entity = await getEntity(slug)
+  // A timeout must not become a 500. The route still answers 200 with meta tags
+  // and a way onward. A backend 404 arrives as null and stays a real notFound().
+  let entity: PublicEntity | null
+  try {
+    entity = await loadEntity(slug)
+  } catch (err) {
+    if (!isBackendUnreachable(err)) throw err
+    // `revalidate = 3600` means a successful render is written to the full
+    // route cache and served to everyone for the next hour. Without this the
+    // shell would replace a good entity page for an hour every time the 7 AM
+    // slow window happened to catch a revalidation. connection() marks the
+    // render dynamic, so this one is never stored.
+    await connection()
+    return <EntityUnavailable slug={slug} />
+  }
   if (!entity) notFound()
   const dossier = entity.dossier ?? null
   const findings = entity.findings ?? []

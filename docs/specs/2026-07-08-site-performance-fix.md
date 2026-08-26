@@ -114,9 +114,21 @@ ratio measurably up.
   (related paths included) and entity/source/finding page payloads to disk;
   request path becomes "read a file." Server-side caches stay as fallback for
   archive gaps.
-- **Purge-on-publish:** after the nightly sync, the pipeline pings a Next.js
-  revalidation webhook so pages update within minutes while cache TTLs stay
-  long (site freshness target: within ~15 min of publish).
+- **Purge-on-publish:** SHIPPED 2026-08-26. `POST /api/revalidate` on the site
+  takes a list of paths, checks a shared secret, and calls `revalidatePath` on
+  each. `orchestrator/sync.py` builds that list from the artifacts the publish
+  just wrote (`changed_site_paths`: the day's stories, the home page, both
+  briefing routes, and the entity pages today's stories name most, capped at
+  12), purges them, then crawls them back warm in the same pass. Purge and
+  crawl are interleaved in waves of 10: `revalidatePath` expires an entry
+  outright rather than serving it stale, so purging the whole set first left
+  every page uncached for the length of the crawl. Pages appear within a
+  minute of the sync instead of waiting out the 3600s TTL.
+
+  Not yet covered: `changed_site_paths` emits no `/f/` or `/arc/` paths even
+  though the day's story JSON carries `finding_ids` and `arc_ids` and the
+  site's allowlist accepts both. Those pages stay stale for the full TTL after
+  a publish.
 - Consider `uvicorn[standard]` + 2 workers once caches are process-safe, and
   a sqlite vector index (or precomputed neighbor lists) to retire the 15.5k
   embedding scans entirely.
@@ -125,10 +137,45 @@ ratio measurably up.
 
 - Backend tests: `cd ~/Projects/mindpattern-v3 && .venv/bin/python -m pytest tests/ -q`
 - Backend compile gate (Fly is Python 3.11): `python3.11 -m py_compile dashboard/routes/api.py`
-- Backend deploy: `~/.fly/bin/flyctl deploy -a mindpattern --strategy immediate`
+- **Backend deploy: `cd ~/Projects/mindpattern-v3 && deploy/deploy.sh`.** The only
+  supported way to deploy. Runs the tests and the 3.11 compile gate, ships with
+  `flyctl deploy --strategy immediate`, waits for `/healthz` and for
+  `/api/warmup/status` to leave `running`, then purges and re-crawls the day's
+  reader paths. Exits nonzero if the crawl covered less than it was asked to.
+  A raw `flyctl deploy` leaves the caches cold with nothing to refill them.
+- **After a Vercel deploy: `cd ~/Projects/mindpattern-v3 && deploy/deploy.sh --warm-only`.**
+  A Vercel deploy drops the whole ISR cache, so this runs `--scope site`: it
+  crawls the paths the sitemap advertises (entry points, every `/e/` and
+  `/source/`, then the newest 30 briefings, 30 blog dates and 200 stories) and
+  purges nothing, because there is nothing left to purge. The `--scope changed`
+  set is four paths on a day with no publish, which is how a cold site once
+  reported itself warm.
+- Purge/warm by hand for one day: `.venv/bin/python -m orchestrator.sync warm --date YYYY-MM-DD`
 - Frontend dev: `cd ~/Projects/mindpattern-rabbit-hole && npm run dev`
 - Frontend build check: `npm run build`
 - Live smoke: `curl -s -o /dev/null -w "%{http_code} %{time_total}s\n" https://mindpattern.ai/<path>`
+
+### Purge-on-publish secret
+
+`POST /api/revalidate` on the site authenticates with a shared secret in the
+`x-revalidate-secret` header. Set the same value on both sides:
+
+- Vercel project env var `REVALIDATE_SECRET` (all environments).
+- Pipeline machine: `MP_REVALIDATE_SECRET`, or `~/.mindpattern-revalidate-secret`.
+
+With the secret unset the pipeline logs a warning, skips the purge, and falls
+back to the hour-long TTL. That is a degraded publish, not a failed one. Under
+`MP_SANDBOX=1` the purge refuses the same way, since it mutates the live CDN.
+
+**Still unverified end to end.** The tests on both sides mock the mechanism
+away: the route's tests replace `revalidatePath` with a spy and the pytest side
+patches `revalidate_site_paths`, so nothing yet proves a purge drops a real ISR
+entry for a page under the `(app)` route group with `revalidate = 3600`. Once
+`REVALIDATE_SECRET` is set on both sides, do this once and record the result
+here: `curl -I` a story page and note `x-vercel-cache: HIT`, POST that path to
+`/api/revalidate`, `curl -I` again and confirm `MISS`. Run `npm run build`
+before the Vercel deploy as well; the route has never been compiled into the
+app.
 
 ## Boundaries
 

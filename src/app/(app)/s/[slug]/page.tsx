@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import type { CSSProperties } from 'react'
+import { cache, type CSSProperties } from 'react'
 import Link from 'next/link'
 import { connection } from 'next/server'
 import { TrackedLink } from '@/components/analytics/tracked-link'
@@ -24,10 +24,27 @@ export function generateStaticParams() {
 
 type Params = { params: Promise<{ slug: string }> }
 
+// generateMetadata and the page component are two calls in one render pass.
+// Without this they each fetch, each with its own 10s budget, and they can
+// disagree: a timed-out head paired with a successful body writes a correct
+// story page into the ISR cache carrying robots {index:false} and a
+// slug-derived title, and serves that for an hour. cache() makes them one
+// call and one outcome.
+const loadStory = cache((slug: string) => getStory(slug))
+
 const STORY_SLUG_RE = /^[a-z0-9][a-z0-9-]{0,127}$/i
 
 function cleanSlug(raw: string): string | null {
-  const slug = decodeURIComponent(raw).toLowerCase()
+  // Next hands params already decoded, so /s/%25 arrives as the literal '%'
+  // and decodeURIComponent throws URIError on it. Uncaught, that is a 500
+  // where the route means to answer 404.
+  let decoded: string
+  try {
+    decoded = decodeURIComponent(raw)
+  } catch {
+    return null
+  }
+  const slug = decoded.toLowerCase()
   return STORY_SLUG_RE.test(slug) && !slug.includes('..') ? slug : null
 }
 
@@ -103,13 +120,16 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 
   let story: PublicStory | null
   try {
-    story = await getStory(slug)
+    story = await loadStory(slug)
   } catch (err) {
     // getStory turns a backend 404 into null and rethrows everything else, so
     // sort the rethrows: a box that did not answer gets the degraded card, and
     // anything else (a bug in here, a malformed payload) goes to the error
     // boundary rather than being reported to readers as a slow minute.
     if (!isBackendUnreachable(err)) throw err
+    // The body marks its own degraded render dynamic; the head has to as well,
+    // or a noindex stub is cached alongside a body that rendered fine.
+    await connection()
     return storyCard({
       slug,
       title: titleFromSlug(slug),
@@ -182,7 +202,7 @@ export default async function StoryPage({ params }: Params) {
   // and a way onward. A backend 404 arrives as null and stays a real notFound().
   let story: PublicStory | null
   try {
-    story = await getStory(slug)
+    story = await loadStory(slug)
   } catch (err) {
     if (!isBackendUnreachable(err)) throw err
     // `revalidate = 3600` means a successful render is written to the full
