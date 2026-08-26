@@ -51,6 +51,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     },
     {
+      url: absoluteUrl('/work'),
+      lastModified: new Date('2026-08-04'),
+      changeFrequency: 'yearly',
+      priority: 0.6,
+    },
+    {
       url: absoluteUrl('/research/agentic-evals'),
       lastModified: new Date('2026-06-23'),
       changeFrequency: 'monthly',

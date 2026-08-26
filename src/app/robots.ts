@@ -28,7 +28,6 @@ export default function robots(): MetadataRoute.Robots {
       { userAgent: 'meta-externalagent', ...crawlRules },
       { userAgent: 'CCBot', ...crawlRules },
       { userAgent: 'MistralAI-User', ...crawlRules },
-      { userAgent: 'CCBot', ...crawlRules },
     ],
     sitemap: `${SITE_URL}/sitemap.xml`,
     host: SITE_URL,

@@ -262,7 +262,7 @@ function ReadingColumn({
             <a
               href={finding.source_url}
               target="_blank"
-              rel="noopener noreferrer"
+              rel="noopener"
               className="inline-block rounded-lg border border-line px-2.5 py-1.5 font-mono text-[0.71875rem] text-ink hover:bg-ink hover:text-white"
             >
               {sourceLabel(finding.source_name, finding.source_url)}

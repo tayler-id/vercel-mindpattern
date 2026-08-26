@@ -60,6 +60,7 @@ describe('sitemap metadata', () => {
       'https://mindpattern.ai/briefings',
       'https://mindpattern.ai/blog',
       'https://mindpattern.ai/explore',
+      'https://mindpattern.ai/work',
       'https://mindpattern.ai/research/agentic-evals',
     ])
   })

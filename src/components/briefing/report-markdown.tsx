@@ -55,8 +55,12 @@ export function ReportMarkdown({ content }: { content: string }) {
           h1: ({ children }) => <h2 data-streamdown="heading-1">{children}</h2>,
           h2: ({ children }) => <h3 data-streamdown="heading-2">{children}</h3>,
           h3: ({ children }) => <h4 data-streamdown="heading-3">{children}</h4>,
+          // rel="noopener" without noreferrer: noopener is what closes the
+          // window.opener hole, while noreferrer also strips the Referer
+          // header, so every source a story links out to never saw
+          // mindpattern.ai in its referral logs.
           a: ({ href, children }) => (
-            <a href={href} target="_blank" rel="noopener noreferrer" data-streamdown="link">
+            <a href={href} target="_blank" rel="noopener" data-streamdown="link">
               {children}
             </a>
           ),
