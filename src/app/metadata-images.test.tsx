@@ -14,7 +14,10 @@ vi.mock('next/og', () => ({
   ImageResponse: imageResponseMock,
 }))
 
-vi.mock('@/lib/api', () => ({
+// backendOutcome and the typed errors stay real: the route's three-way split
+// between loaded, missing, and unavailable runs through them.
+vi.mock('@/lib/api', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/api')>()),
   getStory: api.getStory,
 }))
 
@@ -43,7 +46,7 @@ describe('metadata and image routes', () => {
 
     expect(image.size).toEqual({ width: 1200, height: 630 })
     expect(image.contentType).toBe('image/png')
-    expect(image.alt).toBe('MindPattern — AI Research Intelligence')
+    expect(image.alt).toBe('MindPattern - AI Research Intelligence')
     expect(image.default()).toEqual({
       node: expect.any(Object),
       options: { width: 1200, height: 630 },
@@ -65,18 +68,21 @@ describe('metadata and image routes', () => {
       }),
     ).resolves.toEqual({
       node: expect.any(Object),
-      options: { width: 1200, height: 630 },
+      // socialImageResponse also sets the CDN cache headers; the size is what
+      // this test is about.
+      options: expect.objectContaining({ width: 1200, height: 630 }),
     })
     expect(api.getStory).toHaveBeenCalledWith('story-one')
 
-    api.getStory.mockRejectedValueOnce(new Error('missing'))
+    const { BackendError } = await import('@/lib/api')
+    api.getStory.mockRejectedValueOnce(BackendError.timeout('/api/stories/missing'))
     await expect(
       route.GET(new Request('https://mindpattern.ai/og/story/missing'), {
         params: Promise.resolve({ slug: 'missing' }),
       }),
     ).resolves.toEqual({
       node: expect.any(Object),
-      options: { width: 1200, height: 630 },
+      options: expect.objectContaining({ width: 1200, height: 630, status: 503 }),
     })
     expect(imageResponseMock).toHaveBeenCalledTimes(2)
   })

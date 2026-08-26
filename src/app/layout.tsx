@@ -35,20 +35,32 @@ export const metadata: Metadata = {
     template: `%s | ${SITE_NAME}`,
   },
   description: SITE_DESCRIPTION,
-  alternates: {
-    canonical: '/',
-  },
+  // A page that sets no openGraph or twitter block of its own inherits these
+  // two objects whole, so nothing page-specific may live in either. That rules
+  // out four keys that used to be here.
+  //
+  // Title and description are gone because Next fills them from the page's own
+  // resolved title and description. Hardcoding them served /explore, /blog and
+  // /briefings the site title instead of theirs.
+  //
+  // `url` and `alternates.canonical` are gone because they were both '/', and
+  // six route families inherit them, so /briefings advertised itself as a
+  // duplicate of the homepage. Every page that wants one now declares it. The
+  // homepage sets both in src/app/(app)/page.tsx.
+  //
+  // `images` is gone from both because src/app/opengraph-image.tsx already
+  // supplies the card through the file convention, which the hand-written key
+  // suppressed (mergeStaticMetadata skips a level that declares images). The
+  // file convention adds the ?hash cache-buster crawlers need after the art
+  // changes, and og:image:type. Twitter then auto-fills its images from the
+  // resolved openGraph, which means a page with its own card keeps it instead
+  // of inheriting the site card here.
   openGraph: {
     type: 'website',
     siteName: SITE_NAME,
-    title: SITE_TITLE,
-    description: SITE_DESCRIPTION,
-    url: '/',
   },
   twitter: {
-    card: 'summary',
-    title: SITE_TITLE,
-    description: SITE_DESCRIPTION,
+    card: 'summary_large_image',
   },
   appleWebApp: {
     capable: true,
