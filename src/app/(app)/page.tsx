@@ -19,6 +19,7 @@ import { BriefingCircle } from '@/components/wire/briefing-circle'
 import { KnowledgeGraph, type GraphNode } from '@/components/graph/knowledge-graph'
 import { CountUp } from '@/components/motion/count-up'
 import { SubscribeBand } from '@/components/subscribe/subscribe-band'
+import { ConsultBand } from '@/components/consult/consult-band'
 import { ShareButton } from '@/components/story/share-button'
 import { sectionLabel } from '@/lib/sections'
 import { SITE_NAME, SITE_TITLE } from '@/lib/site'
@@ -34,20 +35,28 @@ type WireSearchParams = { searchParams: Promise<{ view?: string }> }
  * Each tab is a shareable link, so metadata is per view: without this the
  * whole wire unfurled as the generic site card and `/?view=latest` was
  * indistinguishable from `/`.
+ *
+ * Nothing here touches the backend, which is the point. The front page is the
+ * one link that has to unfurl while Fly is wedged, and `/og/view/[view]`
+ * renders from the view name alone, so the image resolves too. A page-level
+ * openGraph object replaces the root's rather than merging into it, so
+ * siteName and the large twitter card are repeated here instead of inherited.
  */
 export async function generateMetadata({ searchParams }: WireSearchParams): Promise<Metadata> {
   const view = resolveWireView((await searchParams).view)
   const heading = HEADING[view]
   const path = wireViewPath(view)
-  const title = view === 'trending' ? SITE_TITLE : `${heading.h1} — ${heading.sub}`
+  const title = view === 'trending' ? SITE_TITLE : `${heading.h1} · ${heading.sub}`
   const description = `${heading.h1} on ${SITE_NAME}: ${heading.sub}, from an autonomous AI research pipeline.`
-  const images = [{ url: `/og/view/${view}`, width: 1200, height: 630, alt: heading.share }]
+  const images = [
+    { url: `/og/view/${view}`, width: 1200, height: 630, type: 'image/png', alt: heading.share },
+  ]
 
   return {
     title,
     description,
     alternates: { canonical: path },
-    openGraph: { type: 'website', title, description, url: path, images },
+    openGraph: { type: 'website', siteName: SITE_NAME, title, description, url: path, images },
     twitter: { card: 'summary_large_image', title, description, images },
   }
 }
@@ -265,6 +274,7 @@ export default async function WirePage({ searchParams }: WireSearchParams) {
       </div>
 
       <SubscribeBand />
+      <ConsultBand />
     </div>
   )
 }

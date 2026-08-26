@@ -171,7 +171,7 @@ export default async function SourcePage({ params }: Params) {
           <a
             href={firstFinding.source_url}
             target="_blank"
-            rel="noopener noreferrer"
+            rel="noopener"
             className="mt-10 inline-flex min-h-[44px] items-center rounded-full bg-ink px-6 py-3 font-mono text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-white transition-all duration-[var(--dur-fast)] ease-[var(--ease-swift)] hover:-translate-y-0.5 hover:bg-primary active:scale-95 focus-visible:outline-2 focus-visible:outline-ink focus-visible:outline-offset-2"
           >
             Open latest cited source

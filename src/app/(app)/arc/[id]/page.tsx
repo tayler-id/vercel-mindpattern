@@ -139,7 +139,7 @@ export default async function ArcPage({ params, searchParams }: Params) {
                     <a
                       href={item.source_url}
                       target="_blank"
-                      rel="noopener noreferrer"
+                      rel="noopener"
                       className="type-kicker mt-2 inline-block text-[color:var(--tc-text)] hover:underline"
                     >
                       Source

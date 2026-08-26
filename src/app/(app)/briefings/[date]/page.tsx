@@ -3,9 +3,16 @@ import { topicFor, topicStyleVars } from '@/lib/topics'
 import type { Metadata } from 'next'
 import type { CSSProperties } from 'react'
 import Link from 'next/link'
+import { connection } from 'next/server'
 import { notFound } from 'next/navigation'
-import { getAudioBriefing, getReport, getReports, getStructuredIssue, isBackendNotFound, reportExists } from '@/lib/api'
-import type { AudioBriefing, IssueStoryUnit, PublicIssue, Report, ReportListItem } from '@/lib/types'
+import {
+  getAudioBriefing,
+  getReport,
+  getStructuredIssue,
+  isBackendNotFound,
+  lookupArchive,
+} from '@/lib/api'
+import type { AudioBriefing, IssueStoryUnit, PublicIssue, Report } from '@/lib/types'
 import { JsonLd } from '@/components/json-ld'
 import { AudioBriefingPlayer } from '@/components/briefing/audio-briefing-player'
 import { ReportMarkdown } from '@/components/briefing/report-markdown'
@@ -36,67 +43,155 @@ export function generateStaticParams() {
 
 type Params = { params: Promise<{ date: string }> }
 
+const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/
+
+const BRIEFING_NOT_FOUND: Metadata = {
+  title: 'Briefing not found',
+  robots: { index: false, follow: false },
+}
+
+/** Names the briefing from the date alone, for a card built with no fetch. */
+function titleForDate(date: string): string {
+  return `Daily AI research briefing for ${date}`
+}
+
+// One card shape for the loaded briefing and for every degraded path. Each
+// emits og:title, og:description, og:url, og:type, og:image with its
+// dimensions, and a large twitter card. Degraded, the card keeps the right
+// title, description and URL; the image falls back to the generic card, which
+// `/og/briefing/[date]` ships under a short negative TTL so it is not pinned.
+function briefingCard(date: string, title: string, degraded = false): Metadata {
+  const canonical = `/briefings/${date}`
+  const description = shortReportDescription(title, date)
+  const images = [
+    {
+      url: `/og/briefing/${date}`,
+      width: 1200,
+      height: 630,
+      type: 'image/png',
+      alt: `${title} · ${SITE_NAME}`,
+    },
+  ]
+
+  return {
+    title,
+    description,
+    alternates: { canonical },
+    // A date-shaped URL reaches the degraded shell whether or not it was ever
+    // published, so a crawler must not index the retry page as the briefing.
+    ...(degraded ? { robots: { index: false, follow: true } } : {}),
+    openGraph: {
+      type: 'article',
+      siteName: SITE_NAME,
+      title,
+      description,
+      url: canonical,
+      publishedTime: date,
+      images,
+    },
+    twitter: { card: 'summary_large_image', title, description, images },
+  }
+}
+
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { date } = await params
-  if ((await reportExists(date)) === false) {
-    return { title: 'Briefing not found', robots: { index: false, follow: false } }
+  if (!ISO_DATE_RE.test(date)) return BRIEFING_NOT_FOUND
+
+  // Only an archive list that came back and does not name the date proves
+  // absence. That check is also the fast path: the per-date endpoint takes up
+  // to 10s to answer for a date that was never published.
+  const archive = await lookupArchive(date)
+  if (archive.state === 'absent') return BRIEFING_NOT_FOUND
+
+  // The backend answers a missing date with a 200 `null` body, not a 404, but
+  // keep the 404 branch: a proxy or a path change can still produce one, and
+  // that is absence rather than a slow box.
+  const report = await getReport(date).catch((err: unknown) => {
+    if (isBackendNotFound(err)) return null
+    return 'unreachable' as const
+  })
+  if (report === 'unreachable') {
+    return briefingCard(date, archive.title ?? titleForDate(date), true)
   }
-  try {
-    // The backend answers missing dates with a 200 `null` body, not a 404.
-    const report = await getReport(date)
-    if (!report) return { title: 'Briefing not found', robots: { index: false, follow: false } }
-    const description = shortReportDescription(report.title, date)
-    const images = [
-      { url: `/og/briefing/${date}`, width: 1200, height: 630, alt: report.title },
-    ]
-    return {
-      title: report.title,
-      description,
-      alternates: { canonical: `/briefings/${date}` },
-      openGraph: {
-        type: 'article',
-        title: report.title,
-        description,
-        url: `/briefings/${date}`,
-        publishedTime: date,
-        images,
-      },
-      twitter: { card: 'summary_large_image', title: report.title, description, images },
-    }
-  } catch (err) {
-    if (isBackendNotFound(err)) {
-      return { title: 'Briefing not found', robots: { index: false, follow: false } }
-    }
-    throw err
-  }
+  return briefingCard(date, report?.title ?? archive.title ?? titleForDate(date))
+}
+
+/** Shown when the backend times out. A 200 with a way onward beats a 500. */
+function BriefingUnavailable({ date }: { date: string }) {
+  return (
+    <div className="h-full overflow-y-auto">
+      <main className="mx-auto max-w-[720px] px-8 pb-24 pt-11 max-sm:px-5">
+        <Link href="/briefings" className="type-kicker inline-block text-ink-soft transition-colors hover:text-ink">
+          ← Briefings
+        </Link>
+        <p className="type-kicker mt-6 text-primary">Wire interrupted</p>
+        <h1
+          className="type-display mt-2 text-[clamp(1.875rem,4vw,2.75rem)] leading-[1.05] tracking-[-0.015em] text-ink"
+          style={{ fontVariationSettings: '"wdth" 114', fontWeight: 850 } as CSSProperties}
+        >
+          {shortDate(date)}
+        </h1>
+        <p className="mt-3 max-w-[56ch] font-serif text-[1.0625rem] leading-[1.5] text-ink-soft">
+          The briefing for {date} could not be loaded. Retry in a minute, or open another issue from
+          the archive.
+        </p>
+        <div className="mt-6 flex flex-wrap gap-3">
+          <a
+            href={`/briefings/${date}`}
+            className="inline-block rounded-full bg-panel px-4 py-2 font-mono text-[0.65625rem] font-semibold uppercase tracking-[0.1em] text-ink hover:bg-ink hover:text-white focus-visible:outline-2 focus-visible:outline-ink focus-visible:outline-offset-2"
+          >
+            Retry
+          </a>
+          <Link
+            href="/briefings"
+            className="inline-block rounded-full bg-panel px-4 py-2 font-mono text-[0.65625rem] font-semibold uppercase tracking-[0.1em] text-ink hover:bg-ink hover:text-white focus-visible:outline-2 focus-visible:outline-ink focus-visible:outline-offset-2"
+          >
+            Briefing archive
+          </Link>
+          <Link
+            href="/"
+            className="inline-block rounded-full bg-panel px-4 py-2 font-mono text-[0.65625rem] font-semibold uppercase tracking-[0.1em] text-ink hover:bg-ink hover:text-white focus-visible:outline-2 focus-visible:outline-ink focus-visible:outline-offset-2"
+          >
+            The Wire
+          </Link>
+        </div>
+      </main>
+    </div>
+  )
 }
 
 export default async function BriefingPage({ params }: Params) {
   const { date } = await params
+  if (!ISO_DATE_RE.test(date)) notFound()
 
-  // Dates missing from the archive list 404 immediately — the per-date
-  // endpoints below take up to 10s to answer for unpublished dates.
-  if ((await reportExists(date)) === false) notFound()
+  // Dates the archive list rules out 404 immediately. The per-date endpoints
+  // below take up to 10s to answer for unpublished dates.
+  const archive = await lookupArchive(date)
+  if (archive.state === 'absent') notFound()
 
-  // The report is the page; a real 404 becomes a (cacheable) not-found, and
-  // any transient failure throws to error.tsx so it can never be ISR-cached.
-  // The list, audio, and graph trail are best-effort fragments.
-  const [report, list, audio, issue]: [Report | null, ReportListItem[], AudioBriefing | null, PublicIssue | null] =
+  // The report is the page. A backend that answers "no such date" becomes a
+  // (cacheable) not-found; a backend that does not answer at all renders the
+  // unavailable state instead of a 500. Audio and the graph trail are
+  // best-effort fragments.
+  const [report, audio, issue]: [Report | null | 'unreachable', AudioBriefing | null, PublicIssue | null] =
     await Promise.all([
-      getReport(date).catch((err) => {
-        if (isBackendNotFound(err)) return null
-        throw err
-      }),
-      getReports().catch(() => [] as ReportListItem[]),
+      getReport(date).catch((err: unknown) => (isBackendNotFound(err) ? null : ('unreachable' as const))),
       getAudioBriefing(date).catch(() => null),
       getStructuredIssue(date).catch(() => null),
     ])
 
+  if (report === 'unreachable') {
+    // `revalidate = 3600` would otherwise write this retry page into the full
+    // route cache and serve it for an hour on a date that has real content,
+    // making "retry in a minute" false. connection() keeps it out.
+    await connection()
+    return <BriefingUnavailable date={date} />
+  }
   if (!report) notFound()
 
   const wordCount = report.content.split(/\s+/).length
   const readTime = Math.max(1, Math.round(wordCount / 200))
-  const dates = list.map((r) => r.date).sort()
+  const dates = archive.list.map((r) => r.date).sort()
   const i = dates.indexOf(date)
   const prev = i > 0 ? dates[i - 1] : null
   const next = i >= 0 && i < dates.length - 1 ? dates[i + 1] : null

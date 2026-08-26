@@ -1,5 +1,7 @@
 'use client'
 
+import Link from 'next/link'
+
 /** Route-level error state: a slow or failed backend fetch lands here with a
     retry, instead of a hung click or a blank page. */
 export default function ErrorState({
@@ -29,12 +31,12 @@ export default function ErrorState({
         >
           Retry
         </button>
-        <a
+        <Link
           href="/"
           className="font-mono text-[11.5px] uppercase tracking-[0.12em] text-ink underline decoration-2 underline-offset-[3px]"
         >
           Front page
-        </a>
+        </Link>
       </div>
     </div>
   )

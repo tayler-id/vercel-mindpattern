@@ -8,18 +8,43 @@ import type { ReportListItem } from '@/lib/types'
 
 export const revalidate = 300
 
+const OG_TITLE = 'Daily AI Research Briefing Archive'
+const OG_DESCRIPTION = 'Search daily AI research intelligence briefings from MindPattern.'
+
+/**
+ * A page-level openGraph object replaces the root's rather than merging into
+ * it, which took the site card with it and left /blog unfurling with no image.
+ * `/og/briefing/[date]` renders one issue, so the archive index shares the
+ * static site card instead.
+ */
+const OG_IMAGE = {
+  url: '/opengraph-image',
+  width: 1200,
+  height: 630,
+  type: 'image/png',
+  alt: 'MindPattern daily AI research briefing archive',
+}
+
 export const metadata: Metadata = {
-  title: 'Daily AI Research Briefing Archive',
+  title: OG_TITLE,
   description:
     'Search the MindPattern archive of daily AI research intelligence briefings covering AI news, agent frameworks, developer tools, papers, sources, and recurring patterns.',
   alternates: {
     canonical: '/blog',
   },
   openGraph: {
-    title: 'Daily AI Research Briefing Archive',
-    description:
-      'Search daily AI research intelligence briefings from MindPattern.',
+    type: 'website',
+    siteName: SITE_NAME,
+    title: OG_TITLE,
+    description: OG_DESCRIPTION,
     url: '/blog',
+    images: [OG_IMAGE],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: OG_TITLE,
+    description: OG_DESCRIPTION,
+    images: [OG_IMAGE],
   },
 }
 

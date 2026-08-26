@@ -16,6 +16,7 @@ const api = vi.hoisted(() => ({
   getReports: vi.fn(),
   getSourceByDomain: vi.fn(),
   getStats: vi.fn(),
+  lookupArchive: vi.fn(),
   getStory: vi.fn(),
   getStories: vi.fn(),
   getStructuredIssue: vi.fn(),
@@ -27,6 +28,10 @@ vi.mock('@/lib/api', async (importOriginal) => ({
   ...api,
   backendAssetUrl: (path: string) => `https://assets.test${path}`,
 }))
+
+// Degraded renders call connection() to stay out of the full route cache.
+const connection = vi.hoisted(() => vi.fn(async () => {}))
+vi.mock('next/server', () => ({ connection }))
 
 vi.mock('next/navigation', () => ({
   notFound: () => {
@@ -199,9 +204,19 @@ const issue = {
   entities: [{ slug: 'openai', name: 'OpenAI' }],
 }
 
+/** The archive states the two date routes branch on. */
+const archive = (dates: string[], date: string) => {
+  const list = dates.map((d) => ({ date: d, title: 'Daily Briefing' }))
+  const match = list.find((r) => r.date === date)
+  return match
+    ? { state: 'listed' as const, list, title: match.title }
+    : { state: 'absent' as const, list }
+}
+
 describe('app route pages', () => {
   beforeEach(() => {
     Object.values(api).forEach((mock) => mock.mockReset())
+    connection.mockClear()
   })
 
   it('renders the wire page for trending, cold-start fallback, latest, most-read, topics, and empty fallback', async () => {
@@ -248,7 +263,10 @@ describe('app route pages', () => {
       { date: '2026-07-01', title: 'Older', filename: 'older.md', size: 100 },
       { date: '2026-07-03', title: 'Newest', filename: 'newest.md', size: 2300 },
     ])
+    // getAllStories pages in 50s and fires every page in parallel, so the base
+    // mock has to answer the pages the two queued values do not.
     api.getStories
+      .mockResolvedValue({ items: [], total: 75, has_more: false })
       .mockResolvedValueOnce({ items: [story], total: 75, has_more: true })
       .mockResolvedValueOnce({ items: [{ ...story, slug: 'archive-two', title: 'Archive Two' }], total: 75, has_more: false })
     api.getTrending.mockResolvedValue({ items: [{ ...story, entity_refs: [{ slug: 'entity-one' }] }] })
@@ -277,10 +295,11 @@ describe('app route pages', () => {
   it('renders briefing archive success and error states', async () => {
     api.getReports.mockResolvedValueOnce([report]).mockRejectedValueOnce(new Error('down'))
     api.getAudioBriefings.mockResolvedValueOnce([{ date: '2026-07-02' }]).mockRejectedValueOnce(new Error('down'))
-    const { default: BriefingsPage, metadata, dynamic } = await import('./(app)/briefings/page')
+    const { default: BriefingsPage, metadata, revalidate } = await import('./(app)/briefings/page')
 
     expect(metadata.title).toBe('Briefings')
-    expect(dynamic).toBe('force-dynamic')
+    expect(metadata.alternates?.canonical).toBe('/briefings')
+    expect(revalidate).toBe(300)
     render(await BriefingsPage())
     expect(screen.getByRole('link', { name: /Daily Briefing/ })).toHaveAttribute('href', '/briefings/2026-07-02')
     expect(screen.getByTestId('audio-compact')).toHaveTextContent('2026-07-02')
@@ -291,7 +310,9 @@ describe('app route pages', () => {
 
   it('renders briefing detail metadata, graph trail, navigation, and missing report state', async () => {
     api.getReport.mockResolvedValueOnce(report).mockResolvedValueOnce(report)
-    api.getReports.mockResolvedValue([{ date: '2026-07-01' }, { date: '2026-07-02' }, { date: '2026-07-03' }])
+    api.lookupArchive.mockImplementation(async (date: string) =>
+      archive(['2026-07-01', '2026-07-02', '2026-07-03'], date),
+    )
     api.getAudioBriefing.mockResolvedValue({ date: '2026-07-02' })
     api.getStructuredIssue.mockResolvedValue(issue)
     const page = await import('./(app)/briefings/[date]/page')
@@ -306,12 +327,11 @@ describe('app route pages', () => {
     expect(screen.getByRole('link', { name: 'OpenAI' })).toHaveAttribute('href', '/e/openai')
     expect(screen.getByRole('link', { name: /Jul 1/ })).toHaveAttribute('href', '/briefings/2026-07-01')
 
-    api.getReport.mockRejectedValueOnce(new Error('missing')).mockRejectedValueOnce(new Error('missing'))
+    // A date the archive does not list is a real 404, with no date fetch.
     await expect(page.generateMetadata({ params: Promise.resolve({ date: '2026-07-04' }) })).resolves.toMatchObject({
       title: 'Briefing not found',
     })
-    render(await page.default({ params: Promise.resolve({ date: '2026-07-04' }) }))
-    expect(screen.getByText('The briefing for 2026-07-04 could not be loaded.')).toBeInTheDocument()
+    await expect(page.default({ params: Promise.resolve({ date: '2026-07-04' }) })).rejects.toThrow('NEXT_NOT_FOUND')
   })
 
   it('renders briefing detail title stripping and graph trail fallbacks', async () => {
@@ -342,7 +362,7 @@ describe('app route pages', () => {
       title: 'Daily Briefing',
       content: '# Different Heading\n\nBriefing body',
     })
-    api.getReports.mockResolvedValue([{ date: '2026-07-02' }])
+    api.lookupArchive.mockImplementation(async (date: string) => archive(['2026-07-02'], date))
     api.getAudioBriefing.mockResolvedValue(null)
     api.getStructuredIssue.mockResolvedValueOnce({
       story_units: [],
@@ -407,7 +427,10 @@ describe('app route pages', () => {
     expect(screen.getByRole('heading', { name: 'Story One' })).toBeInTheDocument()
     expect(screen.getByText('The take')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /Related Story/ })).toHaveAttribute('href', '/s/related-story')
-    expect(screen.getByRole('link', { name: 'Example Source' })).toHaveAttribute('href', '/source/example.com')
+    // The source trail is the story's outbound link; the internal trail sits
+    // under it so both the reader and the crawler have somewhere to go.
+    expect(screen.getByRole('link', { name: 'Example Source' })).toHaveAttribute('href', 'https://example.com/story')
+    expect(screen.getByRole('link', { name: 'More from example.com' })).toHaveAttribute('href', '/source/example.com')
     expect(screen.getByRole('link', { name: 'OpenAI' })).toHaveAttribute('href', '/e/openai')
     expect(screen.getByRole('link', { name: 'Finding 1' })).toHaveAttribute('href', '/f/1')
     await expect(page.generateMetadata({ params: Promise.resolve({ slug: '../bad' }) })).resolves.toMatchObject({
@@ -490,7 +513,7 @@ describe('app route pages', () => {
       last_seen: '2026-07-02',
       findings: [finding],
       entities: [{ slug: 'openai', name: 'OpenAI' }],
-    }).mockRejectedValueOnce(new Error('missing'))
+    }).mockResolvedValueOnce(null)
     const page = await import('./(app)/source/[domain]/page')
 
     await expect(page.generateMetadata({ params: Promise.resolve({ domain: 'www.Example.com' }) })).resolves.toMatchObject({
@@ -508,30 +531,23 @@ describe('app route pages', () => {
   })
 
   it('renders blog archive and blog post success and fallback branches', async () => {
-    api.backendFetch
-      .mockResolvedValueOnce([report])
-      .mockRejectedValueOnce(new Error('down'))
-      .mockResolvedValueOnce({
-        ...report,
-        content: `# Briefing\n\n## Section\n\n### Detail\n\nParagraph with **strong** text and [source](https://example.com/a).\n\n- Bullet\n\n1. Step\n\n> Quote\n\n\`code\`\n\n---\n\n| A | B |\n| - | - |\n| 1 | 2 |`,
-      })
-      .mockResolvedValueOnce({
-        ...report,
-        content: `# Briefing\n\n## Section\n\n### Detail\n\nParagraph with **strong** text and [source](https://example.com/a).\n\n- Bullet\n\n1. Step\n\n> Quote\n\n\`code\`\n\n---\n\n| A | B |\n| - | - |\n| 1 | 2 |`,
-      })
-      .mockResolvedValueOnce([{ date: '2026-07-01' }, { date: '2026-07-02' }, { date: '2026-07-03' }])
-      .mockResolvedValueOnce(report)
-      .mockResolvedValueOnce([{ date: '2026-07-02' }, { date: '2026-07-03' }])
-      .mockResolvedValueOnce(report)
-      .mockResolvedValueOnce([{ date: '2026-07-01' }, { date: '2026-07-02' }])
-      .mockRejectedValueOnce(new Error('missing'))
-      .mockRejectedValueOnce(new Error('missing'))
-    const archive = await import('./(blog)/blog/page')
+    const richReport = {
+      ...report,
+      content: `# Briefing\n\n## Section\n\n### Detail\n\nParagraph with **strong** text and [source](https://example.com/a).\n\n- Bullet\n\n1. Step\n\n> Quote\n\n\`code\`\n\n---\n\n| A | B |\n| - | - |\n| 1 | 2 |`,
+    }
+    // The index page reads the list directly; the post page goes through
+    // lookupArchive and getReport, the same pair /briefings/[date] uses.
+    api.backendFetch.mockResolvedValueOnce([report]).mockRejectedValueOnce(new Error('down'))
+    api.lookupArchive.mockImplementation(async (date: string) =>
+      archive(['2026-07-01', '2026-07-02', '2026-07-03'], date),
+    )
+    api.getReport.mockResolvedValue(richReport)
+    const archivePage = await import('./(blog)/blog/page')
     const post = await import('./(blog)/blog/[date]/page')
 
-    render(await archive.default())
+    render(await archivePage.default())
     expect(screen.getByTestId('blog-search')).toHaveTextContent('Daily Briefing')
-    render(await archive.default())
+    render(await archivePage.default())
     expect(screen.getByText('[NO BRIEFINGS ON FILE]')).toBeInTheDocument()
 
     await expect(post.generateMetadata({ params: Promise.resolve({ date: '2026-07-02' }) })).resolves.toMatchObject({
@@ -549,15 +565,23 @@ describe('app route pages', () => {
     expect(screen.getByText('code')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /\[2026-07-01\]/ })).toHaveAttribute('href', '/blog/2026-07-01')
     expect(screen.getByRole('link', { name: /\[2026-07-03\]/ })).toHaveAttribute('href', '/blog/2026-07-03')
+
+    // Both ends of the archive: no previous issue, then no next issue.
+    api.lookupArchive.mockImplementation(async (date: string) =>
+      archive(['2026-07-02', '2026-07-03'], date),
+    )
     render(await post.default({ params: Promise.resolve({ date: '2026-07-02' }) }))
     expect(screen.getAllByRole('link', { name: /\[2026-07-03\]/ }).at(-1)).toHaveAttribute('href', '/blog/2026-07-03')
+    api.lookupArchive.mockImplementation(async (date: string) =>
+      archive(['2026-07-01', '2026-07-02'], date),
+    )
     render(await post.default({ params: Promise.resolve({ date: '2026-07-02' }) }))
     expect(screen.getAllByRole('link', { name: /\[2026-07-01\]/ }).at(-1)).toHaveAttribute('href', '/blog/2026-07-01')
+
     await expect(post.generateMetadata({ params: Promise.resolve({ date: '2026-07-04' }) })).resolves.toMatchObject({
       title: 'AI Research Briefing Not Found',
     })
-    render(await post.default({ params: Promise.resolve({ date: '2026-07-04' }) }))
-    expect(screen.getByText('[REPORT NOT FOUND]')).toBeInTheDocument()
+    await expect(post.default({ params: Promise.resolve({ date: '2026-07-04' }) })).rejects.toThrow('NEXT_NOT_FOUND')
   })
 
   it('renders static search, explore, and unsubscribe pages', async () => {

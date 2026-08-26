@@ -9,20 +9,24 @@ import { shortDate } from '@/lib/format'
 
 export const revalidate = 300
 
+// No openGraph or twitter block here on purpose. The root layout's blocks
+// carry only siteName and the large-card type, so Next fills the title and
+// description from this page and the image from src/app/opengraph-image.tsx.
 export const metadata: Metadata = {
   title: 'Briefings',
   description: 'The daily MindPattern AI research briefing. Top stories, long-form, with sources.',
+  alternates: { canonical: '/briefings' },
 }
 
 export default async function BriefingsPage() {
-  let error = false
-  const [reports, audioBriefings] = await Promise.all([
-    getReports().catch(() => {
-      error = true
-      return [] as ReportListItem[]
-    }),
+  // null means the archive fetch failed, which the page says out loud. An
+  // empty list is a different thing and reads as an empty archive.
+  const [archive, audioBriefings] = await Promise.all([
+    getReports().catch(() => null),
     getAudioBriefings().catch(() => [] as AudioBriefing[]),
   ])
+  const reports: ReportListItem[] = archive ?? []
+  const error = archive === null
 
   const audioByDate = new Map(audioBriefings.map((audio) => [audio.date, audio]))
 
