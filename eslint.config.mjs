@@ -13,6 +13,12 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // `.claude/worktrees/` holds git worktrees on other branches, each with
+    // its own node_modules. Linting them reported 190 errors from code that is
+    // not checked out here and buried the four that were.
+    ".claude/**",
+    // Standalone HTML/JS sketches, not part of the app build.
+    "prototypes/**",
   ]),
 ]);
 
