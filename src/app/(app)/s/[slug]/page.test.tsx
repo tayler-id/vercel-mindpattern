@@ -246,13 +246,13 @@ describe('story page outbound links', () => {
     )
   })
 
-  it('falls back to the domain when a source has no title', async () => {
+  it('labels a titleless source with its path, not just the site', async () => {
     api.getStory.mockResolvedValueOnce(story)
     const page = await loadPage()
 
     render(await page.default(params('story-one')))
 
-    expect(screen.getByRole('link', { name: 'reuters.com' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: 'reuters.com/tech/deal' })).toHaveAttribute(
       'href',
       'https://www.reuters.com/tech/deal',
     )
@@ -265,9 +265,10 @@ describe('story page outbound links', () => {
     render(await page.default(params('story-one')))
 
     expect(screen.queryByRole('link', { name: 'Source' })).not.toBeInTheDocument()
-    // The listed source lends its title; an unlisted one falls back to its host.
+    // The listed source lends its title; an unlisted one names its page path,
+    // because three anchors reading "GitHub" hid the owner's own project link.
     expect(screen.getAllByRole('link', { name: 'The paper everyone quoted' })).toHaveLength(2)
-    expect(screen.getByRole('link', { name: 'theverge.com' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: 'theverge.com/post' })).toHaveAttribute(
       'href',
       'https://www.theverge.com/post',
     )

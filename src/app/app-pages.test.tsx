@@ -478,7 +478,7 @@ describe('app route pages', () => {
     expect(screen.getByText('Fallback body')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /Same One/ })).toHaveAttribute('href', '/s/same-1')
     expect(screen.getByText('Same Two')).toBeInTheDocument()
-    expect(screen.getByText('example.com')).toBeInTheDocument()
+    expect(screen.getByText('example.com/no-title')).toBeInTheDocument()
     expect(screen.getByText('no')).toBeInTheDocument()
     expect(screen.getByText('site artifact')).toBeInTheDocument()
     expect(screen.getAllByText('source-backed').length).toBeGreaterThan(0)

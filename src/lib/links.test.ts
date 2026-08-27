@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { hostOf, httpUrl } from './links'
+import { hostOf, httpUrl, sourceLabel } from './links'
 
 /**
  * Source URLs arrive from the open-web crawl, not from this repo, so they
@@ -42,5 +42,43 @@ describe('hostOf', () => {
     expect(hostOf('not-a-url')).toBe('the source site')
     expect(hostOf(null)).toBe('the source site')
     expect(hostOf('not-a-url', 'the source')).toBe('the source')
+  })
+})
+
+describe('sourceLabel', () => {
+  // Three source-trail links on one story all read "GitHub" (the pipeline
+  // stamps that title on every github ref), pointing at three different
+  // repos. The owner could not find the project link on his own story.
+  it('turns a generic GitHub title into owner/repo', () => {
+    expect(
+      sourceLabel('https://github.com/deepseek-ai/deepseek-harness/releases/tag/v0.1.0', 'GitHub', 'github.com'),
+    ).toBe('deepseek-ai/deepseek-harness')
+  })
+
+  it('keeps a title that actually names the thing', () => {
+    expect(
+      sourceLabel('https://github.com/vercel/next.js', 'Next.js release notes', 'github.com'),
+    ).toBe('Next.js release notes')
+  })
+
+  it('treats a title equal to the domain as generic', () => {
+    expect(sourceLabel('https://arxiv.org/abs/2608.01234', 'arxiv.org', 'arxiv.org')).toBe(
+      'arxiv.org/abs/2608.01234',
+    )
+  })
+
+  it('falls back to the domain when the URL has no path to show', () => {
+    expect(sourceLabel('https://github.com/', 'GitHub', 'github.com')).toBe('github.com')
+  })
+
+  it('never returns an empty label', () => {
+    expect(sourceLabel('not a url', '', '')).toBeTruthy()
+  })
+
+  it('caps runaway paths so the trail stays readable', () => {
+    const label = sourceLabel(
+      'https://example.com/' + 'a/'.repeat(60), 'example.com', 'example.com',
+    )
+    expect(label.length).toBeLessThanOrEqual(64)
   })
 })

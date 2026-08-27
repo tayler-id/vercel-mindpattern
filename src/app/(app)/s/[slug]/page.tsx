@@ -12,7 +12,7 @@ import { getStory, isBackendUnreachable } from '@/lib/api'
 import type { PublicStory } from '@/lib/types'
 import { isTop5, kickerLabel, topicFor, topicStyleVars } from '@/lib/topics'
 import { absoluteUrl, SITE_NAME } from '@/lib/site'
-import { hostOf, httpUrl } from '@/lib/links'
+import { hostOf, httpUrl, sourceLabel } from '@/lib/links'
 
 // A day-long TTL is safe here because content changes once a day and the
 // nightly publish purges what it changed via POST /api/revalidate.
@@ -422,7 +422,7 @@ export default async function StoryPage({ params }: Params) {
                 // one becomes an anchor. Anything else stays plain text and the
                 // reader still gets the internal trail below it.
                 const href = httpUrl(source.url)
-                const label = source.title || source.domain
+                const label = sourceLabel(source.url, source.title, source.domain)
                 return (
                   <li key={source.url} className="border-t border-line py-3 first:border-t-0">
                     {href ? (
@@ -481,7 +481,7 @@ export default async function StoryPage({ params }: Params) {
                   const evidence = item as { claim?: string; source_url?: string; finding_id?: number | null }
                   const evidenceHref = httpUrl(evidence.source_url)
                   const evidenceLabel = evidence.source_url
-                    ? sourceTitles.get(evidence.source_url) || hostOf(evidence.source_url)
+                    ? sourceLabel(evidence.source_url, sourceTitles.get(evidence.source_url), hostOf(evidence.source_url))
                     : ''
                   return (
                     <li key={`${evidence.finding_id ?? index}-${evidence.claim ?? ''}`} className="border-t border-line py-3 first:border-t-0">
