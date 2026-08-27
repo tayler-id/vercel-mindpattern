@@ -114,6 +114,7 @@ describe('revalidate route', () => {
     const paths = [
       '/',
       '/briefings',
+      '/blog',
       '/explore',
       '/search',
       '/work',

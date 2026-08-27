@@ -67,7 +67,7 @@ describe('entity page metadata', () => {
     // paired with a body that happened to succeed wrote a fully correct entity
     // page into the ISR cache carrying robots {index:false} and the
     // slug-derived title, and served it to every reader and crawler for the
-    // next 3600s. Google reads a persistent 200 + noindex as "remove this
+    // next 86400s. Google reads a persistent 200 + noindex as "remove this
     // URL", so that is worse than the 500 it replaced.
     api.getEntity.mockRejectedValueOnce(timeout())
 

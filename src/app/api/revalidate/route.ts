@@ -15,7 +15,9 @@ import { revalidatePath } from 'next/cache'
  * value and the allowlist below bounds what a correct guess could do.
  */
 
-// One publish sends ~100 paths, split into batches by the caller.
+// One publish sends up to 200 paths (REVALIDATE_MAX_PATHS in
+// orchestrator/sync.py), split into batches of 50 by the caller, so this cap
+// bounds a single POST, not the publish.
 const MAX_PATHS = 60
 
 // Only this site's own reader routes. Anything else is rejected rather than
@@ -23,7 +25,7 @@ const MAX_PATHS = 60
 // Next.js internals or purge a route that does not exist.
 const ALLOWED_PATHS: RegExp[] = [
   /^\/$/,
-  /^\/(?:briefings|explore|search|work)$/,
+  /^\/(?:blog|briefings|explore|search|work)$/,
   /^\/briefings\/\d{4}-\d{2}-\d{2}$/,
   /^\/blog\/\d{4}-\d{2}-\d{2}$/,
   /^\/s\/[a-z0-9][a-z0-9-]{0,159}$/,

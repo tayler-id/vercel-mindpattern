@@ -117,18 +117,22 @@ ratio measurably up.
 - **Purge-on-publish:** SHIPPED 2026-08-26. `POST /api/revalidate` on the site
   takes a list of paths, checks a shared secret, and calls `revalidatePath` on
   each. `orchestrator/sync.py` builds that list from the artifacts the publish
-  just wrote (`changed_site_paths`: the day's stories, the home page, both
-  briefing routes, and the entity pages today's stories name most, capped at
-  12), purges them, then crawls them back warm in the same pass. Purge and
-  crawl are interleaved in waves of 10: `revalidatePath` expires an entry
-  outright rather than serving it stale, so purging the whole set first left
-  every page uncached for the length of the crawl. Pages appear within a
-  minute of the sync instead of waiting out the 3600s TTL.
+  just wrote (`changed_site_paths`: the home page, both briefing routes, the
+  day's stories, and the source, arc, entity, and finding pages those stories
+  reference, capped at 200 total with every dropped path logged), purges them,
+  then crawls them back warm in the same pass. Purge and crawl are interleaved
+  in waves of 10: `revalidatePath` expires an entry outright rather than
+  serving it stale, so purging the whole set first left every page uncached
+  for the length of the crawl. Pages appear within a minute of the sync
+  instead of waiting out the TTL.
 
-  Not yet covered: `changed_site_paths` emits no `/f/` or `/arc/` paths even
-  though the day's story JSON carries `finding_ids` and `arc_ids` and the
-  site's allowlist accepts both. Those pages stay stale for the full TTL after
-  a publish.
+  2026-08-26: coverage extended to `/source/`, `/arc/`, and `/f/`. All seven
+  detail routes now carry a day-long TTL backed by the purge; a real publish
+  day emits ~160 paths (measured 164 for 2026-08-26: 5 entry points, 80
+  stories, 34 sources, 25 entities, 20 findings), all accepted by the route's
+  allowlist. Purging the day's new finding ids and first-cited source domains
+  also clears any 404 a reader pinned into the ISR cache by visiting the page
+  before it existed.
 - Consider `uvicorn[standard]` + 2 workers once caches are process-safe, and
   a sqlite vector index (or precomputed neighbor lists) to retire the 15.5k
   embedding scans entirely.

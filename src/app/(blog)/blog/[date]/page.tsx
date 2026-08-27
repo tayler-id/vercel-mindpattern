@@ -10,7 +10,13 @@ import { JsonLd } from '@/components/json-ld'
 import { absoluteUrl, shortReportDescription, SITE_NAME } from '@/lib/site'
 import type { Report } from '@/lib/types'
 
-export const revalidate = 3600
+// A day-long TTL is safe here because content changes once a day and the
+// nightly publish purges what it changed via POST /api/revalidate.
+// changed_site_paths in orchestrator/sync.py (mindpattern-v3) lists the day's
+// briefing, blog, story, source, arc, entity, and finding paths, capped at
+// 200 with every dropped path logged, so fresh content does not wait out
+// the TTL.
+export const revalidate = 86400
 
 // Opt into on-demand ISR — without this, Next 16 ignores the revalidate
 // export and re-renders every blog click against the Fly backend.
@@ -151,7 +157,7 @@ export default async function BlogPostPage({
   )
 
   if (report === 'unreachable') {
-    // `revalidate = 3600` would otherwise store this retry page for an hour on
+    // `revalidate = 86400` would otherwise store this retry page for a day on
     // a date that has real content, which makes "retry in a minute" false.
     await connection()
     return <BriefingUnavailable date={date} />

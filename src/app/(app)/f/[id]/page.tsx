@@ -8,7 +8,13 @@ import type { Finding } from '@/lib/types'
 import { RabbitHole } from '@/components/story/rabbit-hole'
 import { SITE_NAME } from '@/lib/site'
 
-export const revalidate = 3600
+// A day-long TTL is safe here because content changes once a day and the
+// nightly publish purges what it changed via POST /api/revalidate.
+// changed_site_paths in orchestrator/sync.py (mindpattern-v3) lists the day's
+// briefing, blog, story, source, arc, entity, and finding paths, capped at
+// 200 with every dropped path logged, so fresh content does not wait out
+// the TTL.
+export const revalidate = 86400
 
 // Opt into on-demand ISR — without this, Next 16 ignores the revalidate
 // export and re-renders every finding click against the Fly backend.
@@ -172,7 +178,7 @@ export default async function FindingPage({ params }: Params) {
   ])
   if (finding === 'unreachable') {
     // Keep the degraded render out of the full route cache, which `revalidate`
-    // above would otherwise hold for an hour on a URL that has real content.
+    // above would otherwise hold for a day on a URL that has real content.
     await connection()
     return <FindingUnavailable id={id} />
   }

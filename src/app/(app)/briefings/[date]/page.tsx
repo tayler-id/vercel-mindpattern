@@ -31,7 +31,13 @@ function stripLeadingTitle(content: string, title: string): string {
 import { absoluteUrl, shortReportDescription, SITE_NAME } from '@/lib/site'
 import { shortDate } from '@/lib/format'
 
-export const revalidate = 3600
+// A day-long TTL is safe here because content changes once a day and the
+// nightly publish purges what it changed via POST /api/revalidate.
+// changed_site_paths in orchestrator/sync.py (mindpattern-v3) lists the day's
+// briefing, blog, story, source, arc, entity, and finding paths, capped at
+// 200 with every dropped path logged, so fresh content does not wait out
+// the TTL.
+export const revalidate = 86400
 
 // Without generateStaticParams, Next 16 treats a dynamic segment as
 // SSR-on-every-request and the revalidate export above is ignored — every
@@ -181,8 +187,8 @@ export default async function BriefingPage({ params }: Params) {
     ])
 
   if (report === 'unreachable') {
-    // `revalidate = 3600` would otherwise write this retry page into the full
-    // route cache and serve it for an hour on a date that has real content,
+    // `revalidate = 86400` would otherwise write this retry page into the full
+    // route cache and serve it for a day on a date that has real content,
     // making "retry in a minute" false. connection() keeps it out.
     await connection()
     return <BriefingUnavailable date={date} />

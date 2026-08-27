@@ -189,7 +189,7 @@ describe('story page body when the backend is slow', () => {
   })
 
   it('keeps the degraded render out of the route cache', async () => {
-    // `revalidate = 3600` stores a successful render for an hour. Without this
+    // `revalidate = 86400` stores a successful render for a day. Without this
     // the shell would replace a good story page every time a revalidation
     // landed inside the 7 AM slow window, which is most mornings.
     api.getStory.mockRejectedValueOnce(timeout())

@@ -14,7 +14,13 @@ import { isTop5, kickerLabel, topicFor, topicStyleVars } from '@/lib/topics'
 import { absoluteUrl, SITE_NAME } from '@/lib/site'
 import { hostOf, httpUrl } from '@/lib/links'
 
-export const revalidate = 3600
+// A day-long TTL is safe here because content changes once a day and the
+// nightly publish purges what it changed via POST /api/revalidate.
+// changed_site_paths in orchestrator/sync.py (mindpattern-v3) lists the day's
+// briefing, blog, story, source, arc, entity, and finding paths, capped at
+// 200 with every dropped path logged, so fresh content does not wait out
+// the TTL.
+export const revalidate = 86400
 
 // Opt into on-demand ISR — without this, Next 16 ignores the revalidate
 // export and re-renders every story click against the Fly backend.
@@ -205,9 +211,9 @@ export default async function StoryPage({ params }: Params) {
     story = await loadStory(slug)
   } catch (err) {
     if (!isBackendUnreachable(err)) throw err
-    // `revalidate = 3600` means a successful render is written to the full
-    // route cache and served to everyone for the next hour. Without this the
-    // shell would replace a good story page for an hour every time the 7 AM
+    // `revalidate = 86400` means a successful render is written to the full
+    // route cache and served to everyone for the next day. Without this the
+    // shell would replace a good story page for a day every time the 7 AM
     // slow window happened to catch a revalidation. connection() marks the
     // render dynamic, so this one is never stored.
     await connection()

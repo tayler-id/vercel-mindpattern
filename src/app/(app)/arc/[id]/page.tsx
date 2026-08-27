@@ -9,7 +9,13 @@ import { getNarrativeArc, isBackendUnreachable } from '@/lib/api'
 import type { NarrativeArc } from '@/lib/types'
 import { absoluteUrl, SITE_NAME } from '@/lib/site'
 
-export const revalidate = 3600
+// A day-long TTL is safe here because content changes once a day and the
+// nightly publish purges what it changed via POST /api/revalidate.
+// changed_site_paths in orchestrator/sync.py (mindpattern-v3) lists the day's
+// briefing, blog, story, source, arc, entity, and finding paths, capped at
+// 200 with every dropped path logged, so fresh content does not wait out
+// the TTL.
+export const revalidate = 86400
 
 // Opt into on-demand ISR, matching /s, /f, /e and the briefing routes. Without
 // it Next 16 ignores the revalidate export.
@@ -203,8 +209,8 @@ export default async function ArcPage({ params, searchParams }: Params) {
     arc = await loadArc(id, date)
   } catch (err) {
     if (!isBackendUnreachable(err)) throw err
-    // connection() marks this render dynamic so `revalidate = 3600` cannot
-    // write the degraded shell over a good page for an hour.
+    // connection() marks this render dynamic so `revalidate = 86400` cannot
+    // write the degraded shell over a good page for a day.
     await connection()
     return <ArcUnavailable id={id} date={date} />
   }
