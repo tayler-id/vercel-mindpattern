@@ -3,6 +3,11 @@ import { track } from '@vercel/analytics'
 export type AnalyticsProps = Record<string, string | number | boolean>
 
 const ANON_KEY = 'mp_anon'
+
+/** False when nothing on this client can hold the reader id, so every page
+ *  load would mint a new one. Reported with the event so the dashboard can
+ *  separate a reader it can count from churn it cannot. */
+let anonDurable = false
 const OPTOUT_KEY = 'mp_optout'
 const OWNER_KEY = 'mp_owner'
 // Session-scoped campaign attribution (sessionStorage ONLY — dies with the tab).
@@ -224,24 +229,80 @@ function persistAnonId(storage: Storage | null, id: string): boolean {
   }
 }
 
+/** Read the reader id from a first-party cookie, validated before use.
+ *
+ * localStorage and sessionStorage are one permission; cookies are another. A
+ * profile that refuses both storages often still keeps a same-site cookie, and
+ * a cookie survives a navigation, which a module-level variable does not. That
+ * gap is what made one crawler over forty pages look like forty new readers on
+ * 2026-08-26.
+ */
+function cookieAnonId(): string | null {
+  try {
+    const raw = document.cookie || ''
+    for (const part of raw.split(';')) {
+      const [name, ...rest] = part.trim().split('=')
+      if (name !== ANON_KEY) continue
+      const value = decodeURIComponent(rest.join('='))
+      return ANON_ID_RE.test(value) ? value : null
+    }
+  } catch {
+    // no document, or cookies unavailable in this context
+  }
+  return null
+}
+
+function persistAnonCookie(id: string): boolean {
+  try {
+    // Lax so it survives a normal navigation, one year, path-wide, no PII.
+    document.cookie =
+      `${ANON_KEY}=${encodeURIComponent(id)}; Max-Age=31536000; path=/; SameSite=Lax`
+    return cookieAnonId() === id
+  } catch {
+    return false
+  }
+}
+
 /** Random first-party reader id: resettable, never tied to identity. */
 function anonId(): string {
   const local = localStorageOrNull()
   const durableId = validStoredValue(local, ANON_KEY, ANON_ID_RE)
   if (durableId) {
     memoryAnonId = durableId
+    // The id was read back from localStorage, which is exactly what durable
+    // means: it survived a previous page load.
+    anonDurable = true
     return durableId
+  }
+
+  const cookieId = cookieAnonId()
+  if (cookieId) {
+    memoryAnonId = cookieId
+    // Re-assert it so an expiring cookie keeps rolling forward.
+    anonDurable = persistAnonCookie(cookieId) || persistAnonId(local, cookieId)
+    return cookieId
   }
 
   const session = sessionStorageOrNull()
   const sessionId = validStoredValue(session, ANON_KEY, ANON_ID_RE)
   if (sessionId) {
     memoryAnonId = sessionId
+    // sessionStorage dies with the tab, so an id living only there is not
+    // durable. Try to promote it to a store that survives; report the outcome.
+    anonDurable = persistAnonId(local, sessionId) || persistAnonCookie(sessionId)
     return sessionId
   }
 
   if (!ANON_ID_RE.test(memoryAnonId)) memoryAnonId = newAnonId()
-  if (!persistAnonId(local, memoryAnonId)) persistAnonId(session, memoryAnonId)
+  // localStorage first, matching the read order above, so a returning reader
+  // is found in the first store checked. The cookie is the fallback that
+  // survives blocked storage and a navigation; both verify their write, so
+  // durable means one of them actually round-tripped, and a write that just
+  // failed is not retried in the same tick.
+  const stored =
+    persistAnonId(local, memoryAnonId) || persistAnonCookie(memoryAnonId)
+  persistAnonId(session, memoryAnonId)
+  anonDurable = stored
   return memoryAnonId
 }
 
@@ -265,14 +326,18 @@ if (typeof window !== 'undefined') {
 function beacon(name: string, props?: AnalyticsProps) {
   if (devTraffic()) return
   try {
+    // anonId() sets anonDurable as a side effect, so it must run before the
+    // durable field below reads the flag.
+    const id = anonId()
     const payload = JSON.stringify({
       type: name,
       target: String(props?.to ?? props?.entity ?? props?.domain ?? props?.id ?? props?.from ?? ''),
       path: window.location.pathname,
       ref_domain: refDomain(),
-      anon_id: anonId(),
+      anon_id: id,
       value: typeof props?.depth === 'number' ? props.depth : 0,
       owner: isOwner() ? 1 : 0,
+      durable: anonDurable ? 1 : 0,
       ...campaignFields(name),
     })
     if (!navigator.sendBeacon?.('/api/proxy/event', new Blob([payload], { type: 'application/json' }))) {
@@ -311,4 +376,14 @@ export function trackPageView(pathname: string) {
   // capture above, so this also guarantees acquisition tags stay stripped.
   captureCampaignTags()
   beacon('page_view', { id: pathname })
+}
+
+/** Test hooks. Not part of the public surface. */
+export function __anonIdForTests(): string {
+  return anonId()
+}
+
+export function __anonDurableForTests(): boolean {
+  anonId()
+  return anonDurable
 }
