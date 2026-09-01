@@ -8,6 +8,7 @@ import { notFound } from 'next/navigation'
 import { JsonLd } from '@/components/json-ld'
 import { ReportMarkdown } from '@/components/briefing/report-markdown'
 import { ShareButton } from '@/components/story/share-button'
+import { SubscribeBand } from '@/components/subscribe/subscribe-band'
 import { getStory, isBackendUnreachable } from '@/lib/api'
 import type { PublicStory } from '@/lib/types'
 import { isTop5, kickerLabel, topicFor, topicStyleVars } from '@/lib/topics'
@@ -283,13 +284,13 @@ export default async function StoryPage({ params }: Params) {
             {[topic ? '' : sectionName, story.issue_date, story.confidence].filter(Boolean).join(' · ')}
           </p>
           <h1
-            className="rise-in type-display relative z-[1] mt-2 max-w-[24ch] text-[clamp(2.25rem,5vw,3.5rem)] leading-[1.05] tracking-[-0.02em] text-ink"
-            style={{ '--i': 2, fontVariationSettings: '"wdth" 114', fontWeight: 850 } as CSSProperties}
+            className="type-display relative z-[1] mt-2 max-w-[24ch] text-[clamp(2.25rem,5vw,3.5rem)] leading-[1.05] tracking-[-0.02em] text-ink"
+            style={{ fontVariationSettings: '"wdth" 114', fontWeight: 850 } as CSSProperties}
           >
             {story.title}
           </h1>
           {story.dek && (
-            <p className="rise-in mt-2 max-w-[56ch] font-serif text-[1.3125rem] leading-[1.45] text-ink-soft" style={{ '--i': 3 } as CSSProperties}>
+            <p className="mt-2 max-w-[56ch] font-serif text-[1.3125rem] leading-[1.45] text-ink-soft">
               {story.dek}
             </p>
           )}
@@ -368,22 +369,21 @@ export default async function StoryPage({ params }: Params) {
               Each link below shares sources, entities, or timing with this story.
             </p>
             <ol>
-              {story.related_paths.slice(0, 8).map((related, index) => {
-                const labels = (related.connector_labels || ['Connected']).join(' / ')
-                const prevLabels =
-                  index > 0
-                    ? (story.related_paths[index - 1].connector_labels || ['Connected']).join(' / ')
-                    : null
+              {story.related_paths.slice(0, 6).map((related, index) => {
+                // The connector labels and reason are written for the graph
+                // ("Shared entity: GAIA / Tension"), not for a reader deciding
+                // whether to click. The headline leads; the summary, when the
+                // backend provides one, is the invitation. The connectors still
+                // ride the click event so the graph keeps its measurement.
                 const inner = (
                   <>
                     <div className="min-w-0">
-                      {labels !== prevLabels && (
-                        <p className="type-kicker text-ink-faint">{labels}</p>
+                      <h3 className="type-display text-[1.1875rem] leading-[1.1] text-ink">{related.title}</h3>
+                      {related.summary && (
+                        <p className="mt-2 font-serif text-[0.9375rem] leading-[1.5] text-ink-soft">
+                          {related.summary}
+                        </p>
                       )}
-                      <h3 className="type-display mt-2 text-[1.1875rem] leading-[1.1] text-ink">{related.title}</h3>
-                      <p className="mt-2 font-serif text-[0.9375rem] leading-[1.5] text-ink-soft">
-                        {related.reason || related.summary}
-                      </p>
                     </div>
                   </>
                 )
@@ -411,6 +411,15 @@ export default async function StoryPage({ params }: Params) {
             </ol>
           </section>
         )}
+
+        {/* The one form a search-landed reader ever sees: story pages are
+            where readers are, the home-page band is where they are not. */}
+        <SubscribeBand
+          surface="story_page"
+          kicker="MindPattern daily"
+          headline="Tomorrow's issue, in your inbox."
+          sub="One email a day at 7 AM. Sources and a take on every story. Unsubscribe anytime."
+        />
 
         <div className="mx-auto max-w-[720px] px-8 max-sm:px-5">
           {/* ── Source trail: the story's outbound links ── */}

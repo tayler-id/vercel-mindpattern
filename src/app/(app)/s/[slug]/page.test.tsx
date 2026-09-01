@@ -38,6 +38,13 @@ vi.mock('@/components/briefing/report-markdown', () => ({
 vi.mock('@/components/story/share-button', () => ({
   ShareButton: () => <button type="button">Share</button>,
 }))
+vi.mock('@/components/subscribe/subscribe-band', () => ({
+  SubscribeBand: (props: { surface?: string; headline?: string }) => (
+    <section data-testid="subscribe-band" data-surface={props.surface}>
+      {props.headline}
+    </section>
+  ),
+}))
 
 const story = {
   kind: 'story',
@@ -296,5 +303,114 @@ describe('story page outbound links', () => {
     )
     expect(screen.queryByRole('link', { name: 'the source site' })).not.toBeInTheDocument()
     expect(screen.getByText('the source site')).toBeInTheDocument()
+  })
+})
+
+// ── Retention: the page must offer a reader something to do next ──
+// Evidence basis (see the retention report, 2026-08-29): related-story blocks
+// convert when the headline leads and the label is plain; graph vocabulary
+// ("Shared entity: GAIA / Tension") is written for the graph, not a reader.
+// The subscribe form goes where the finished reader is — after related — and
+// the headline must be visible on first paint, not opacity-0 behind .rise-in.
+
+const relatedStory = {
+  ...story,
+  related_paths: [
+    {
+      kind: 'story', id: 'r1', slug: 'r-one', title: 'Related One',
+      target_url: '/s/r-one', reason: 'Linked by a graph relationship (Anthropic benchmarked against GAIA); both cover Agent.',
+      summary: 'A reader-facing summary of related one.',
+      connector_labels: ['Shared entity: GAIA', 'Earlier coverage', 'Tension'],
+    },
+    {
+      kind: 'story', id: 'r2', slug: 'r-two', title: 'Related Two',
+      target_url: '/s/r-two', reason: 'Linked by a graph relationship.',
+      summary: '', connector_labels: ['Same source domain'],
+    },
+    { kind: 'story', id: 'r3', slug: 'r-three', title: 'Related Three', target_url: '/s/r-three', reason: '', summary: '', connector_labels: [] },
+    { kind: 'story', id: 'r4', slug: 'r-four', title: 'Related Four', target_url: '/s/r-four', reason: '', summary: '', connector_labels: [] },
+    { kind: 'story', id: 'r5', slug: 'r-five', title: 'Related Five', target_url: '/s/r-five', reason: '', summary: '', connector_labels: [] },
+    { kind: 'story', id: 'r6', slug: 'r-six', title: 'Related Six', target_url: '/s/r-six', reason: '', summary: '', connector_labels: [] },
+    { kind: 'story', id: 'r7', slug: 'r-seven', title: 'Related Seven', target_url: '/s/r-seven', reason: '', summary: '', connector_labels: [] },
+  ],
+}
+
+describe('story page retention affordances', () => {
+  beforeEach(() => {
+    api.getStory.mockReset()
+  })
+
+  it('leads each related item with its headline and drops the graph vocabulary', async () => {
+    api.getStory.mockResolvedValueOnce(relatedStory)
+    const page = await loadPage()
+
+    render(await page.default(params('story-one')))
+
+    expect(screen.getByRole('link', { name: /Related One/ })).toHaveAttribute('href', '/s/r-one')
+    // The machine-written connector kicker and reason sentence stay out of the
+    // reader's view; the summary is the invitation.
+    expect(screen.queryByText(/Shared entity/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/Linked by a graph relationship/i)).not.toBeInTheDocument()
+    expect(screen.getByText('A reader-facing summary of related one.')).toBeInTheDocument()
+  })
+
+  it('offers at most six related stories', async () => {
+    api.getStory.mockResolvedValueOnce(relatedStory)
+    const page = await loadPage()
+
+    render(await page.default(params('story-one')))
+
+    expect(screen.getByText('Related Six')).toBeInTheDocument()
+    expect(screen.queryByText('Related Seven')).not.toBeInTheDocument()
+  })
+
+  it('still renders a related item without a target as plain text', async () => {
+    api.getStory.mockResolvedValueOnce({
+      ...story,
+      related_paths: [
+        { kind: 'story', id: 'r0', title: 'Untargeted', reason: '', summary: 'No link.', connector_labels: [] },
+      ],
+    })
+    const page = await loadPage()
+
+    render(await page.default(params('story-one')))
+
+    expect(screen.getByText('Untargeted')).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: /Untargeted/ })).not.toBeInTheDocument()
+  })
+
+  it('puts the subscribe form after related stories and before the source trail', async () => {
+    api.getStory.mockResolvedValueOnce(relatedStory)
+    const page = await loadPage()
+
+    const { container } = render(await page.default(params('story-one')))
+
+    const band = screen.getByTestId('subscribe-band')
+    expect(band).toHaveAttribute('data-surface', 'story_page')
+    const related = screen.getByRole('heading', { name: 'Related stories' })
+    const sourceTrail = screen.getByRole('heading', { name: 'Source trail' })
+    // DOCUMENT_POSITION_FOLLOWING = 4: argument follows the node.
+    expect(related.compareDocumentPosition(band) & 4).toBeTruthy()
+    expect(band.compareDocumentPosition(sourceTrail) & 4).toBeTruthy()
+    expect(container.querySelectorAll('[data-testid="subscribe-band"]')).toHaveLength(1)
+  })
+
+  it('renders the subscribe form even when there are no related stories', async () => {
+    api.getStory.mockResolvedValueOnce(story)
+    const page = await loadPage()
+
+    render(await page.default(params('story-one')))
+
+    expect(screen.getByTestId('subscribe-band')).toHaveAttribute('data-surface', 'story_page')
+  })
+
+  it('shows the headline and dek on first paint instead of animating from opacity 0', async () => {
+    api.getStory.mockResolvedValueOnce(relatedStory)
+    const page = await loadPage()
+
+    render(await page.default(params('story-one')))
+
+    expect(screen.getByRole('heading', { name: 'Story One' })).not.toHaveClass('rise-in')
+    expect(screen.getByText('Story dek')).not.toHaveClass('rise-in')
   })
 })

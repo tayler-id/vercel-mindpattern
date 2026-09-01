@@ -10,7 +10,20 @@ type Status = 'idle' | 'loading' | 'ok' | 'error'
  * display headline, pill white input + white pill button (ink text stays AA
  * on the ink block), mono microcopy. Button hover nudges the arrow.
  */
-export function SubscribeBand() {
+interface SubscribeBandProps {
+  /** Analytics surface name, so signups report where they came from. */
+  surface?: string
+  kicker?: string
+  headline?: string
+  sub?: string
+}
+
+export function SubscribeBand({
+  surface = 'subscribe_band',
+  kicker = 'The Ramsay Research Report',
+  headline = 'The daily brief, in your inbox.',
+  sub = 'The day\u2019s top stories, long-form, with sources and a take. No noise, unsubscribe anytime.',
+}: SubscribeBandProps = {}) {
   const [email, setEmail] = useState('')
   const [status, setStatus] = useState<Status>('idle')
   const [msg, setMsg] = useState('')
@@ -19,7 +32,7 @@ export function SubscribeBand() {
   async function submit(e: React.FormEvent) {
     e.preventDefault()
     setStatus('loading')
-    trackEvent('subscribe_submitted', { surface: 'subscribe_band' })
+    trackEvent('subscribe_submitted', { surface })
     try {
       const res = await fetch('/api/subscribe', {
         method: 'POST',
@@ -28,7 +41,7 @@ export function SubscribeBand() {
       })
       const data = await res.json().catch(() => ({}))
       if (res.ok) {
-        trackEvent('subscribe_success', { surface: 'subscribe_band' })
+        trackEvent('subscribe_success', { surface })
         setStatus('ok')
         setMsg(data.already ? "You're already on the list." : "You're in. Check your inbox.")
       } else {
@@ -47,17 +60,16 @@ export function SubscribeBand() {
         <div className="flex flex-wrap items-end gap-8">
           <div className="min-w-[240px] flex-1">
             <p className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.2em] text-white/80">
-              The Ramsay Research Report
+              {kicker}
             </p>
             <h2
               className="type-display mt-3 text-[clamp(26px,3.4vw,40px)] uppercase leading-[1.02] text-white"
               style={{ fontVariationSettings: '"wdth" 114', fontWeight: 850 }}
             >
-              The daily brief, in your inbox.
+              {headline}
             </h2>
             <p className="mt-3 max-w-[52ch] font-mono text-[11.5px] leading-[1.6] tracking-[0.04em] text-white/80">
-              The day&rsquo;s top stories, long-form, with sources and a take. No noise,
-              unsubscribe anytime.
+              {sub}
             </p>
           </div>
 

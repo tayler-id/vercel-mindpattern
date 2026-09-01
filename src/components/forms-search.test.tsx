@@ -127,6 +127,46 @@ describe('form and search components', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('Network error. Try again.')
   })
 
+  it('renders story-page copy and reports its surface when given variant props', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({ ok: true, json: vi.fn().mockResolvedValue({}) })
+    vi.stubGlobal('fetch', fetchMock)
+
+    render(
+      <SubscribeBand
+        surface="story_page"
+        kicker="MindPattern daily"
+        headline="Tomorrow's issue, in your inbox."
+        sub="One email at 7 AM. Sources and a take. Unsubscribe anytime."
+      />,
+    )
+
+    expect(screen.getByText("Tomorrow's issue, in your inbox.")).toBeInTheDocument()
+    expect(screen.getByText('MindPattern daily')).toBeInTheDocument()
+    expect(screen.queryByText('The daily brief, in your inbox.')).not.toBeInTheDocument()
+    fireEvent.change(screen.getByLabelText('Email address'), { target: { value: 'reader@example.com' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Subscribe' }))
+    await screen.findByRole('status')
+    expect(analyticsMocks.trackEvent).toHaveBeenCalledWith('subscribe_submitted', { surface: 'story_page' })
+    expect(analyticsMocks.trackEvent).toHaveBeenCalledWith('subscribe_success', { surface: 'story_page' })
+  })
+
+  it('keeps the home-page copy and surface by default', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({ ok: true, json: vi.fn().mockResolvedValue({}) })
+    vi.stubGlobal('fetch', fetchMock)
+
+    render(<SubscribeBand />)
+
+    expect(screen.getByText('The daily brief, in your inbox.')).toBeInTheDocument()
+    fireEvent.change(screen.getByLabelText('Email address'), { target: { value: 'reader@example.com' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Subscribe' }))
+    await screen.findByRole('status')
+    expect(analyticsMocks.trackEvent).toHaveBeenCalledWith('subscribe_submitted', { surface: 'subscribe_band' })
+  })
+
   it('handles search hotkey navigation', () => {
     render(<SearchHotkey />)
 
