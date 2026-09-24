@@ -16,7 +16,7 @@ describe('robots metadata', () => {
     expect(metadata.sitemap).toBe('https://mindpattern.ai/sitemap.xml')
     expect(metadata.host).toBe('https://mindpattern.ai')
     expect(metadata.rules).toContainEqual({ userAgent: '*', ...CRAWL_RULES })
-    expect(metadata.rules).toContainEqual({ userAgent: 'GPTBot', ...CRAWL_RULES })
+    expect(metadata.rules).toContainEqual({ userAgent: 'ChatGPT-User', ...CRAWL_RULES })
     expect(metadata.rules).toContainEqual({ userAgent: 'Claude-SearchBot', ...CRAWL_RULES })
   })
 
@@ -24,5 +24,16 @@ describe('robots metadata', () => {
     const agents = (robots().rules as { userAgent: string }[]).map((rule) => rule.userAgent)
 
     expect(agents).toEqual([...new Set(agents)])
+  })
+
+  it('disallows the whole site to crawlers that collect training data', () => {
+    const rules = robots().rules as { userAgent: string; disallow?: string | string[] }[]
+
+    for (const agent of [
+      'GPTBot', 'ClaudeBot', 'CCBot', 'Google-Extended', 'Applebot-Extended',
+      'meta-externalagent', 'Bytespider', 'Amazonbot',
+    ]) {
+      expect(rules).toContainEqual({ userAgent: agent, disallow: '/' })
+    }
   })
 })

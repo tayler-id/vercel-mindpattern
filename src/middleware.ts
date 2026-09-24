@@ -30,6 +30,11 @@ const AGENT_PATTERNS: [RegExp, string][] = [
   [/LinerBot/i, 'linerbot'],
 ]
 
+/** Families that crawl for model training rather than to answer a person or
+ *  build a search index. robots.txt disallows them too; this refuses the ones
+ *  that ignore it. They may still read /robots.txt. */
+const TRAINING_CRAWLERS = new Set(['gptbot', 'claudebot', 'ccbot', 'meta', 'bytespider', 'amazonbot', 'cohere'])
+
 export function middleware(request: NextRequest, event: NextFetchEvent) {
   const ua = request.headers.get('user-agent') ?? ''
   for (const [pattern, family] of AGENT_PATTERNS) {
@@ -45,6 +50,9 @@ export function middleware(request: NextRequest, event: NextFetchEvent) {
           }),
         }).catch(() => {}),
       )
+      if (TRAINING_CRAWLERS.has(family) && request.nextUrl.pathname !== '/robots.txt') {
+        return new NextResponse(null, { status: 403 })
+      }
       break
     }
   }

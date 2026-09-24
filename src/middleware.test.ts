@@ -22,7 +22,7 @@ describe('middleware', () => {
     const { middleware, config } = await import('./middleware')
 
     const response = middleware(
-      requestFor('Mozilla/5.0 GPTBot extra text', '/s/story-one') as never,
+      requestFor('Mozilla/5.0 ChatGPT-User extra text', '/s/story-one') as never,
       { waitUntil } as never,
     )
 
@@ -34,7 +34,7 @@ describe('middleware', () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         type: 'agent_hit',
-        target: 'gptbot',
+        target: 'chatgpt-user',
         path: '/s/story-one',
       }),
     })
@@ -97,4 +97,48 @@ describe('middleware', () => {
     expect(waitUntilPromises).toHaveLength(1)
     await expect(waitUntilPromises[0]).resolves.toBeUndefined()
   })
+
+  it.each([
+    ['Mozilla/5.0 GPTBot/1.2', 'gptbot'],
+    ['ClaudeBot/1.0', 'claudebot'],
+    ['CCBot/2.0', 'ccbot'],
+    ['meta-externalagent/1.1', 'meta'],
+    ['Bytespider', 'bytespider'],
+    ['Amazonbot/0.1', 'amazonbot'],
+  ])('refuses the training crawler %s and still records the hit', async (userAgent, family) => {
+    const fetchMock = vi.fn().mockResolvedValue(new Response(null, { status: 204 }))
+    vi.stubGlobal('fetch', fetchMock)
+    const waitUntil = vi.fn()
+    const { middleware } = await import('./middleware')
+
+    const response = middleware(requestFor(userAgent, '/e/langchain') as never, { waitUntil } as never)
+
+    expect(response.status).toBe(403)
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({
+      type: 'agent_hit',
+      target: family,
+      path: '/e/langchain',
+    })
+  })
+
+  it('lets a blocked training crawler read robots.txt', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(null, { status: 204 })))
+    const { middleware } = await import('./middleware')
+
+    const response = middleware(requestFor('GPTBot', '/robots.txt') as never, { waitUntil: vi.fn() } as never)
+
+    expect(response.status).toBe(200)
+  })
+
+  it.each(['ChatGPT-User/1.0', 'OAI-SearchBot/1.0', 'Claude-User', 'PerplexityBot', 'DuckAssistBot', 'Googlebot/2.1', 'Applebot/0.1'])(
+    'serves the answer or search agent %s',
+    async (userAgent) => {
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(null, { status: 204 })))
+      const { middleware } = await import('./middleware')
+
+      const response = middleware(requestFor(userAgent) as never, { waitUntil: vi.fn() } as never)
+
+      expect(response.status).toBe(200)
+    },
+  )
 })

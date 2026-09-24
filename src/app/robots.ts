@@ -9,25 +9,34 @@ const crawlRules = {
   crawlDelay: 10,
 }
 
+// Crawlers that collect model-training data. Google-Extended and
+// Applebot-Extended are opt-out tokens only: Googlebot and Applebot keep
+// indexing the site for search. src/middleware.ts refuses the rest with a 403.
+const TRAINING_CRAWLERS = [
+  'GPTBot',
+  'ClaudeBot',
+  'CCBot',
+  'Google-Extended',
+  'Applebot-Extended',
+  'meta-externalagent',
+  'Bytespider',
+  'Amazonbot',
+]
+
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
       { userAgent: '*', ...crawlRules },
-      { userAgent: 'GPTBot', ...crawlRules },
+      // Agents that fetch a page to answer a person, or index it for search.
       { userAgent: 'ChatGPT-User', ...crawlRules },
-      { userAgent: 'Google-Extended', ...crawlRules },
       { userAgent: 'PerplexityBot', ...crawlRules },
-      { userAgent: 'ClaudeBot', ...crawlRules },
       { userAgent: 'Claude-User', ...crawlRules },
       { userAgent: 'Claude-SearchBot', ...crawlRules },
       { userAgent: 'OAI-SearchBot', ...crawlRules },
       { userAgent: 'Perplexity-User', ...crawlRules },
       { userAgent: 'DuckAssistBot', ...crawlRules },
-      { userAgent: 'Amazonbot', ...crawlRules },
-      { userAgent: 'Applebot-Extended', ...crawlRules },
-      { userAgent: 'meta-externalagent', ...crawlRules },
-      { userAgent: 'CCBot', ...crawlRules },
       { userAgent: 'MistralAI-User', ...crawlRules },
+      ...TRAINING_CRAWLERS.map((userAgent) => ({ userAgent, disallow: '/' })),
     ],
     sitemap: `${SITE_URL}/sitemap.xml`,
     host: SITE_URL,
